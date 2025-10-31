@@ -1,0 +1,84 @@
+# ==========================
+# AppointMe Salon Management Hub
+# ==========================
+
+# === System Files ===
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# === Composer Dependencies ===
+/vendor/
+composer.lock
+
+# === Node / Frontend Dependencies (if used) ===
+/node_modules/
+package-lock.json
+yarn.lock
+
+# === Environment & Config Files ===
+.env
+.env.local
+.env.*.local
+/config.php
+/src/config/
+*.ini
+
+# === Logs & Cache ===
+/logs/
+*.log
+*.tmp
+*.cache
+*.bak
+*.swp
+
+# === Uploaded Files ===
+/uploads/
+/src/data/uploads/
+/src/data/temp/
+/src/data/backups/
+
+# === IDE / Editor Settings ===
+.vscode/
+.idea/
+*.iml
+*.sublime-workspace
+*.sublime-project
+
+# === Build / Generated Files ===
+/dist/
+/build/
+/coverage/
+/reports/
+/storage/framework/cache/
+*.pdf
+
+# === PHPStorm / Code Editor Metadata ===
+.phpstorm.meta.php
+/.phpunit.result.cache
+
+# === Temporary Files ===
+tmp/
+temp/
+*.pid
+*.seed
+*.pid.lock
+Instructions.md
+
+# === Backup or Exported SQL Files ===
+*.sql
+*.sql.gz
+*.tar.gz
+*.zip
+*.rar
+*.7z
+
+
+# === Cache from DOMPDF or PHPMailer ===
+/src/lib/dompdf/cache/
+/src/lib/phpmailer/temp/
+
+# === Custom Application Exclusions ===
+/src/public/uploads/
+src/public/assets/temp/
+src/public/assets/backup/
