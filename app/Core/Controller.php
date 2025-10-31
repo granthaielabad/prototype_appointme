@@ -1,26 +1,44 @@
 <?php
+
 namespace App\Core;
 
 class Controller
 {
-    protected function view(string $view, array $data = []): void
+    /*
+        Renders a view with optional data
+        Automatically includes navbar/footer except for auth pages.
+     */
+    public function view(string $view, array $data = []): void
     {
+                
         extract($data);
-        $base = __DIR__ . '/../Views/';
-        $header = $base . 'layouts/header.php';
-        $navbar = $base . 'layouts/navbar.php';
-        $alerts = $base . 'layouts/alerts.php';
-        $footer = $base . 'layouts/footer.php';
-        $viewFile = $base . "{$view}.php";
+        $viewFile = __DIR__ . '/../Views/' . $view . '.php';
 
-        if (file_exists($viewFile)) {
-            require $header;
-            require $navbar;
-            require $alerts;
-            require $viewFile;
-            require $footer;
-        } else {
-            require $base . 'errors/404.php';
+        if (!file_exists($viewFile)) {
+            echo "❌ View not found: $viewFile";
+            return;
         }
+                
+        // Determine if this view should hide the navbar/footer
+        $authPages = ['Auth/login', 'Auth/register', 'Auth/forgot_password'];
+        $isAuthPage = false;
+        foreach ($authPages as $authPage) {
+            if (str_contains($view, $authPage)) {
+                $isAuthPage = true;
+                break;
+            }
+        }
+                
+        // Include layout conditionally
+        if (!$isAuthPage) {
+            require __DIR__ . '/../Views/layouts/navbar.php';
+        }
+                
+        require $viewFile;
+
+        if (!$isAuthPage) {
+            require __DIR__ . '/../Views/layouts/footer.php';
+        }
+
     }
 }
