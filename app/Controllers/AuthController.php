@@ -2,94 +2,192 @@
 namespace App\Controllers;
 
 use App\Core\Controller;
-use App\Core\Validator;
 use App\Core\Session;
 use App\Core\Auth;
 use App\Models\User;
+use App\Helpers\Mailer;
 
 class AuthController extends Controller
 {
-    public function login(): void
+    public function loginForm(): void
     {
-        $this->view('pages/login');
+        $this->view('Auth/login');
     }
 
-    // Handle POST /login
-    public function handleLogin(): void
+    public function login(): void
     {
-        $data = $_POST;
-        $errors = Validator::required(['email', 'password'], $data);
+        $email = trim($_POST['email'] ?? '');
+        $password = trim($_POST['password'] ?? '');
 
-        if ($errors) {
-            Session::flash('error', 'All fields are required.', 'danger');
+        if ($email === '' || $password === '') {
+            Session::flash('error', 'Email and password are required.', 'danger');
             header('Location: /login');
             exit;
         }
 
-        $user = (new User())->findByEmail($data['email']);
-        if (!$user || !password_verify($data['password'], $user['password'])) {
+        $m = new User();
+        $user = $m->findByEmail($email);
+        if (!$user || !password_verify($password, $user['password'])) {
             Session::flash('error', 'Invalid email or password.', 'danger');
             header('Location: /login');
             exit;
         }
 
-        Session::set('user', $user);
+        Auth::login($user);
 
-        // Redirect by role
+        // redirect by role
         if ($user['role_id'] == 1) {
-            Session::flash('success', 'Welcome back, Admin!', 'success');
             header('Location: /admin/dashboard');
-        } elseif ($user['role_id'] == 2) {
-            Session::flash('success', 'Welcome back, Staff!', 'success');
-            header('Location: /staff/dashboard'); // optional staff route if added later
-        } else {
-            Session::flash('success', 'Welcome back, ' . $user['first_name'] . '!', 'success');
-            header('Location: /home');
+            exit;
         }
+
+        header('Location: /my-appointments');
         exit;
+    }
+
+    public function registerForm(): void
+    {
+        $this->view('Auth/register');
     }
 
     public function register(): void
     {
-        $this->view('pages/register');
+        $first_name = trim($_POST['first_name'] ?? '');
+        $last_name = trim($_POST['last_name'] ?? '');
+        $email = trim($_POST['email'] ?? '');
+        $contact = trim($_POST['contact_number'] ?? '');
+        $password = trim($_POST['password'] ?? '');
+        $confirm = trim($_POST['confirm_password'] ?? '');
+
+        if ($first_name === '' || $last_name === '' || $email === '' || $password === '' || $confirm === '') {
+            Session::flash('error', 'Please fill in all required fields.', 'danger');
+            header('Location: /register');
+            exit;
+        }
+
+        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            Session::flash('error', 'Invalid email.', 'danger');
+            header('Location: /register');
+            exit;
+        }
+
+        if ($password !== $confirm) {
+            Session::flash('error', 'Passwords do not match.', 'danger');
+            header('Location: /register');
+            exit;
+        }
+
+        if (strlen($password) < 6) {
+            Session::flash('error', 'Password must be at least 6 characters.', 'danger');
+            header('Location: /register');
+            exit;
+        }
+
+        $m = new User();
+        if ($m->findByEmail($email)) {
+            Session::flash('error', 'Email already registered.', 'danger');
+            header('Location: /register');
+            exit;
+        }
+
+        $m->create([
+            'first_name' => $first_name,
+            'last_name' => $last_name,
+            'email' => $email,
+            'contact_number' => $contact ?: null,
+            'password' => password_hash($password, PASSWORD_DEFAULT),
+            'role_id' => 3,
+            'created_at' => date('Y-m-d H:i:s')
+        ]);
+
+        Session::flash('success', 'Account created. Please login.', 'success');
+        header('Location: /login');
+        exit;
     }
 
-    public function handleRegister(): void {
-        $data = $_POST;
-        // required fields
-        $errors = [];
-        foreach (['first_name','last_name','email','password','confirm_password','phone'] as $f) {
-            if (in_array($f, ['phone'])) continue; // phone optional? you asked to include contact number; adjust if required
-            if (empty(trim($data[$f] ?? ''))) $errors[] = ucfirst(str_replace('_',' ',$f)).' required';
+    public function forgotPasswordForm(): void
+    {
+        $this->view('Auth/forgot_password');
+    }
+
+    public function sendResetLink(): void
+    {
+        $email = trim($_POST['email'] ?? '');
+        if ($email === '') {
+            Session::flash('error', 'Please provide an email.', 'danger');
+            header('Location: /forgot-password');
+            exit;
         }
-        // confirm password match
-        if (($data['password'] ?? '') !== ($data['confirm_password'] ?? '')) {
-            $errors[] = 'Passwords do not match';
-        }
-        if (!filter_var($data['email'], FILTER_VALIDATE_EMAIL)) $errors[] = 'Invalid email';
-        if ($errors) {
-            \App\Core\Session::flash('error', implode('. ',$errors), 'danger');
-            header('Location: /register'); exit;
+        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            Session::flash('error', 'Invalid email.', 'danger');
+            header('Location: /forgot-password');
+            exit;
         }
 
-        // create user (make sure user model expects password column name)
-        $um = new \App\Models\User();
-        // if your DB column is 'password' use this; if 'user_password', change accordingly
-        $payload = [
-            'first_name'=>$data['first_name'],
-            'last_name'=>$data['last_name'],
-            'email'=>$data['email'],
-            'password'=>password_hash($data['password'], PASSWORD_DEFAULT),
-            'phone'=>$data['phone'] ?? null,
-            'role_id'=>3
-        ];
-        $um->create($payload);
-        Session::flash('success','Account created, please log in.','success');
+        $m = new User();
+        $user = $m->findByEmail($email);
+        // do not reveal whether email exists
+        if ($user) {
+            $token = bin2hex(random_bytes(24));
+            $m->saveResetToken($user['user_id'], $token);
+
+            $link = ($_ENV['APP_URL'] ?? 'http://localhost:8000') . '/reset-password?token=' . urlencode($token);
+
+            $mailer = new Mailer();
+            $body = "Hi {$user['first_name']},<br><br>Click <a href=\"{$link}\">this link</a> to reset your password. The link expires in 1 hour.";
+            $mailer->send($user['email'], 'Password Reset', $body);
+        }
+
+        Session::flash('success', 'If that email exists, a reset link was sent.', 'success');
+        header('Location: /forgot-password');
+        exit;
+    }
+
+    public function resetPasswordForm(): void
+    {
+        $this->view('Auth/reset_password', ['token' => $_GET['token'] ?? null]);
+    }
+
+    public function resetPassword(): void
+    {
+        $token = trim($_POST['token'] ?? '');
+        $pw = trim($_POST['password'] ?? '');
+        $confirm = trim($_POST['confirm_password'] ?? '');
+
+        if ($token === '' || $pw === '' || $confirm === '') {
+            Session::flash('error', 'Please fill all fields.', 'danger');
+            header('Location: /reset-password?token=' . urlencode($token));
+            exit;
+        }
+        if ($pw !== $confirm) {
+            Session::flash('error', 'Passwords do not match.', 'danger');
+            header('Location: /reset-password?token=' . urlencode($token));
+            exit;
+        }
+
+        $m = new User();
+        $user = $m->findByResetToken($token);
+        if (!$user) {
+            Session::flash('error', 'Invalid or expired token.', 'danger');
+            header('Location: /forgot-password');
+            exit;
+        }
+
+        $m->update($user['user_id'], [
+            'password' => password_hash($pw, PASSWORD_DEFAULT),
+            'reset_token' => null,
+            'token_expiry' => null
+        ]);
+
+        Session::flash('success', 'Password reset. Please login.', 'success');
         header('Location: /login');
+        exit;
     }
 
     public function logout(): void
     {
         Auth::logout();
+        header('Location: /');
+        exit;
     }
 }

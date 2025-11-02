@@ -1,8 +1,6 @@
-/* ============ Auth Pages (Login / Register / Forgot Password) ============ */
-
 body.auth-page {
-  background: linear-gradient(120deg, #f5f5f5, #fafafa);
-  font-family: "Poppins", sans-serif;
+  background: linear-gradient(120deg, #f6f8fb, #ffffff);
+  font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
   margin: 0;
   display: flex;
   align-items: center;
@@ -12,73 +10,62 @@ body.auth-page {
 
 .auth-container {
   background: #fff;
-  padding: 40px 50px;
-  border-radius: 12px;
-  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
-  max-width: 400px;
-  width: 90%;
+  padding: 34px 36px;
+  border-radius: 10px;
+  box-shadow: 0 10px 30px rgba(31,41,55,0.06);
+  width: 100%;
+  max-width: 420px;
   text-align: center;
 }
 
 .auth-container h2 {
-  margin-bottom: 25px;
-  font-size: 24px;
+  margin-bottom: 18px;
+  font-size: 22px;
   font-weight: 600;
-  color: #333;
+  color: #111827;
 }
 
 .auth-container form {
   display: flex;
   flex-direction: column;
-  gap: 15px;
+  gap: 12px;
+  margin-top: 6px;
 }
 
 .auth-container input {
-  padding: 12px 15px;
-  border: 1px solid #ddd;
+  padding: 12px 14px;
+  border: 1px solid #e6e9ef;
   border-radius: 8px;
   font-size: 15px;
   outline: none;
-  transition: all 0.2s ease;
 }
 
 .auth-container input:focus {
-  border-color: #2f8bfd;
-  box-shadow: 0 0 5px rgba(47, 139, 253, 0.3);
+  border-color: #2563eb;
+  box-shadow: 0 6px 18px rgba(37,99,235,0.08);
 }
 
 .auth-container button {
-  background: #2f8bfd;
-  color: white;
-  font-size: 16px;
-  border: none;
   padding: 12px;
   border-radius: 8px;
+  border: none;
+  background: #2563eb;
+  color: #fff;
+  font-weight: 600;
   cursor: pointer;
-  transition: all 0.2s ease;
+  font-size: 15px;
 }
 
-.auth-container button:hover {
-  background: #256fe0;
+.auth-container .alert {
+  padding: 10px 12px;
+  border-radius: 8px;
+  margin-bottom: 8px;
+  text-align: left;
 }
 
-.auth-container p {
-  font-size: 14px;
-  color: #666;
-}
-
-.auth-container a {
-  color: #2f8bfd;
-  text-decoration: none;
-  font-weight: 500;
-}
-
-.auth-container a:hover {
-  text-decoration: underline;
-}
+.alert-success { background: #ecfdf5; color: #065f46; border: 1px solid #bbf7d0; }
+.alert-danger { background: #fff1f2; color: #7f1d1d; border: 1px solid #fecaca; }
 
 @media (max-width: 480px) {
-  .auth-container {
-    padding: 30px 25px;
-  }
+  .auth-container { padding: 22px; border-radius: 8px; }
 }

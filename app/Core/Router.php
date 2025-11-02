@@ -3,90 +3,64 @@ namespace App\Core;
 
 class Router
 {
-    private array $routes = [
-        'GET' => [],
-        'POST' => [],
-    ];
+    protected array $routes = [];
 
-    protected $notFound;
-
-    public function get(string $path, string $handler): void
+    public function get(string $path, string $controllerAction): void
     {
-        $this->routes['GET'][$this->normalize($path)] = $handler;
+        $this->addRoute('GET', $path, $controllerAction);
     }
 
-    public function post(string $path, string $handler): void
+    public function post(string $path, string $controllerAction): void
     {
-        $this->routes['POST'][$this->normalize($path)] = $handler;
-    }
-        
-    public function setNotFound(callable $cb): void
-    {
-        $this->notFound = $cb;
-    }
-        
-    protected function normalize(string $path): string
-    {
-        $p = parse_url($path, PHP_URL_PATH) ?: '/';
-        return rtrim($p, '/') === '' ? '/' : rtrim($p, '/');
+        $this->addRoute('POST', $path, $controllerAction);
     }
 
-    /*
-       Normalizes the given path by removing trailing slashes
-     */
-    public function dispatch(string $uri, string $method): void
+    protected function addRoute(string $method, string $path, string $controllerAction): void
     {
-        $requestPath = $this->normalize($uri);
-        $method = strtoupper($method);
+        $this->routes[$method][$path] = $controllerAction;
+    }
 
-        $handler = $this->routes[$method][$requestPath] ?? null;
+    public function dispatch(string $uri = null, string $method = null): void
+    {
+        $uri = $uri ?? parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
+        $method = $method ?? $_SERVER['REQUEST_METHOD'];
 
-        if (!$handler) {
-            if (is_callable($this->notFound)) {
-                call_user_func($this->notFound);
-            } else {
-                http_response_code(404);
-                echo "404 Not Found";
-            }
+        // Normalize trailing slash
+        if ($uri !== '/' && str_ends_with($uri, '/')) {
+            $uri = rtrim($uri, '/');
+        }
+
+        if (!isset($this->routes[$method][$uri])) {
+            http_response_code(404);
+            echo "<h1>404 Not Found</h1><p>Route {$uri} not defined for {$method}</p>";
             return;
         }
 
-        // handler format: "Controller@method" or "Namespace\Ctrl@method"
-        if (is_string($handler) && strpos($handler, '@') !== false) {
-            [$controller, $action] = explode('@', $handler);
-            $controllerClass = $this->qualifyController($controller);
-            if (!class_exists($controllerClass)) {
-                http_response_code(500);
-                echo "Controller {$controllerClass} not found";
-                return;
-            }
-            $instance = new $controllerClass();
-            if (!method_exists($instance, $action)) {
-                http_response_code(500);
-                echo "Action {$action} not found in {$controllerClass}";
-                return;
-            }
-            call_user_func_array([$instance, $action], []);
+        $controllerAction = $this->routes[$method][$uri];
+        [$controllerName, $methodName] = explode('@', $controllerAction);
+
+        // ✅ Detect namespaced controller (like Admin\DashboardController)
+        if (str_contains($controllerName, '\\')) {
+            $fullController = "App\\Controllers\\{$controllerName}";
+        } else {
+            $fullController = "App\\Controllers\\{$controllerName}";
+        }
+
+        if (!class_exists($fullController)) {
+            http_response_code(404);
+            echo "<h1>404 Not Found</h1><p>Controller {$fullController} not found.</p>";
             return;
         }
 
-        if (is_callable($handler)) {
-            call_user_func($handler);
+        $controller = new $fullController();
+
+        if (!method_exists($controller, $methodName)) {
+            http_response_code(404);
+            echo "<h1>404 Not Found</h1><p>Method {$methodName} not found in {$fullController}.</p>";
             return;
         }
 
-        http_response_code(500);
-        echo "Invalid route handler.";
+        // Finally call the controller action
+        $controller->$methodName();
     }
-        
-    protected function qualifyController(string $controller): string
-    {
-        // If provided with backslash namespace, use it as-is
-        if (strpos($controller, '\\') !== false) {
-            return $controller;
-        }
-        // Default namespace for controllers
-        return 'App\\Controllers\\' . $controller;
-    }
-
 }

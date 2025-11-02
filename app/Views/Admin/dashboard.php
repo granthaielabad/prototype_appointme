@@ -1,21 +1,22 @@
-<h1>Dashboard</h1>
-<div class="row mt-4">
-    <div class="col-md-4">
-        <div class="card text-center p-3 shadow-sm">
-            <h4><?= $totalUsers ?></h4>
-            <p>Registered Users</p>
+<div class="admin-content">
+    <h1 class="page-title"><?= htmlspecialchars($pageTitle ?? 'Dashboard') ?></h1>
+
+    <div class="dashboard-grid">
+        <div class="dashboard-card">
+            <h3>Total Users</h3>
+            <p><?= htmlspecialchars($totalUsers) ?></p>
         </div>
-    </div>
-    <div class="col-md-4">
-        <div class="card text-center p-3 shadow-sm">
-            <h4><?= $totalServices ?></h4>
-            <p>Salon Services</p>
+        <div class="dashboard-card">
+            <h3>Total Appointments</h3>
+            <p><?= htmlspecialchars($totalAppointments) ?></p>
         </div>
-    </div>
-    <div class="col-md-4">
-        <div class="card text-center p-3 shadow-sm">
-            <h4><?= $totalAppointments ?></h4>
-            <p>Total Appointments</p>
+        <div class="dashboard-card">
+            <h3>Services</h3>
+            <p><?= htmlspecialchars($totalServices) ?></p>
+        </div>
+        <div class="dashboard-card">
+            <h3>New Inquiries</h3>
+            <p><?= htmlspecialchars($newInquiries) ?></p>
         </div>
     </div>
 </div>

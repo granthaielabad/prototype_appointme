@@ -1,12 +1,9 @@
-<aside>
-    <div class="p-3 border-bottom">
-        <h4 class="text-white">AppointMe</h4>
-        <small class="text-muted"><?= htmlspecialchars($_SESSION['user']['role'] ?? 'Admin') ?></small>
-    </div>
-    <a href="/admin/dashboard" class="active"><i class="bi bi-speedometer2"></i> Dashboard</a>
-    <a href="/admin/services"><i class="bi bi-scissors"></i> Services</a>
-    <a href="/admin/appointments"><i class="bi bi-calendar-check"></i> Appointments</a>
-    <a href="/admin/users"><i class="bi bi-people"></i> Users</a>
-    <a href="/logout"><i class="bi bi-box-arrow-right"></i> Logout</a>
+<ul class="nav flex-column">
+  <li class="nav-item"><a class="nav-link" href="/admin/dashboard">Dashboard</a></li>
+  <li class="nav-item"><a class="nav-link" href="/admin/appointments">Appointments</a></li>
+  <li class="nav-item"><a class="nav-link" href="/admin/services">Services</a></li>
+  <li class="nav-item"><a class="nav-link" href="/admin/inquiries">Inquiries</a></li>
+  <li class="nav-item"><a class="nav-link" href="/admin/reports">Reports</a></li>
+</ul>
 </aside>
-<main>
+<main class="col-md-10 py-4">

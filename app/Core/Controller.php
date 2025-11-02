@@ -1,44 +1,56 @@
 <?php
-
 namespace App\Core;
 
 class Controller
 {
-    /*
-        Renders a view with optional data
-        Automatically includes navbar/footer except for auth pages.
+    /**
+     * Render a view and optionally wrap with navbar/footer.
+     *
+     * $view is path under Views (e.g. "Auth/login" or "Home/landing")
      */
-    public function view(string $view, array $data = []): void
+    protected function view(string $view, array $data = []): void
     {
-                
         extract($data);
-        $viewFile = __DIR__ . '/../Views/' . $view . '.php';
+        $base = __DIR__ . '/../Views/';
+        $viewFile = $base . $view . '.php';
 
         if (!file_exists($viewFile)) {
-            echo "❌ View not found: $viewFile";
+            http_response_code(500);
+            echo "View not found: {$viewFile}";
             return;
         }
-                
-        // Determine if this view should hide the navbar/footer
-        $authPages = ['Auth/login', 'Auth/register', 'Auth/forgot_password'];
+
+        // auth pages that should not show navbar/footer
+        $authPages = [
+            'Auth/login',
+            'Auth/register',
+            'Auth/forgot_password',
+            'Auth/reset_password'
+        ];
+
         $isAuthPage = false;
-        foreach ($authPages as $authPage) {
-            if (str_contains($view, $authPage)) {
+        foreach ($authPages as $p) {
+            if (strpos($view, $p) !== false) {
                 $isAuthPage = true;
                 break;
             }
         }
-                
-        // Include layout conditionally
-        if (!$isAuthPage) {
-            require __DIR__ . '/../Views/layouts/navbar.php';
+
+        // Always ensure session available
+        if (session_status() === PHP_SESSION_NONE) {
+            session_start();
         }
-                
+
+        // Header - if you have a header file include it (optional)
+        // if (!$isAuthPage) require $base . 'layouts/header.php';
+        if (!$isAuthPage) {
+            require_once $base . 'layouts/navbar.php';
+        }
+
         require $viewFile;
 
         if (!$isAuthPage) {
-            require __DIR__ . '/../Views/layouts/footer.php';
+            require_once $base . 'layouts/footer.php';
         }
-
     }
 }
