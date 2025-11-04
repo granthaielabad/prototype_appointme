@@ -1,13 +1,8 @@
 <?php
 namespace App\Core;
 
-class Controller
+abstract class Controller
 {
-    /**
-     * Render a view and optionally wrap with navbar/footer.
-     *
-     * $view is path under Views (e.g. "Auth/login" or "Home/landing")
-     */
     protected function view(string $view, array $data = []): void
     {
         extract($data);
@@ -20,12 +15,12 @@ class Controller
             return;
         }
 
-        // auth pages that should not show navbar/footer
         $authPages = [
             'Auth/login',
             'Auth/register',
             'Auth/forgot_password',
-            'Auth/reset_password'
+            'Auth/reset_password',
+            'Auth/verify_otp'
         ];
 
         $isAuthPage = false;
@@ -36,15 +31,9 @@ class Controller
             }
         }
 
-        // Always ensure session available
-        if (session_status() === PHP_SESSION_NONE) {
-            session_start();
-        }
-
-        // Header - if you have a header file include it (optional)
-        // if (!$isAuthPage) require $base . 'layouts/header.php';
         if (!$isAuthPage) {
             require_once $base . 'layouts/navbar.php';
+            require_once $base . 'layouts/alerts.php';
         }
 
         require $viewFile;

@@ -2,6 +2,7 @@
 namespace App\Models;
 
 use App\Core\Model;
+use Exception;
 use PDO;
 
 class Appointment extends Model

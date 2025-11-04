@@ -1,5 +1,4 @@
 <?php
-
 namespace App\Core;
 
 class Auth
@@ -29,10 +28,6 @@ class Auth
         return (bool) Session::get('user', false);
     }
 
-    /**
-     * Check login only (no role). If not logged in, redirect to /login
-     * If $roles provided, enforce role(s) as well.
-     */
     public static function requireLogin(int|array|null $roles = null): void
     {
         Session::start();
@@ -46,10 +41,6 @@ class Auth
         }
     }
 
-    /**
-     * Require specific role(s) to access page.
-     * $roles may be int or array of ints.
-     */
     public static function requireRole(int|array $roles): void
     {
         Session::start();

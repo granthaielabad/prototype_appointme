@@ -1,14 +1,10 @@
 <?php
-
 namespace App\Helpers;
 
 use PHPMailer\PHPMailer\PHPMailer;
+use PHPMailer\PHPMailer\SMTP;
 use PHPMailer\PHPMailer\Exception;
 
-/**
- * Simple Mailer helper using PHPMailer and .env configuration.
- * Provides send() method as controllers expect, plus legacy sendMail().
- */
 class Mailer
 {
     protected PHPMailer $mail;
@@ -17,45 +13,111 @@ class Mailer
     {
         $this->mail = new PHPMailer(true);
 
-        // Basic SMTP config from env; update .env accordingly
+        // load environment safely and trim possible surrounding quotes
+        $host = $this->env('MAIL_HOST', 'smtp.gmail.com');
+        $username = $this->env('MAIL_USERNAME', '');
+        $password = $this->env('MAIL_PASSWORD', '');
+        $port = (int) $this->env('MAIL_PORT', 587);
+        $encryption = strtolower($this->env('MAIL_ENCRYPTION', 'tls'));
+        $fromAddress = $this->env('MAIL_FROM_ADDRESS', 'noreply@example.com');
+        $fromName = $this->env('MAIL_FROM_NAME', 'AppointMe');
+
+        // map encryption string to PHPMailer constant
+        $encConst = PHPMailer::ENCRYPTION_STARTTLS;
+        if ($encryption === 'ssl') {
+            $encConst = PHPMailer::ENCRYPTION_SMTPS;
+        } else {
+            $encConst = PHPMailer::ENCRYPTION_STARTTLS;
+        }
+
+        // configure mailer
         $this->mail->isSMTP();
-        $this->mail->Host       = $_ENV['MAIL_HOST'] ?? 'smtp.gmail.com';
+        $this->mail->Host       = $host;
         $this->mail->SMTPAuth   = true;
-        $this->mail->Username   = $_ENV['MAIL_USERNAME'] ?? '';
-        $this->mail->Password   = $_ENV['MAIL_PASSWORD'] ?? '';
-        $this->mail->SMTPSecure = $_ENV['MAIL_ENCRYPTION'] ?? PHPMailer::ENCRYPTION_STARTTLS;
-        $this->mail->Port       = (int)($_ENV['MAIL_PORT'] ?? 587);
+        $this->mail->Username   = $username;
+        $this->mail->Password   = $password;
+        $this->mail->SMTPSecure = $encConst;
+        $this->mail->Port       = $port;
 
-        $this->mail->setFrom(
-            $_ENV['MAIL_FROM_ADDRESS'] ?? 'noreply@example.com',
-            $_ENV['MAIL_FROM_NAME'] ?? 'AppointMe'
-        );
+        // allow TLS options (avoid failures with certain local setups)
+        $this->mail->SMTPOptions = [
+            'ssl' => [
+                'verify_peer' => true,
+                'verify_peer_name' => true,
+                'allow_self_signed' => false,
+            ],
+        ];
 
+        // Set debug if app is in debug mode
+        $appDebug = strtolower($this->env('APP_DEBUG', 'false'));
+        if ($appDebug === 'true' || $appDebug === '1') {
+            // enable verbose debug (logs to error_log via Debugoutput)
+            $this->mail->SMTPDebug = SMTP::DEBUG_OFF; // keep off by default; enable below if needed
+            // To log SMTP debug to error_log, set Debugoutput closure
+            $this->mail->Debugoutput = function($str, $level) {
+                error_log("[PHPMailer][SMTPDebug][$level] $str");
+            };
+            // You can set SMTPDebug>0 during deep troubleshooting, e.g. SMTP::DEBUG_SERVER
+            // $this->mail->SMTPDebug = SMTP::DEBUG_SERVER;
+        }
+
+        $this->mail->setFrom($fromAddress, $fromName);
         $this->mail->isHTML(true);
     }
 
     /**
-     * Primary method controllers should call.
+     * Helper to read env with trimming quotes
      */
-    public function send(string $to, string $subject, string $body): bool
+    protected function env(string $key, $default = null)
     {
-        return $this->sendMail($to, $subject, $body);
+        $val = $_ENV[$key] ?? getenv($key) ?: $default;
+        if (!is_string($val)) return $val;
+        // trim whitespace and surrounding single/double quotes
+        return trim($val, " \t\n\r\0\x0B\"'");
     }
 
     /**
-     * Backwards-compatible method.
+     * Public send wrapper.
      */
-    public function sendMail(string $to, string $subject, string $body): bool
+    public function send(string $to, string $subject, string $body, array $options = []): bool
+    {
+        return $this->sendMail($to, $subject, $body, $options);
+    }
+
+    /**
+     * Actual sending implementation with logging.
+     */
+    public function sendMail(string $to, string $subject, string $body, array $options = []): bool
     {
         try {
+            // clear previous recipients and attachments if any
             $this->mail->clearAddresses();
+            $this->mail->clearAttachments();
+
             $this->mail->addAddress($to);
+
+            if (!empty($options['replyTo'])) {
+                $this->mail->addReplyTo($options['replyTo']);
+            }
+
             $this->mail->Subject = $subject;
             $this->mail->Body    = $body;
+            $this->mail->AltBody = strip_tags($body);
 
-            return (bool)$this->mail->send();
+            $sent = $this->mail->send();
+            if (!$sent) {
+                error_log('Mailer: send() returned false with no Exception; lastError: ' . $this->mail->ErrorInfo);
+            }
+            return (bool)$sent;
         } catch (Exception $e) {
-            error_log('Mailer Error: ' . $e->getMessage());
+            // log verbose error
+            error_log('Mailer Exception: ' . $e->getMessage());
+            // also include PHPMailer ErrorInfo if provided
+            try {
+                error_log('Mailer ErrorInfo: ' . ($this->mail->ErrorInfo ?? 'n/a'));
+            } catch (\Throwable $t) {
+                // ignore
+            }
             return false;
         }
     }

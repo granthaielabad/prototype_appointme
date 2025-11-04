@@ -1,35 +1,34 @@
-<?php
-use App\Core\Session;
-?>
 <!doctype html>
-<html lang="en">
-<head>
-  <meta charset="utf-8">
-  <title>Register - AppointMe</title>
-  <link rel="stylesheet" href="/assets/css/auth.css">
-</head>
-<body class="auth-page">
-  <div class="auth-container">
-    <h2>Create Account</h2>
-
-    <?php if ($f = Session::getFlash('success')): ?>
-      <div class="alert alert-success"><?= htmlspecialchars($f['msg']) ?></div>
-    <?php endif; ?>
-    <?php if ($f = Session::getFlash('error')): ?>
-      <div class="alert alert-danger"><?= htmlspecialchars($f['msg']) ?></div>
-    <?php endif; ?>
-
-    <form method="POST" action="/register">
-      <input name="first_name" placeholder="First name" required>
-      <input name="last_name" placeholder="Last name" required>
-      <input name="email" type="email" placeholder="Email" required>
-      <input name="contact_number" placeholder="Contact number">
-      <input name="password" type="password" placeholder="Password" required>
-      <input name="confirm_password" type="password" placeholder="Confirm password" required>
-      <button type="submit">Register</button>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Register - AppointMe</title>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"></head>
+<body>
+<div class="d-flex align-items-center justify-content-center vh-100" style="background:#f8fafc">
+  <div class="card p-4" style="width:420px">
+    <h4>Create account</h4>
+    <?php require_once __DIR__ . '/../layouts/alerts.php'; ?>
+    <form method="post" action="/register">
+      <input type="hidden" name="_csrf" value="<?= \App\Core\CSRF::getToken() ?? \App\Core\CSRF::generate() ?>">
+      <div class="row">
+        <div class="col"><input class="form-control mb-2" name="first_name" placeholder="First name" required></div>
+        <div class="col"><input class="form-control mb-2" name="last_name" placeholder="Last name" required></div>
+      </div>
+      <div class="mb-2"><input class="form-control" name="email" type="email" placeholder="Email" required></div>
+      <div class="mb-2"><input class="form-control" name="contact_number" placeholder="Contact number"></div>
+      <div class="mb-2"><input class="form-control" name="password" type="password" placeholder="Password" required></div>
+      <div class="mb-2"><input class="form-control" name="confirm_password" type="password" placeholder="Confirm password" required></div>
+      <button class="btn btn-primary w-100">Register</button>
     </form>
+    <hr>
+    <small>Already have an account? <a href="/login">Login</a></small>
 
-    <p style="margin-top:12px;">Already have an account? <a href="/login">Login</a></p>
+    <div class="text-center mt-3">
+      <a href="/" class="btn btn-outline-secondary btn-sm">
+        <i class="bi bi-arrow-left"></i> Go back to homepage
+      </a>
+    </div>
+    
   </div>
+</div>
 </body>
 </html>
