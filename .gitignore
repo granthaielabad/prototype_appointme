@@ -13,6 +13,7 @@ composer.lock
 
 # === Node / Frontend Dependencies (if used) ===
 /node_modules/
+node_modules
 package-lock.json
 yarn.lock
 
