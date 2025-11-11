@@ -15,7 +15,7 @@
         <li class="nav-item"><a class="nav-link" href="/#contact">Contact</a></li>
         <?php if (!\App\Core\Auth::check()): ?>
           <li class="nav-item"><a class="nav-link btn btn-outline-primary ms-2" href="/login">Login</a></li>
-          <li class="nav-item"><a class="nav-link btn btn-primary ms-2 text-white" href="/register">Sign Up</a></li>
+          <li class="nav-item"><a class="nav-link btn btn-outline-primary ms-2" href="/register">Register</a></li>
         <?php else: $user = \App\Core\Auth::user(); ?>
           <?php if ($user['role_id'] == 1): ?>
             <li class="nav-item"><a class="nav-link" href="/admin/dashboard">Admin</a></li>
