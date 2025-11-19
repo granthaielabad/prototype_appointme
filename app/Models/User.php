@@ -32,7 +32,7 @@ class User extends Model
 
     /*
         Find user by valid (non-expired) reset token.
-     */
+     */ 
     public function findByResetToken(string $token): ?array
     {
         $stmt = $this->db->prepare("SELECT * FROM {$this->table} WHERE reset_token = :token LIMIT 1");
