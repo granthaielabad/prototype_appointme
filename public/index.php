@@ -8,116 +8,68 @@ require_once __DIR__ . '/../vendor/autoload.php';
 
 // Load .env
 $dotenv = Dotenv\Dotenv::createImmutable(dirname(__DIR__));
-$dotenv->load();
+$dotenv->safeLoad();
 
 // Start session
 Session::start();
 
-// Initialize Router
+// Router
 $router = new Router();
 
-/*
-|--------------------------------------------------------------------------
-| PUBLIC ROUTES
-|--------------------------------------------------------------------------
-*/
+/* PUBLIC */
 $router->get('/', 'HomeController@landing');
-$router->post('/inquiry/submit', 'InquiryController@storePublic');
+$router->post('/inquiry/storePublic', 'InquiryController@storePublic');
 
-/*
-|--------------------------------------------------------------------------
-| AUTH ROUTES
-|--------------------------------------------------------------------------
-*/
+/* AUTH */
 $router->get('/login', 'AuthController@loginForm');
 $router->post('/login', 'AuthController@login');
-
 $router->get('/register', 'AuthController@registerForm');
 $router->post('/register', 'AuthController@register');
-
+$router->get('/verify-otp', 'AuthController@verifyOtpForm');
+$router->post('/verify-otp', 'AuthController@verifyOtp');
 $router->get('/forgot-password', 'AuthController@forgotPasswordForm');
 $router->post('/forgot-password', 'AuthController@sendResetLink');
-
-$router->get('/reset-password', 'AuthController@resetPasswordForm'); // ?token=...
+$router->get('/reset-password', 'AuthController@resetPasswordForm');
 $router->post('/reset-password', 'AuthController@resetPassword');
-
 $router->get('/logout', 'AuthController@logout');
 
-/*
-|--------------------------------------------------------------------------
-| CUSTOMER ROUTES
-|--------------------------------------------------------------------------
-*/
+/* CUSTOMER */
 $router->get('/book', 'BookingController@index');
 $router->post('/book', 'BookingController@store');
 $router->get('/my-appointments', 'BookingController@myAppointments');
 $router->get('/cancel-appointment', 'BookingController@cancel');
 
-/*
-|--------------------------------------------------------------------------
-| ADMIN ROUTES
-|--------------------------------------------------------------------------
-*/
-$router->get('/admin/dashboard', 'Admin\DashboardController@index');
-
-$router->get('/admin/appointments', 'Admin\AppointmentController@index');
-$router->post('/admin/appointments/updateStatus', 'Admin\AppointmentController@updateStatus');
-
-$router->get('/admin/services', 'Admin\ServiceController@index');
-$router->get('/admin/services/create', 'Admin\ServiceController@create');
-$router->post('/admin/services/store', 'Admin\ServiceController@store');
-$router->get('/admin/services/edit', 'Admin\ServiceController@edit');
-$router->post('/admin/services/update', 'Admin\ServiceController@update');
-$router->get('/admin/services/delete', 'Admin\ServiceController@delete');
-
-$router->get('/admin/inquiries', 'Admin\InquiryController@index');
-
-$router->get('/admin/reports', 'Admin\ReportController@index');
-$router->get('/admin/reports/summary', 'Admin\ReportController@summary');
-
-
-
-
-
-
-// OTP
+/* OTP */
 $router->post('/otp/send', 'OTPController@send');
 $router->post('/otp/verify', 'OTPController@verify');
 
-// Admin Reports
+/* ANALYTICS */
+$router->get('/analytics/daily-appointments', 'AnalyticsController@dailyAppointments');
+$router->get('/analytics/service-popularity', 'AnalyticsController@servicePopularity');
+
+/* ADMIN (namespaced) */
+$router->get('/admin/dashboard', 'Admin\\DashboardController@index');
+$router->get('/admin/appointments', 'Admin\\AppointmentController@index');
+$router->post('/admin/appointments/update-status', 'Admin\\AppointmentController@updateStatus');
+
+$router->get('/admin/services', 'Admin\\ServiceController@index');
+$router->get('/admin/services/create', 'Admin\\ServiceController@create');
+$router->post('/admin/services/store', 'Admin\\ServiceController@store');
+$router->get('/admin/services/edit', 'Admin\\ServiceController@edit');
+$router->post('/admin/services/update', 'Admin\\ServiceController@update');
+$router->get('/admin/services/delete', 'Admin\\ServiceController@delete');
+
+$router->get('/admin/inquiries', 'Admin\\InquiryController@index');
+$router->get('/admin/inquiries/show', 'Admin\\InquiryController@show');
+$router->post('/admin/inquiries/update-status', 'Admin\\InquiryController@updateStatus');
+
 $router->get('/admin/reports', 'Admin\\ReportController@index');
 $router->get('/admin/reports/summary', 'Admin\\ReportController@summary');
+$router->get('/admin/reports/export-csv', 'Admin\\ReportController@exportCsv');
+$router->get('/admin/reports/export-pdf', 'Admin\\ReportController@exportPdf');
 
-// Analytics endpoints (for charts)
-$router->get('/analytics/daily-appointments', 'AnalyticsController@dailyAppointments');
-
-
-/*
-|--------------------------------------------------------------------------
-| RESOURCE-LIKE ROUTES (Optional)
-|--------------------------------------------------------------------------
-*/
-$router->get('/users', 'UserController@index');
-$router->get('/users/show', 'UserController@show');
-
+/* RESOURCE-LIKE (misc) */
 $router->get('/services', 'ServiceController@index');
 $router->get('/services/show', 'ServiceController@show');
 
-$router->get('/appointments', 'AppointmentController@index');
-$router->get('/appointments/show', 'AppointmentController@show');
-
-$router->get('/payments', 'PaymentController@index');
-$router->get('/payments/show', 'PaymentController@show');
-
-$router->get('/invoices', 'InvoiceController@index');
-$router->get('/invoices/show', 'InvoiceController@show');
-
-$router->get('/inquiries', 'InquiryController@index');
-$router->get('/inquiries/show', 'InquiryController@show');
-
-/*
-|--------------------------------------------------------------------------
-| DISPATCH ROUTER
-|--------------------------------------------------------------------------
-*/
 $router->dispatch($_SERVER['REQUEST_URI'], $_SERVER['REQUEST_METHOD']);

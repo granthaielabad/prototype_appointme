@@ -51,4 +51,15 @@ abstract class Model
         $stmt = $this->db->prepare("DELETE FROM {$this->table} WHERE {$this->primaryKey} = :id");
         return $stmt->execute(['id' => $id]);
     }
+
+    public function getDb(): \PDO
+    {
+        return $this->db;
+    }
+
+    public function getTable(): string
+    {
+        return $this->table;
+    }
+
 }

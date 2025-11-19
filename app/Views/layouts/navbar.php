@@ -1,15 +1,12 @@
 <?php
-// Views/layouts/navbar.php
+// minimal, responsive navbar
 ?>
 <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm">
   <div class="container">
     <a class="navbar-brand" href="/">AppointMe</a>
-    <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
-      data-bs-target="#navCollapse" aria-controls="navCollapse" aria-expanded="false"
-      aria-label="Toggle navigation">
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navCollapse">
       <span class="navbar-toggler-icon"></span>
     </button>
-
     <div class="collapse navbar-collapse" id="navCollapse">
       <ul class="navbar-nav ms-auto">
         <li class="nav-item"><a class="nav-link" href="/#home">Home</a></li>
@@ -18,7 +15,7 @@
         <li class="nav-item"><a class="nav-link" href="/#contact">Contact</a></li>
         <?php if (!\App\Core\Auth::check()): ?>
           <li class="nav-item"><a class="nav-link btn btn-outline-primary ms-2" href="/login">Login</a></li>
-          <li class="nav-item"><a class="nav-link btn btn-primary ms-2 text-white" href="/register">Sign Up</a></li>
+          <li class="nav-item"><a class="nav-link btn btn-outline-primary ms-2" href="/register">Register</a></li>
         <?php else: $user = \App\Core\Auth::user(); ?>
           <?php if ($user['role_id'] == 1): ?>
             <li class="nav-item"><a class="nav-link" href="/admin/dashboard">Admin</a></li>
