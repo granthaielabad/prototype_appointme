@@ -36,6 +36,8 @@ export async function sendSMS (recipient, message, senderId = "PhilSMS") {
         }
 
         console.log('SMS send Succestfully:', result);
+
+        return result // himayin ko mamaya anong need na data.
         
     } catch (error) {
         console.error('Error Found:',error.message)

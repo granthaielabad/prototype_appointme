@@ -6,7 +6,7 @@ const router = express.Router()
 
 router.use("/sms", smsRouter) 
 
-router.use("/", paymentsRouter)
+router.use("/payments", paymentsRouter)
 
 
 

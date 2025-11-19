@@ -71,7 +71,7 @@ export async function createCheckoutSession({billing,  line_items, cancel_url, s
         const status = error?.response?.status;
         const data   = error?.response?.data;
         console.error("PayMongo create checkout failed:", status, JSON.stringify(data, null, 2));
-        throw error; // let controller return the message or a friendly error
+        throw error; 
 
 
     }

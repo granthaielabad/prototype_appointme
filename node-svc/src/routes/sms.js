@@ -10,11 +10,11 @@ router.use(requireInternalToken);
 router.post("/" , async (req , res , next  ) => {
 
     try {
-        const { recipient, message , senderId /* sender_id try ko to mamaya this if it work then used it. */ } = req.body
+        const { recipient, message , sender_id /* "sender_id" For future purposes kung may sarili ng sender_id ang company */  } = req.body
             
 
 
-            console.log("Recipient: " , recipient, "Message: " , message , "senderId: ", senderId)
+            console.log(" SMS.JS = Recipient: " , recipient, "Message: " , message , "senderId: ", sender_id)
 
 
             //validation ko
@@ -23,12 +23,8 @@ router.post("/" , async (req , res , next  ) => {
 
             };
 
-            const result = await sendSMS(recipient, message, senderId);
+            const result = await sendSMS(recipient, message, sender_id);
             res.json({ success: true , data: result });
-
-
-           
-
 
 
     } catch (error) {
@@ -43,7 +39,6 @@ router.post("/" , async (req , res , next  ) => {
 
 export default router;
 
-// Developer mindset:“Never res.json() inside a catch block. Always delegate to the centralized error handler.” why ??
 
 
 
