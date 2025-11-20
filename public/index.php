@@ -38,6 +38,8 @@ $router->get('/book', 'BookingController@index');
 $router->post('/book', 'BookingController@store');
 $router->get('/my-appointments', 'BookingController@myAppointments');
 $router->get('/cancel-appointment', 'BookingController@cancel');
+$router->post('/webhook/paymongo', 'PaymentWebhookController@handle');
+
 
 /* OTP */
 $router->post('/otp/send', 'OTPController@send');
