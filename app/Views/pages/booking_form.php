@@ -15,6 +15,9 @@
     <input type="email" id="email" placeholder="email" class="form-control" value="<?= htmlspecialchars($user['email']) ?>">
 
 
+    <input type="text" id="phonenumber" placeholder="Phone Number" class="form-control" value="<?= htmlspecialchars($user['contact_number']) ?>">
+
+
    
 
     <div class="mb-3">

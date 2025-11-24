@@ -3,6 +3,9 @@ namespace App\Controllers;
 
 use App\Core\Controller;
 use App\Models\Payment;
+use App\Models\Appointment;
+use App\Models\User;
+
 
 class PaymentWebhookController extends Controller
 {
@@ -51,10 +54,54 @@ class PaymentWebhookController extends Controller
             $paymentModel->update($paymentRow['payment_id'], [
                 'status' => $finalStatus
             ]);
-        }
+        };
 
-        http_response_code(200);
-        echo "Webhook processed";
+        if ($finalStatus === 'completed') {
+
+            $appointmentModel = new Appointment();
+            $appointment = $appointmentModel->find((int)$appointmentId);
+
+            if ($appointment) {
+
+                $userModel = new User();
+                $user = $userModel->find((int)$appointment['user_id']);
+
+                if ($user && !empty($user['contact_number'])) {
+
+                    $recipient = $user['contact_number'];
+                    
+                    $message = "Good Day! {$user['first_name']}, your payment and booking reservation (Ref: {$referenceNumber}) has been confirmed. Thank you !";
+ 
+                    $smsPayload = json_encode([
+                        'recipient' => $recipient,
+                        'message'   => $message,
+                     
+                    ]);
+
+                    $token = "super-secret-string"; 
+
+                    $ch = curl_init("http://localhost:4000/api/sms");
+                    curl_setopt_array($ch, [
+                        CURLOPT_POST           => true,
+                        CURLOPT_RETURNTRANSFER => true,
+                        CURLOPT_HTTPHEADER     => [
+                            'Content-Type: application/json',
+                            "Authorization: Bearer $token",
+                        ],
+                        CURLOPT_POSTFIELDS     => $smsPayload,
+                    ]);
+
+                    $smsResponse = curl_exec($ch);
+                    $smsHttpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+                    curl_close($ch);
+
+                
+                }
+            }
+        }               
+
+            http_response_code(200);
+            echo "Webhook processed";
 
 
 

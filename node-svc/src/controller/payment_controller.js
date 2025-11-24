@@ -11,6 +11,8 @@ export async function startCheckout(req, res, next){
         
         const {billing, line_items, reference_number } = req.body;
 
+        const phone = billing?.phone;
+
         console.log(billing, line_items, reference_number)
 
         const session = await createCheckoutSession({
@@ -19,6 +21,7 @@ export async function startCheckout(req, res, next){
             cancel_url: CANCEL_URL ,
             success_url: SUCCESS_URL ,
             reference_number,
+            phone
         })
 
         res.json({ success: true , checkout_url : session.checkout_url, payment_intent_id: session.payment_intent_id, reference_number  

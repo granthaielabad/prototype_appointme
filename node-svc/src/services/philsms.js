@@ -10,12 +10,33 @@ console.log("PHILSMS- TOKEN ", apiTokken)
 console.log("PHILSMS- URL ", apiUrl)
 
 
+function toPhilippinesInternational(recipient) {
+  if (!recipient) return recipient;
+
+  // remove spaces, dashes, etc.
+  let digits = recipient.replace(/\D/g, '');
+
+  // If it starts with 0 and has 11 digits → convert 09xxxxxxxxx → 639xxxxxxxxx
+  if (digits.length === 11 && digits.startsWith('0')) {
+    digits = '63' + digits.slice(1);
+  }
+
+  // If it already starts with 63, keep as is
+  // (e.g. 639567915563)
+  return digits;
+}
+
+
+
 export async function sendSMS (recipient, message, senderId = "PhilSMS") {
     
     try { 
 
+        const normalizedRecipient = toPhilippinesInternational(recipient);
+        console.log("philsms.js recipient" +normalizedRecipient)
+
         const payLoad = {
-            recipient,
+            recipient: normalizedRecipient,
             sender_id: senderId,
             type: "plain",
             message,
