@@ -44,6 +44,7 @@ yarn.lock
 *.iml
 *.sublime-workspace
 *.sublime-project
+.prettierrc
 
 # === Build / Generated Files ===
 /dist/
