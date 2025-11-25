@@ -2,7 +2,7 @@
 namespace App\Controllers;
 
 use App\Core\Controller;
-use App\Models\Payment;
+use App\Models\Payment; 
 
 class PaymentController extends Controller
 {

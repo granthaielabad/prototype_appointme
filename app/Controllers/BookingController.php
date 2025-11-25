@@ -135,13 +135,39 @@ class BookingController extends Controller
         exit;
     }
 
+    $_SESSION['checkout_url'] = $result['checkout_url'];
+
+
+
  
-    Session::flash('success', 'Appointment booked successfully! Redirecting to payment...', 'success');
+    Session::flash('success', 'Appointment booked successfully! Please Prcoeed to the Payment', 'success');
 
 
-    header("Location: " . $result['checkout_url']);
+    header("Location: /payment-qr");
     exit;
     }
+
+
+    public function paymentQr(): void
+    {
+        Auth::requireRole(3);
+
+        if (empty($_SESSION['checkout_url'])) {
+            Session::flash('error', 'No activepaymentsession found. Please try booking again.', 'danger' );
+            header('Location: /my-appointments' );
+            exit;
+        }
+
+        $checkoutUrl = $_SESSION['checkout_url'];
+
+         $this->view('pages/payment_qr', [
+             'checkoutUrl' => $checkoutUrl,
+    ]);
+
+    }
+
+
+
 
     public function myAppointments(): void
     {

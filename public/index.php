@@ -36,9 +36,11 @@ $router->get('/logout', 'AuthController@logout');
 /* CUSTOMER */
 $router->get('/book', 'BookingController@index');
 $router->post('/book', 'BookingController@store');
+$router->get('/payment-qr', 'BookingController@paymentQr'); 
 $router->get('/my-appointments', 'BookingController@myAppointments');
 $router->get('/cancel-appointment', 'BookingController@cancel');
 $router->post('/webhook/paymongo', 'PaymentWebhookController@handle');
+
 
 
 /* OTP */
