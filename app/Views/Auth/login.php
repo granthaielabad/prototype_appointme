@@ -3,6 +3,7 @@
 <head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Login - AppointMe</title>
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
 </head>
 <body>
 <div class="d-flex align-items-center justify-content-center vh-100" style="background:#f8fafc">
@@ -11,8 +12,8 @@
     <?php require_once __DIR__ . '/../layouts/alerts.php'; ?>
     <form method="post" action="/login">
       <input type="hidden" name="_csrf" value="<?= \App\Core\CSRF::getToken() ?? \App\Core\CSRF::generate() ?>">
-      <div class="mb-3"><input class="form-control" name="email" placeholder="Email" type="email" required></div>
-      <div class="mb-3"><input class="form-control" name="password" placeholder="Password" type="password" required></div>
+      <div class="mb-3"><input class="form-control" name="email" placeholder="Email" autocomplete="email" required></div>
+      <div class="mb-3"><input class="form-control" name="password" placeholder="Password" type="password" autocomplete="current-password" required></div>
       <div class="d-flex justify-content-between align-items-center">
         <a href="/forgot-password">Forgot Password?</a>
         <button class="btn btn-primary">Login</button>

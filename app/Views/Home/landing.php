@@ -1,64 +1,224 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
+
 <head>
-  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>AppointMe</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-  <style>.hero{padding:5rem 0;background:linear-gradient(135deg,#f8fafc,#fff)}.service-card{min-height:160px}</style>
+    <meta charset="UTF-8">
+    <title>8th Avenue Salon | Book Appointments Online</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <!-- Bootstrap -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Italiana&family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap"
+        rel="stylesheet">
+
+    <!-- Landing Styles -->
+    <link rel="stylesheet" href="/prototype/public/assets/css/landing.css">
 </head>
+
 <body>
-  <?php require_once __DIR__ . '/../layouts/navbar.php'; ?>
-  <header id="home" class="hero">
-    <div class="container"><div class="row align-items-center">
-      <div class="col-md-6">
-        <h1 class="display-5 fw-bold">Book salon appointments effortlessly</h1>
-        <p class="lead text-muted">Find services, pick a time, and get confirmed — all in one place.</p>
-        <p><a href="/register" class="btn btn-primary">Get Started</a> <a href="#services" class="btn btn-outline-secondary">View Services</a></p>
-      </div>
-      <div class="col-md-6 text-center"><img src="/assets/img/hero.png" class="img-fluid" style="max-height:320px"></div>
-    </div></div>
-  </header>
 
-  <section id="services" class="py-5">
-    <div class="container">
-      <h2>Services</h2>
-      <div class="row">
-        <?php if (!empty($services)): foreach($services as $category => $list): ?>
-          <div class="col-12"><h5 class="mt-3"><?=htmlspecialchars($category)?></h5>
-            <div class="row">
-              <?php foreach($list as $s): ?>
-                <div class="col-md-4">
-                  <div class="card p-3 service-card shadow-sm">
-                    <h6><?=htmlspecialchars($s['service_name'])?></h6>
-                    <p class="mb-1 small text-muted"><?=number_format($s['price'],2)?> • <?=$s['duration_minutes']?> mins</p>
-                    <p class="small text-muted"><?=htmlspecialchars($s['description'] ?? '')?></p>
-                  </div>
-                </div>
-              <?php endforeach; ?>
+    <?php include __DIR__ . "/../layouts/navbar.php"; ?>
+
+
+    <!-- ======================================================= -->
+    <!-- HERO SECTION (full width, no container) -->
+    <!-- ======================================================= -->
+    <section id="home" class="hero-section">
+
+        <div class="hero-inner">
+            <!-- LEFT -->
+            <div class="hero-left">
+                <h1 class="hero-title">
+                    Pamper Yourself,<br>
+                    The Smart & Easy Way.
+                </h1>
+
+                <p class="hero-desc">
+                    Book appointments, explore services, and enjoy a seamless salon experience
+                    designed just for you at 8th Avenue Salon.
+                </p>
+
+                <a href="/login" class="btn btn-primary hero-btn" style="background:#AF62FF;border:none;">Get
+                    Started</a>
             </div>
-          </div>
-        <?php endforeach; else: ?>
-          <p>No services available.</p>
-        <?php endif; ?>
-      </div>
-    </div>
-  </section>
 
-  <section id="contact" class="py-5 bg-light">
-    <div class="container">
-      <h2>Contact / Inquiry</h2>
-      <form action="/inquiry/storePublic" method="post" class="row g-3">
-        <input type="hidden" name="_csrf" value="<?= \App\Core\CSRF::getToken() ?? \App\Core\CSRF::generate() ?>">
-        <div class="col-md-6"><input class="form-control" name="first_name" placeholder="First name" required></div>
-        <div class="col-md-6"><input class="form-control" name="last_name" placeholder="Last name" required></div>
-        <div class="col-md-6"><input class="form-control" name="email" placeholder="Email" type="email" required></div>
-        <div class="col-md-6"><input class="form-control" name="phone" placeholder="Phone"></div>
-        <div class="col-12"><textarea name="message" class="form-control" rows="4" placeholder="Message" required></textarea></div>
-        <div class="col-12"><button class="btn btn-primary">Send Inquiry</button></div>
-      </form>
-    </div>
-  </section>
+            <!-- RIGHT -->
+            <div class="hero-right">
+                <div class="hero-card price-card">
+                    <h4>Haircut</h4>
+                    <p class="price">₱150</p>
+                    <small>Classic haircut service</small>
+                </div>
 
-  <?php require_once __DIR__ . '/../layouts/footer.php'; ?>
+                <div class="hero-card promo-card">
+                    <h5>Holiday Promo 🎉</h5>
+                    <p>15% OFF on hair coloring services</p>
+                </div>
+
+                <div class="hero-card stat-card">
+                    <h2>24+</h2>
+                    <small>Daily Appointments</small>
+                </div>
+            </div>
+        </div>
+
+    </section>
+
+
+    <!-- ======================================================= -->
+    <!-- SERVICES SECTION -->
+    <!-- ======================================================= -->
+    <section id="services" class="services-section">
+
+        <h2 class="section-title italiana">Featured Services</h2>
+
+        <div class="featured-services-wrapper">
+
+            <!-- SERVICE CARD -->
+            <div class="fs-card">
+                <h3 class="fs-title">Rebond</h3>
+                <p class="fs-desc">Achieve sleek, straight, and shiny hair with our expert rebonding service.</p>
+                <p class="fs-price">Starts at ₱1500.00</p>
+            </div>
+
+            <div class="fs-card">
+                <h3 class="fs-title">Hair Color</h3>
+                <p class="fs-desc">Transform your look with vibrant, long-lasting hair color tailored just for you.</p>
+                <p class="fs-price">Starts at ₱400.00</p>
+            </div>
+
+            <div class="fs-card">
+                <h3 class="fs-title">Hair Treatment</h3>
+                <p class="fs-desc">Revitalize and nourish your hair with our intensive treatment solutions.</p>
+                <p class="fs-price">Starts at ₱700.00</p>
+            </div>
+
+            <div class="fs-card">
+                <h3 class="fs-title">Perming</h3>
+                <p class="fs-desc">Get beautiful, bouncy curls or waves that last with our professional perming.</p>
+                <p class="fs-price">Starts at ₱800.00</p>
+            </div>
+
+            <div class="fs-card">
+                <h3 class="fs-title">Make Up</h3>
+                <p class="fs-desc">Look your best with our flawless professional makeup services.</p>
+                <p class="fs-price">Starts at ₱600.00</p>
+            </div>
+
+        </div>
+
+        <div class="featured-btn-wrap">
+            <a href="/login" class="featured-btn">Book an Appointment</a>
+        </div>
+    </section>
+
+
+
+    <!-- ======================================================= -->
+    <!-- ABOUT SECTION (NEW DESIGN) -->
+    <!-- ======================================================= -->
+    <section id="about" class="aboutus-section">
+        <div class="aboutus-inner">
+            <!-- LEFT IMAGES -->
+            <div class="aboutus-images">
+                <!-- MAIN BACKGROUND IMAGE -->
+                <img src="/assets/img/about-bg-02.svg" class="about-img about-img-main">
+                <!-- TWO STACKED IMAGES -->
+                <img src="/assets/img/about-bg-01.svg" class="about-img about-img-small about-img-small-1">
+                <img src="/assets/img/about-bg-03.svg" class="about-img about-img-small about-img-small-2">
+            </div>
+
+            <!-- RIGHT CONTENT -->
+            <div class="aboutus-content">
+                <h2 class="aboutus-title italiana">About Us</h2>
+                <p class="aboutus-text">
+                    Best Beauty expert at your home and provides beauty salon at home.
+                    Home Salon provide well trained beauty professionals for beauty services at home
+                    including Facial, Clean Up, Bleach, Waxing, Pedicure, Manicure, etc.
+                </p>
+                <a href="/about" class="aboutus-btn">Learn More</a>
+            </div>
+
+        </div>
+
+    </section>
+
+
+
+
+    <!-- ======================================================= -->
+    <!-- CONTACT SECTION -->
+    <!-- ======================================================= -->
+    <section id="contact" class="contact-section">
+
+        <h2 class="section-title">Contact Us</h2>
+        <p class="section-subtitle">Do you want to ask something? Send us a message.</p>
+
+        <div class="contact-inner">
+            <div class="row mt-4">
+                <!-- LEFT FORM -->
+                <div class="col-md-6">
+                    <form method="POST" action="/inquiry/storePublic">
+                        <div class="mb-3">
+                            <label class="form-label">Name</label>
+                            <input name="name" type="text" class="form-control" required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Email</label>
+                            <input name="email" type="email" class="form-control" required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Message</label>
+                            <textarea name="message" class="form-control" rows="4" required></textarea>
+                        </div>
+
+                        <button class="btn btn-primary" style="background:#AF62FF;border:none;">
+                            Send Message
+                        </button>
+                    </form>
+                </div>
+
+                <!-- RIGHT CONTACT INFO -->
+                <div class="col-md-6">
+                    <div class="contact-info-box">
+                        <h5>Visit Us</h5>
+                        <p>8th Avenue Salon, QC</p>
+
+                        <h5>Contact</h5>
+                        <p>0912 345 6789<br>8thavenuesalon@gmail.com</p>
+
+                        <h5>Business Hours</h5>
+                        <p>Mon–Sun: 9:00 AM – 7:00 PM</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+
+    <script>
+    // Smooth scroll for navbar links
+    document.querySelectorAll('.scroll-link').forEach(link => {
+        link.addEventListener('click', function(e) {
+            e.preventDefault();
+            const target = document.querySelector(this.getAttribute('href'));
+            if (target) {
+                window.scrollTo({
+                    top: target.offsetTop - 80,
+                    behavior: 'smooth'
+                });
+            }
+        });
+    });
+    </script>
+
 </body>
+
 </html>

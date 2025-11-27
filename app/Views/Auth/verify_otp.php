@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>Verify Account - AppointMe</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
   <style>
     body { background:#f8fafc; }
     .card { width:420px; }
@@ -24,14 +25,14 @@
 
       <div class="mb-3">
         <input class="form-control" name="email" type="email"
-               placeholder="Email"
+               placeholder="Email" autocomplete="email"
                value="<?= htmlspecialchars($_GET['email'] ?? '') ?>"
                required>
       </div>
 
       <div class="mb-3">
         <input class="form-control otp-input" maxlength="6" name="code"
-               placeholder="Enter 6-digit code" required>
+               placeholder="Enter 6-digit code" autocomplete="one-time-code" required>
       </div>
 
       <div class="d-flex justify-content-between">
