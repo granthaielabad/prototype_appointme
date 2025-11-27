@@ -1,0 +1,683 @@
+/* ========================================
+   GLOBAL FONT USAGE
+======================================== */
+
+* {
+    font-family: "Poppins", sans-serif;
+    box-sizing: border-box;
+}
+
+.italiana {
+    font-family: "Italiana", serif !important;
+    font-weight: 400;
+}
+
+html,
+body {
+    margin: 0 !important;
+    padding: 0 !important;
+    width: 100%;
+    overflow-x: hidden;
+    scroll-behavior: smooth;
+}
+
+/* Reset bootstrap container spacing */
+.container,
+.container-fluid {
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+    max-width: 1400px !important;
+}
+
+/* ========================================
+   NAVBAR
+======================================== */
+
+.main-navbar {
+    width: 100%;
+    background: #2E2E2E;
+    padding: 12px 40px;
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 999;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.nav-left {
+    display: flex;
+    align-items: center;
+    gap: 25px;
+}
+
+.nav-logo {
+    height: 55px;
+}
+
+.nav-divider {
+    width: 2px;
+    height: 52px;
+    background: #C9C9C9;
+    opacity: 0.3;
+}
+
+/* NAV LINKS */
+.nav-links {
+    list-style: none;
+    display: flex;
+    gap: 32px;
+    padding: 0;
+    margin: 0;
+}
+
+.nav-links li a {
+    color: #ffffff;
+    text-decoration: none;
+    font-size: 18px;
+    transition: 0.25s ease;
+}
+
+.nav-links li a:hover {
+    color: #CD9FFE;
+}
+
+/* RIGHT ICONS */
+.nav-right {
+    display: flex;
+    align-items: center;
+    gap: 25px;
+}
+
+.nav-icon {
+    cursor: pointer;
+    width: 28px;
+    height: 28px;
+}
+
+
+/* ========================================
+   NOTIFICATION DROPDOWN
+======================================== */
+
+.notification-wrapper {
+    position: relative;
+}
+
+.notif-dropdown {
+    position: absolute;
+    right: 0;
+    top: 45px;
+    width: 320px;
+    background: #FFF;
+    border-radius: 14px;
+    box-shadow: 0 8px 22px rgba(0, 0, 0, 0.15);
+    padding: 15px;
+    display: none;
+    z-index: 1200;
+}
+
+.notif-dropdown.show {
+    display: block;
+}
+
+.notif-title {
+    font-weight: 600;
+    margin-bottom: 10px;
+    font-size: 15px;
+}
+
+.notif-item {
+    background: #F6E9FF;
+    padding: 12px;
+    border-radius: 10px;
+    margin-bottom: 10px;
+}
+
+.notif-item strong {
+    color: #AF62FF;
+}
+
+.notif-count {
+    position: absolute;
+    top: -6px;
+    right: -6px;
+    background: #D10000;
+    color: #fff;
+    font-size: 11px;
+    padding: 2px 6px;
+    border-radius: 50%;
+}
+
+
+/* ========================================
+   PROFILE DROPDOWN (TOGGLE MODE)
+======================================== */
+
+.profile-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+/* Profile icon (click → go to /profile) */
+.profile-icon {
+    cursor: pointer;
+}
+
+/* Caret toggle */
+.profile-toggle {
+    font-size: 14px;
+    color: #fff;
+    cursor: pointer;
+    user-select: none;
+}
+
+/* Dropdown container */
+.profile-dropdown {
+    position: absolute;
+    right: 0;
+    top: 42px;
+    width: 160px;
+    background: #FFF;
+    border-radius: 12px;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+    padding: 6px 0;
+    display: none;
+    z-index: 1200;
+}
+
+.profile-dropdown.show {
+    display: block !important;
+}
+
+/* Dropdown items */
+.profile-dropdown .dropdown-item {
+    padding: 12px 16px;
+    display: block;
+    text-decoration: none;
+    color: #444;
+    font-size: 14px;
+    transition: 0.2s ease;
+}
+
+.profile-dropdown .dropdown-item:hover {
+    background: #F4ECFF;
+    color: #AF62FF;
+}
+
+
+/* ========================================
+   HERO SECTION
+======================================== */
+
+.hero-section {
+    width: 100%;
+    padding-top: 150px;
+    padding-bottom: 80px;
+
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 40px;
+
+    background-image: url(/assets/img/heroBackground.svg);
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-position: center;
+
+    max-width: unset !important;
+}
+
+.hero-section .hero-inner {
+    width: 100%;
+    max-width: 1300px;
+    margin: 0 auto;
+
+    display: flex;
+    justify-content: space-between;
+    gap: 40px;
+}
+
+.hero-left {
+    width: 50%;
+}
+
+.hero-title {
+    font-family: "Italiana", serif !important;
+    font-size: 64px;
+    font-weight: 400;
+    line-height: 1.1;
+    color: #2A2A2A;
+}
+
+.hero-desc {
+    margin-top: 18px;
+    color: #555;
+    font-size: 17px;
+    max-width: 90%;
+}
+
+.hero-btn {
+    margin-top: 20px;
+    padding: 12px 30px;
+    background: #AF62FF;
+    border: none;
+    border-radius: 10px;
+    font-weight: 600;
+    color: white;
+    transition: 0.25s ease;
+}
+
+.hero-btn:hover {
+    background: #CD9FFE;
+    transform: translateY(-2px);
+}
+
+.hero-right {
+    width: 45%;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 18px;
+}
+
+.hero-card {
+    border-radius: 16px;
+    padding: 20px;
+    background: white;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+    transition: 0.25s ease;
+}
+
+.hero-card:hover {
+    transform: translateY(-4px);
+}
+
+.price-card {
+    grid-column: span 2;
+    border-left: 8px solid #AF62FF;
+}
+
+.price-card h4 {
+    font-family: "Italiana", serif !important;
+    font-size: 28px;
+}
+
+.price {
+    font-size: 36px;
+    font-weight: 700;
+    color: #AF62FF;
+}
+
+.promo-card {
+    background: #AF62FF;
+    color: white;
+    border-radius: 16px;
+}
+
+.promo-card h5 {
+    font-family: "Italiana", serif;
+    font-size: 22px;
+}
+
+.stat-card h2 {
+    font-size: 36px;
+    font-weight: 800;
+    color: #AF62FF;
+}
+
+/* ========================================
+   SERVICES SECTION
+======================================== */
+
+.services-section {
+    width: 100%;
+    padding-top: 100px;
+    padding-bottom: 100px;
+}
+
+.section-title {
+    font-family: "Italiana", serif !important;
+    font-size: 82px;
+    font-weight: 400;
+    text-align: center;
+}
+
+.section-subtitle {
+    text-align: center;
+    margin-top: 8px;
+    color: #777;
+}
+
+.service-box {
+    background: white;
+    border-radius: 14px;
+    padding: 18px;
+    text-align: center;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+    transition: 0.25s ease;
+}
+
+.service-box:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+}
+
+.service-img {
+    width: 100%;
+    height: 180px;
+    object-fit: cover;
+    border-radius: 12px;
+    margin-bottom: 12px;
+}
+
+/* =========================================================
+   ABOUT US 
+========================================================= */
+.aboutus-section {
+    width: 100%;
+    padding: 50px 0;
+    background: #E1E1E1;
+}
+
+.aboutus-inner {
+    max-width: 1350px;
+    margin: 0 auto;
+
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 60px;
+
+    position: relative;
+}
+
+/* LEFT IMAGE CLUSTER */
+.aboutus-images {
+    width: 50%;
+    position: relative;
+    min-height: 500px;
+}
+
+/* MAIN LARGE BACKGROUND IMAGE */
+.about-img-main {
+    height: 100%;
+    position: absolute;
+    top: 0;
+    left: 115px;
+}
+
+/* SMALL IMAGES */
+.about-img-small {
+    width: auto;
+    position: absolute;
+}
+
+/* FIRST SMALL IMAGE (left bottom) */
+.about-img-small-1 {
+    bottom: 30px;
+    left: 40px;
+}
+
+/* SECOND SMALL IMAGE (right middle) */
+.about-img-small-2 {
+    top: 20px;
+    right: 0;
+}
+
+/* RIGHT CONTENT AREA */
+.aboutus-content {
+    width: 60%;
+}
+
+.aboutus-title {
+    font-size: 82px;
+    font-weight: 400;
+    margin-bottom: 25px;
+    color: #2A2A2A;
+}
+
+.aboutus-text {
+    font-size: 22px;
+    line-height: 1.75;
+    color: #4A4A4A;
+    margin-bottom: 40px;
+    max-width: 95%;
+}
+
+/* BUTTON */
+.aboutus-btn {
+    display: inline-block;
+    padding: 18px 45px;
+    border-radius: 16px;
+
+    font-size: 20px;
+    font-weight: 600;
+    color: white;
+
+    background: linear-gradient(90deg, #C57BFF, #A55BFF);
+    text-decoration: none;
+
+    box-shadow: 0 12px 28px rgba(130, 70, 200, 0.35);
+    transition: 0.25s ease;
+}
+
+.aboutus-btn:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 16px 32px rgba(130, 70, 200, 0.45);
+}
+
+/* RESPONSIVE */
+@media (max-width: 1024px) {
+    .aboutus-inner {
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .aboutus-images,
+    .aboutus-content {
+        width: 100%;
+    }
+
+    .aboutus-images {
+        min-height: 480px;
+        transform: scale(0.92);
+    }
+
+    .aboutus-text {
+        margin: 0 auto 35px;
+    }
+}
+
+
+
+/* ========================================
+   CONTACT SECTION
+======================================== */
+
+.contact-section {
+    width: 100%;
+    padding-top: 100px;
+    padding-bottom: 100px;
+}
+
+.contact-info-box {
+    background: white;
+    padding: 22px;
+    border-radius: 14px;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.06);
+}
+
+
+/* ========================================
+   FOOTER
+======================================== */
+
+.landing-footer {
+    background: #2E2E2E;
+    color: #FFFFFF;
+    padding-top: 60px;
+    padding-bottom: 30px;
+    margin-top: 0 !important;
+}
+
+.footer-inner {
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 40px;
+}
+
+.footer-brand {
+    max-width: 300px;
+}
+
+.footer-logo {
+    width: 300px;
+    margin-bottom: 15px;
+}
+
+.footer-desc {
+    font-size: 15px;
+    color: #D8D8D8;
+    line-height: 1.6;
+}
+
+.footer-title {
+    font-size: 18px;
+    font-weight: 600;
+    margin-bottom: 15px;
+}
+
+.footer-links ul,
+.footer-contact ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.footer-links li,
+.footer-contact li {
+    margin-bottom: 10px;
+    font-size: 15px;
+}
+
+.footer-links a {
+    color: #FFFFFF;
+    text-decoration: none;
+    transition: 0.2s;
+}
+
+.footer-links a:hover {
+    color: #CD9FFE;
+}
+
+.footer-bottom {
+    margin-top: 50px;
+    border-top: 1px solid #444;
+    padding-top: 20px;
+    text-align: center;
+    color: #CFCFCF;
+    font-size: 14px;
+}
+
+/* Mobile */
+@media (max-width: 768px) {
+    .footer-inner {
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .footer-brand {
+        margin: 0 auto;
+    }
+}
+
+
+/* ========================================
+   FEATURED SERVICES — NEW FIGMA DESIGN
+======================================== */
+.featured-services-wrapper {
+    margin-top: 40px;
+    display: flex;
+    justify-content: space-between;
+    gap: 22px;
+    padding: 30px 25px;
+    border-radius: 20px;
+    background: #ffffff;
+    max-width: 1400px;
+    margin-left: auto;
+    margin-right: auto;
+
+    /* Glow under container */
+    box-shadow: 0 25px 40px rgba(0, 0, 0, 0.08);
+}
+
+.fs-card {
+    flex: 1;
+    background: #FDF9FF;
+    border-radius: 18px;
+    padding: 28px 22px;
+    text-align: left;
+
+    box-shadow:
+        8px 8px 18px rgba(0, 0, 0, 0.12),
+        -8px -8px 22px rgba(255, 255, 255, 0.8);
+    transition: 0.25s ease;
+}
+
+.fs-card:hover {
+    transform: translateY(-6px);
+    box-shadow:
+        12px 12px 26px rgba(0, 0, 0, 0.16),
+        -10px -10px 24px rgba(255, 255, 255, 0.85);
+}
+
+.fs-title {
+    font-family: "Poppins", sans-serif;
+    font-size: 28px;
+    font-weight: 200;
+    font-style: normal;
+    margin-bottom: 14px;
+    color: #2A2A2A;
+}
+
+.fs-desc {
+    color: #666;
+    font-size: 15px;
+    line-height: 1.6;
+    min-height: 70px;
+}
+
+.fs-price {
+    margin-top: 15px;
+    font-size: 15px;
+    font-weight: 600;
+    color: #AF62FF;
+}
+
+/* Book button */
+.featured-btn-wrap {
+    margin-top: 40px;
+    text-align: center;
+}
+
+.featured-btn {
+    padding: 16px 38px;
+    border-radius: 30px;
+    background: #AF62FF;
+    color: #fff;
+    text-decoration: none;
+    font-size: 18px;
+    box-shadow: 0 10px 22px rgba(175, 98, 255, 0.25);
+    transition: 0.25s;
+}
+
+.featured-btn:hover {
+    background: #C78FFF;
+    transform: translateY(-4px);
+}

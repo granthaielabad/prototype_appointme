@@ -1,41 +1,60 @@
-/* Global font */
-* {
+/* ============================================================
+   ADMIN UI — CLEAN + CONSISTENT + MATCHES PROVIDED MOCKUPS
+   (Everything in your screenshots: Services, Inquiry, Reports,
+    Dashboard, Modals, Filters, Sidebar)
+   Theme colors:
+     Purple primary: #AF62FF
+     Purple light:   #CD9FFE
+     Light background: #FFF9FE
+   ============================================================ */
+
+/* ------------- GLOBAL RESETS ------------- */
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
     font-family: "Inter", sans-serif;
 }
 
-html, body {
+html,
+body {
     margin: 0;
     padding: 0;
-    font-family: "Inter", sans-serif;
     background: #FFF9FE;
+    color: #2a2a2a;
 }
 
-/* ----- LAYOUT STRUCTURE ----- */
+/* Wrapper */
 .admin-wrapper {
     display: flex;
     min-height: 100vh;
 }
 
-/* ----- SIDEBAR ----- */
+/* ------------- SIDEBAR ------------- */
 .sidebar {
     width: 240px;
-    background: #FFFFFF;
+    background: #ffffff;
     border-right: 1px solid #E5E5E5;
     padding: 24px 16px;
     position: fixed;
-    top: 0;
     left: 0;
+    top: 0;
     bottom: 0;
     overflow-y: auto;
 }
 
 .sidebar .logo img {
-    width: 200px;
+    width: 180px;
     display: block;
-    margin: 0 auto 30px auto;
+    margin: 0 auto 28px auto;
 }
 
-/* NAV LINKS */
+/* NAV ITEMS */
+.sidebar ul {
+    padding: 0;
+    list-style: none;
+}
+
 .sidebar ul li {
     margin-bottom: 6px;
 }
@@ -45,106 +64,252 @@ html, body {
     align-items: center;
     gap: 12px;
     padding: 10px 12px;
-    border-radius: 8px;
+    border-radius: 10px;
+    text-decoration: none;
     font-weight: 500;
     color: #333;
-    text-decoration: none;
-    transition: 0.25s ease;
+    transition: 0.2s;
 }
 
 .nav-link img {
     width: 22px;
 }
 
-/* Hover effect */
+/* Hover */
 .nav-link:hover {
     background: #F4ECFF;
-    color: #CD9FFE !important;
+    color: #AF62FF !important;
 }
 
-/* ACTIVE STATE */
+/* Active */
 .active-nav {
     background: #F4ECFF;
-    color: #CD9FFE !important;
+    color: #AF62FF !important;
     font-weight: 600;
 }
 
-
-/* ----- FIX MAIN CONTENT SHIFT ----- */
+/* ------------- MAIN AREA ------------- */
 .admin-main {
-    margin-left: 240px !important;
-    padding-top: 0;
+    margin-left: 240px;
+    width: calc(100% - 240px);
+    padding-bottom: 50px;
 }
 
-/* ----- HEADER (inside main pages) ----- */
+/* ------------- HEADER AREA ------------- */
 .admin-header {
-    background: #FFFFFF;
-    border-bottom: 1px solid #E5E5E5;
-    padding: 16px 24px;
+    background: #ffffff;
+    border-bottom: 1px solid #e5e5e5;
+    padding: 18px 28px;
     display: flex;
-    align-items: center;
     justify-content: space-between;
-    top: 0;
-    z-index: 10;
+    align-items: center;
 }
 
 .admin-header h2 {
     margin: 0;
-    font-size: 20px;
-    font-weight: 600;
-}
-
-/* Notification + Profile */
-.admin-header .header-right {
-    display: flex;
-    align-items: center;
-    gap: 16px;
-}
-
-.admin-header .notification-icon {
-    cursor: pointer;
-    font-size: 20px;
-}
-
-/* ----- PAGE CONTENT ----- */
-.admin-content {
-    padding: 24px;
-}
-
-/* Cards (Dashboard, etc.) */
-.stats-card {
-    background: #FFF;
-    padding: 20px;
-    border-radius: 12px;
-    box-shadow: 0px 1px 3px rgba(0,0,0,0.07);
-}
-
-.stats-card h6 {
-    margin-bottom: 4px;
-    font-weight: 600;
-    color: #333;
-}
-
-.stats-card .value {
-    font-size: 22px;
     font-weight: 700;
+    font-size: 20px;
 }
 
-/* Weekly table spacing */
+/* Profile / Notification icons */
+.header-right img {
+    cursor: pointer;
+    transition: .2s ease;
+}
+
+.header-right img:hover {
+    opacity: .7;
+}
+
+/* ------------- PROFILE DROPDOWN ------------- */
+.profile-wrapper {
+    position: relative;
+}
+
+.profile-dropdown {
+    display: none;
+    position: absolute;
+    top: 38px;
+    right: 0;
+    width: 160px;
+    background: #ffffff;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    padding: 6px 0;
+    z-index: 200;
+}
+
+.profile-dropdown .dropdown-item {
+    display: block;
+    padding: 10px 16px;
+    color: #333;
+    text-decoration: none;
+    transition: .15s;
+}
+
+.profile-dropdown .dropdown-item:hover {
+    background: #F4ECFF;
+    color: #AF62FF;
+}
+
+/* ------------- PAGE CONTENT ------------- */
+.admin-page {
+    padding: 28px;
+}
+
+/* ------------- CARDS ------------- */
+.stats-card {
+    background: #ffffff;
+    border-radius: 14px;
+    padding: 20px;
+    border: 1px solid #ececec;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, .05);
+}
+
+/* Tables */
 .weekly-table td {
-    padding: 12px 0 !important;
+    padding: 10px 0 !important;
 }
 
-/* Top services list */
+/* Top service list */
 .top-service-list .list-group-item {
-    border: none;
     background: transparent;
+    border: none;
+    padding: 10px 0;
     font-size: 14px;
 }
 
+/* ------------- FILTER BUTTONS ------------- */
+.filter-btn {
+    background: #fff;
+    border: 1px solid #ddd;
+    padding: 6px 16px;
+    border-radius: 8px;
+    font-size: 14px;
+}
 
-/* ===== SERVICES PAGE STYLING ===== */
+.filter-btn:hover {
+    border-color: #AF62FF;
+}
 
+.download-btn {
+    background: #37D449 !important;
+    color: white !important;
+    border-radius: 8px;
+    padding: 6px 16px;
+    border: none;
+    font-size: 14px;
+}
+
+.download-btn:hover {
+    background: #28b83a !important;
+}
+
+/* ------------- CONTENT CARDS ------------- */
+.content-card {
+    background: #ffffff;
+    border-radius: 14px;
+    border: 1px solid #e5e5e5;
+}
+
+/* ------------- MODALS (UNIVERSAL) ------------- */
+.custom-modal {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, .35);
+    align-items: center;
+    justify-content: center;
+    z-index: 3000;
+}
+
+.custom-modal-content {
+    background: white;
+    border-radius: 16px;
+    padding: 26px;
+    width: 420px;
+    max-width: 92%;
+    animation: fadeIn .25s ease;
+}
+
+.small-modal {
+    width: 350px !important;
+}
+
+/* Modal header */
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.close-modal {
+    background: none;
+    border: none;
+    font-size: 24px;
+    cursor: pointer;
+}
+
+/* Modal inputs */
+.modal-label {
+    font-weight: 600;
+    margin-top: 10px;
+}
+
+.modal-input,
+.custom-modal textarea {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+}
+
+.modal-input:focus {
+    border-color: #AF62FF;
+    outline: none;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(12px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* ------------- UTILITIES ------------- */
+.text-purple {
+    color: #AF62FF;
+}
+
+.text-purple:hover {
+    color: #CD9FFE;
+}
+
+/* Responsive sidebar collapse */
+@media (max-width: 900px) {
+    .sidebar {
+        position: relative;
+        width: 100%;
+        height: auto;
+    }
+
+    .admin-main {
+        margin-left: 0;
+        width: 100%;
+    }
+}
+
+
+/* ============================
+   SERVICES PAGE STYLING
+============================ */
+
+/* Add Service Button */
 .add-service-btn {
     background: #AF62FF;
     border: none;
@@ -156,170 +321,39 @@ html, body {
 }
 
 .add-service-btn:hover {
-    background: #b684ff;
+    background: #CD9FFE;
     color: #fff;
 }
 
-/* CARD STYLE */
+/* Service Cards */
 .service-card {
     background: #ffffff;
     border-radius: 14px;
     border: 1px solid #e5e5e5;
+    padding: 18px;
     transition: 0.2s ease;
 }
 
 .service-card:hover {
-    box-shadow: 0px 3px 12px rgba(0,0,0,0.08);
+    box-shadow: 0px 4px 14px rgba(0, 0, 0, 0.08);
 }
 
 .service-card h5 {
     font-weight: 600;
+    margin-bottom: 6px;
 }
 
-/* PRICE TEXT */
 .service-price {
-    color: #CD9FFE;
+    color: #AF62FF;
     font-weight: 700;
     font-size: 20px;
 }
 
-/* Badge */
+/* Category Badge */
 .service-card .badge {
     font-size: 11px;
     padding: 3px 8px;
     border-radius: 6px;
-}
-
-
-/* Profile Dropdown (Click Toggle) */
-.profile-wrapper {
-    position: relative;
-}
-
-.profile-dropdown {
-    position: absolute;
-    right: 0;
-    top: 40px;
-    background: #fff;
-    border-radius: 8px;
-    border: 1px solid #e5e5e5;
-    width: 160px;
-    padding: 6px 0;
-    display: none; /* hidden by default */
-    z-index: 1000;
-}
-
-.profile-dropdown .dropdown-item {
-    display: block;
-    padding: 10px 16px;
-    text-decoration: none;
-    color: #333;
-}
-
-.profile-dropdown .dropdown-item:hover {
-    background: #f4ecff;
+    background: #F4ECFF;
     color: #AF62FF;
-}
-
-/* Section Headers */
-.section-title {
-    font-size: 18px;
-    font-weight: 600;
-}
-
-.section-subtitle {
-    font-size: 13px;
-}
-
-/* Content card (white rounded box) */
-.content-card {
-    background: #FFFFFF;
-    border-radius: 12px;
-    border: 1px solid #E5E5E5;
-}
-
-/* Purple icons */
-.text-purple {
-    color: #AF62FF;
-}
-.text-purple:hover {
-    color: #CD9FFE;
-}
-
-
-.custom-modal {
-    display: none;
-    justify-content: center;
-    align-items: center;
-    position: fixed;
-    inset: 0;
-    background: rgba(0,0,0,0.3);
-    z-index: 2000;
-}
-
-.custom-modal-content {
-    background: white;
-    width: 420px;
-    padding: 24px;
-    border-radius: 14px;
-    animation: fadeIn 0.2s ease;
-}
-
-.small-modal {
-    width: 350px;
-}
-
-.modal-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-.close-modal {
-    background: none;
-    border: none;
-    font-size: 20px;
-    cursor: pointer;
-}
-
-.modal-label {
-    font-size: 14px;
-    font-weight: 500;
-}
-
-.modal-input {
-    width: 100%;
-    padding: 10px;
-    border-radius: 8px;
-    border: 1px solid #ddd;
-}
-
-.modal-input:focus {
-    border-color: #CD9FFE;
-    outline: none;
-}
-
-@keyframes fadeIn {
-    from { opacity:0; transform: translateY(10px); }
-    to { opacity:1; transform: translateY(0); }
-}
-
-
-
-/* Dropdown styling */
-.filter-btn {
-    background: #FFF;
-    border: 1px solid #ddd;
-    padding: 6px 14px;
-    border-radius: 8px;
-    font-size: 14px;
-}
-
-.filter-btn:hover {
-    border-color: #CD9FFE;
-}
-
-/* Modal body spacing */
-.custom-modal .modal-body p {
-    margin-bottom: 6px;
 }
