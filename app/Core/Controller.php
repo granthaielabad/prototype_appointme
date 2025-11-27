@@ -3,43 +3,73 @@ namespace App\Core;
 
 abstract class Controller
 {
-    protected function view(string $view, array $data = []): void
+    protected string $viewBase;
+    protected string $layoutBase;
+
+    public function __construct()
+    {
+        $this->viewBase = __DIR__ . "/../Views/";
+        $this->layoutBase = $this->viewBase . "layouts/";
+    }
+
+    /**
+     * RENDER: Public-facing site using main layout
+     */
+    protected function renderPublic(string $view, array $data = []): void
+    {
+        $this->renderWithLayout($view, "main", $data);
+    }
+
+    /**
+     * RENDER: Auth pages (login/register)
+     */
+    protected function renderAuth(string $view, array $data = []): void
+    {
+        $this->renderWithLayout($view, "auth", $data);
+    }
+
+    /**
+     * RENDER: Customer pages (/Views/Customer/)
+     * Automatically adds folder prefix "Customer/"
+     */
+    protected function renderCustomer(string $view, array $data = []): void
+    {
+        if (!str_starts_with($view, "Customer/")) {
+            $view = "Customer/" . $view;
+        }
+
+        $this->renderWithLayout($view, "customer_layout", $data);
+    }
+
+    /**
+     * BASE RENDERING ENGINE
+     * Injects $content inside layout
+     */
+    protected function renderWithLayout(string $view, string $layout, array $data = []): void
     {
         extract($data);
-        $base = __DIR__ . '/../Views/';
-        $viewFile = $base . $view . '.php';
+
+        $viewFile = $this->viewBase . $view . ".php";
+        $layoutFile = $this->layoutBase . $layout . ".php";
 
         if (!file_exists($viewFile)) {
             http_response_code(500);
-            echo "View not found: {$viewFile}";
+            echo "<b>View not found:</b> {$viewFile}";
             return;
         }
 
-        $authPages = [
-            'Auth/login',
-            'Auth/register',
-            'Auth/forgot_password',
-            'Auth/reset_password',
-            'Auth/verify_otp'
-        ];
-
-        $isAuthPage = false;
-        foreach ($authPages as $p) {
-            if (strpos($view, $p) !== false) {
-                $isAuthPage = true;
-                break;
-            }
+        if (!file_exists($layoutFile)) {
+            http_response_code(500);
+            echo "<b>Layout not found:</b> {$layoutFile}";
+            return;
         }
 
-        if (!$isAuthPage) {
-            require_once $base . 'layouts/navbar.php';
-            require_once $base . 'layouts/alerts.php';
-        }
-
+        // Capture view output
+        ob_start();
         require $viewFile;
+        $content = ob_get_clean();
 
-        if (!$isAuthPage) {
-            require_once $base . 'layouts/footer.php';
-        }
+        // Render layout with injected $content
+        require $layoutFile;
     }
 }

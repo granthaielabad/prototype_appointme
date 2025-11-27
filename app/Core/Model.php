@@ -28,6 +28,14 @@ abstract class Model
         return $result ?: null;
     }
 
+    public function count(): int
+    {
+        $sql = "SELECT COUNT(*) FROM {$this->table}";
+        $stmt = $this->db->query($sql);
+        return (int) $stmt->fetchColumn();
+    }
+
+
     public function create(array $data): int
     {
         $columns = array_keys($data);
