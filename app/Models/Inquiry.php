@@ -4,6 +4,10 @@ namespace App\Models;
 use App\Core\Model;
 use PDO;
 
+
+// Sql changes to mark-as-read and filtering by read status to work
+// ALTER TABLE tbl_inquiries ADD COLUMN is_read TINYINT(1) DEFAULT 0;
+
 class Inquiry extends Model
 {
     protected string $table = 'tbl_inquiries';
@@ -41,12 +45,62 @@ class Inquiry extends Model
                 phone,
                 message,
                 status,
+                is_read,
                 created_at
             FROM {$this->table}
-            ORDER BY created_at DESC
+            ORDER BY is_read ASC, created_at DESC
         ";
         $stmt = $this->getDb()->query($sql);
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    /**
+     * Get inquiries filtered by read status
+     */
+    public function getByReadStatus(?string $readStatus = null): array
+    {
+        $sql = "
+            SELECT 
+                {$this->primaryKey},
+                user_id,
+                CONCAT(
+                    COALESCE(first_name, ''), 
+                    CASE 
+                        WHEN first_name IS NOT NULL AND last_name IS NOT NULL THEN ' ' 
+                        ELSE '' 
+                    END, 
+                    COALESCE(last_name, '')
+                ) AS full_name,
+                email,
+                phone,
+                message,
+                status,
+                is_read,
+                created_at
+            FROM {$this->table}
+        ";
+        
+        if ($readStatus === 'read') {
+            $sql .= " WHERE is_read = 1";
+        } elseif ($readStatus === 'unread') {
+            $sql .= " WHERE is_read = 0";
+        }
+        
+        $sql .= " ORDER BY is_read ASC, created_at DESC";
+        
+        $stmt = $this->getDb()->prepare($sql);
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    /**
+     * Mark inquiry as read
+     */
+    public function markAsRead(int|string $id): bool
+    {
+        $sql = "UPDATE {$this->table} SET is_read = 1 WHERE {$this->primaryKey} = :id";
+        $stmt = $this->getDb()->prepare($sql);
+        return $stmt->execute(['id' => $id]);
     }
 
     /**
@@ -70,6 +124,7 @@ class Inquiry extends Model
                 phone,
                 message,
                 status,
+                is_read,
                 created_at
             FROM {$this->table}
             WHERE {$this->primaryKey} = :id
@@ -102,6 +157,7 @@ class Inquiry extends Model
                 phone,
                 message,
                 status,
+                is_read,
                 created_at
             FROM {$this->table}
             WHERE user_id = :user_id

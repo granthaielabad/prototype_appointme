@@ -23,11 +23,23 @@ class InquiryController extends AdminController
     public function index(): void
     {
         try {
-            $inquiries = $this->inquiryModel->getAll();
-            $this->render('inquiries/index', ['inquiries' => $inquiries]);
+            $filter = $_GET['filter'] ?? 'all';
+            
+            if ($filter === 'read') {
+                $inquiries = $this->inquiryModel->getByReadStatus('read');
+            } elseif ($filter === 'unread') {
+                $inquiries = $this->inquiryModel->getByReadStatus('unread');
+            } else {
+                $inquiries = $this->inquiryModel->getAll();
+            }
+            
+            $this->render('inquiries/index', [
+                'inquiries' => $inquiries,
+                'currentFilter' => $filter
+            ]);
         } catch (\Throwable $e) {
             Session::flash('error', 'Failed to load inquiries: ' . $e->getMessage(), 'danger');
-            $this->render('inquiries/index', ['inquiries' => []]);
+            $this->render('inquiries/index', ['inquiries' => [], 'currentFilter' => 'all']);
         }
     }
 
@@ -50,6 +62,9 @@ class InquiryController extends AdminController
             header('Location: /admin/inquiries');
             exit;
         }
+
+        // Mark as read
+        $this->inquiryModel->markAsRead($id);
 
         $this->render('inquiries/show', ['inquiry' => $inquiry]);
     }
@@ -90,6 +105,36 @@ class InquiryController extends AdminController
         }
 
         header('Location: /admin/inquiries');
+        exit;
+    }
+
+    /**
+     * Mark inquiry as read (AJAX endpoint)
+     */
+    public function markAsRead(): void
+    {
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            http_response_code(405);
+            echo json_encode(['error' => 'Method not allowed']);
+            exit;
+        }
+
+        $id = isset($_POST['id']) ? (int) $_POST['id'] : 0;
+        if ($id <= 0) {
+            http_response_code(400);
+            echo json_encode(['error' => 'Invalid inquiry ID']);
+            exit;
+        }
+
+        $success = $this->inquiryModel->markAsRead($id);
+        
+        header('Content-Type: application/json');
+        if ($success) {
+            echo json_encode(['success' => true, 'message' => 'Inquiry marked as read']);
+        } else {
+            http_response_code(500);
+            echo json_encode(['error' => 'Failed to mark as read']);
+        }
         exit;
     }
 }

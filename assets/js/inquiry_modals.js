@@ -16,6 +16,32 @@ document.addEventListener("DOMContentLoaded", () => {
             document.getElementById("inq_message").textContent = data.message || "";
 
             modal.style.display = "flex";
+
+            // Mark as read via AJAX
+            if (data.inquiry_id && !data.is_read) {
+                const formData = new FormData();
+                formData.append('id', data.inquiry_id);
+
+                fetch('/admin/inquiries/mark-as-read', {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => response.json())
+                .then(result => {
+                    if (result.success) {
+                        // Update row styling to remove unread appearance
+                        row.classList.remove('table-light', 'fw-bold');
+                        // Update is_read in data
+                        data.is_read = 1;
+                        // Remove NEW badge if present
+                        const badge = row.querySelector('.badge');
+                        if (badge) {
+                            badge.remove();
+                        }
+                    }
+                })
+                .catch(err => console.error('Error marking as read:', err));
+            }
         });
     });
 

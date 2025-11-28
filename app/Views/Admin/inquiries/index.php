@@ -15,12 +15,19 @@ $activePage = "inquiry";
     <div class="d-flex justify-content-end mb-3">
         <div class="dropdown">
             <button class="btn dropdown-toggle filter-btn" type="button" data-bs-toggle="dropdown">
-                Read Inquiry
+                <?php
+                    $filterLabels = [
+                        'all' => 'All Inquiry',
+                        'read' => 'Read Inquiry',
+                        'unread' => 'Unread Inquiry'
+                    ];
+                    echo $filterLabels[$currentFilter] ?? 'All Inquiry';
+                ?>
             </button>
             <ul class="dropdown-menu">
-                <li><a class="dropdown-item filter-option" data-filter="all">All Inquiry</a></li>
-                <li><a class="dropdown-item filter-option" data-filter="read">Read Inquiry</a></li>
-                <li><a class="dropdown-item filter-option" data-filter="unread">Unread Inquiry</a></li>
+                <li><a class="dropdown-item" href="?filter=all">All Inquiry</a></li>
+                <li><a class="dropdown-item" href="?filter=read">Read Inquiry</a></li>
+                <li><a class="dropdown-item" href="?filter=unread">Unread Inquiry</a></li>
             </ul>
         </div>
     </div>
@@ -49,9 +56,9 @@ $activePage = "inquiry";
                         </tr>
                     <?php else: ?>
                         <?php foreach ($inquiries as $i => $inq): ?>
-                            <tr data-inquiry='<?= json_encode($inq) ?>'>
+                            <tr data-inquiry='<?= json_encode($inq) ?>' class="<?= !$inq['is_read'] ? 'table-light fw-bold' : '' ?>">
                                 <td><?= $i + 1 ?></td>
-                                <td><?= htmlspecialchars($inq['full_name']) ?></td>
+                                <td><?= htmlspecialchars($inq['full_name']) ?><?= !$inq['is_read'] ? ' <span class="badge bg-warning text-dark ms-2">NEW</span>' : '' ?></td>
                                 <td><?= htmlspecialchars($inq['email']) ?></td>
                                 <td><?= date("M d, Y", strtotime($inq['created_at'])) ?></td>
                                 <td>
