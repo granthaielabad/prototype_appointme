@@ -17,7 +17,7 @@
         rel="stylesheet">
 
     <!-- Landing Styles -->
-    <link rel="stylesheet" href="/prototype/public/assets/css/landing.css">
+    <link rel="stylesheet" href="/assets/css/landing.css">
 </head>
 
 <body>
