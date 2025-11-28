@@ -12,11 +12,24 @@ class AppointmentController extends AdminController
     public function index(): void
     {
         $appointmentModel = new Appointment();
-        $appointments = method_exists($appointmentModel, "findAllWithUsers")
-            ? $appointmentModel->findAllWithUsers()
-            : $appointmentModel->findAll();
-
-        $this->render("appointments/index", ["appointments" => $appointments]);
+        
+        // Get filter from query parameter (default to 'all')
+        $filter = $_GET['filter'] ?? 'all';
+        
+        // Validate filter to prevent SQL injection
+        $allowedFilters = ['all', 'pending', 'confirmed', 'completed', 'cancelled'];
+        if (!in_array($filter, $allowedFilters)) {
+            $filter = 'all';
+        }
+        
+        // Fetch appointments with filter
+        $appointments = $appointmentModel->findAllWithUsersFiltered($filter);
+        
+        // Pass filter to view so dropdown can show current selection
+        $this->render("appointments/index", [
+            "appointments" => $appointments,
+            "currentFilter" => $filter
+        ]);
     }
 
     public function updateStatus(): void

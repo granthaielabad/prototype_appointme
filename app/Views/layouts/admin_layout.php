@@ -53,6 +53,7 @@
                             <img src="/assets/img/admin/ProfileIcon.svg" width="28" height="28" alt="Profile">
                         </button>
 
+
                         <!-- DROPDOWN MENU -->
                         <div id="profileDropdown" class="profile-dropdown shadow-sm">
                             <a href="/admin/profile" class="dropdown-item">Profile</a>

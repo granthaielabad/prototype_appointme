@@ -46,6 +46,7 @@ class Appointment extends Model
             SELECT 
                 a.*, 
                 CONCAT(u.first_name, ' ', u.last_name) AS full_name,
+                IFNULL(u.contact_number, '') AS phone,
                 s.service_name, 
                 s.category
             FROM {$this->table} a
@@ -53,6 +54,42 @@ class Appointment extends Model
             JOIN tbl_services s ON a.service_id = s.service_id
             ORDER BY a.appointment_date DESC, a.appointment_time DESC
         ");
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    /*
+     * Admin view: all appointments filtered by status
+     */
+    public function findAllWithUsersFiltered(?string $status = null): array
+    {
+        $query = "
+            SELECT 
+                a.*, 
+                CONCAT(u.first_name, ' ', u.last_name) AS full_name,
+                IFNULL(u.contact_number, '') AS phone,
+                s.service_name, 
+                s.category
+            FROM {$this->table} a
+            JOIN tbl_users u ON a.user_id = u.user_id
+            JOIN tbl_services s ON a.service_id = s.service_id
+        ";
+        
+        // Add status filter if provided and not 'all'
+        if (!empty($status) && $status !== 'all') {
+            $query .= " WHERE a.status = :status";
+        }
+        
+        $query .= " ORDER BY a.appointment_date DESC, a.appointment_time DESC";
+        
+        $stmt = $this->db->prepare($query);
+        
+        // Bind status parameter if filtering
+        if (!empty($status) && $status !== 'all') {
+            $stmt->execute(['status' => $status]);
+        } else {
+            $stmt->execute();
+        }
+        
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
         

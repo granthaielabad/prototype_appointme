@@ -1,39 +1,41 @@
-// Bar Chart
+// Bar Chart (only initialize when element exists)
 const bar = document.getElementById('barChart');
+if (bar) {
+    new Chart(bar, {
+        type: 'bar',
+        data: {
+            labels: ['Jan','Feb','Mar','Apr','May','Jun'],
+            datasets: [{
+                label: 'Sales',
+                data: [3500, 2900, 4100, 3800, 4500, 5200],
+                backgroundColor: '#ff99c2'
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: { legend: { display: false } }
+        }
+    });
+}
 
-new Chart(bar, {
-    type: 'bar',
-    data: {
-        labels: ['Jan','Feb','Mar','Apr','May','Jun'],
-        datasets: [{
-            label: 'Sales',
-            data: [3500, 2900, 4100, 3800, 4500, 5200],
-            backgroundColor: '#ff99c2'
-        }]
-    },
-    options: {
-        responsive: true,
-        plugins: { legend: { display: false } }
-    }
-});
-
-// Donut Chart
+// Donut Chart (only initialize when element exists)
 const donut = document.getElementById('donutChart');
-
-new Chart(donut, {
-    type: 'doughnut',
-    data: {
-        labels: ['Completed', 'Pending', 'Cancelled'],
-        datasets: [{
-            data: [68, 22, 10],
-            backgroundColor: ['#d6336c', '#ff99c2', '#ffe0ea']
-        }]
-    },
-    options: {
-        cutout: '68%',
-        plugins: { legend: { display: true } }
-    }
-});
+if (donut) {
+    new Chart(donut, {
+        type: 'doughnut',
+        data: {
+            labels: ['Completed', 'Pending', 'Cancelled'],
+            datasets: [{
+                data: [68, 22, 10],
+                backgroundColor: ['#d6336c', '#ff99c2', '#ffe0ea']
+            }]
+        },
+        options: {
+            cutout: '68%',
+            plugins: { legend: { display: true } }
+        }
+    });
+}
 
 
 document.addEventListener("DOMContentLoaded", () => {

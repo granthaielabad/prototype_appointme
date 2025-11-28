@@ -15,7 +15,16 @@ $activePage = "appointments";
         <!-- FILTER DROPDOWN -->
         <div class="dropdown">
             <button class="btn btn-light border dropdown-toggle" type="button" data-bs-toggle="dropdown">
-                All appointment
+                <?php
+                    $filterLabels = [
+                        'all' => 'All appointments',
+                        'pending' => 'Pending',
+                        'confirmed' => 'Confirmed',
+                        'completed' => 'Completed',
+                        'cancelled' => 'Cancelled'
+                    ];
+                    echo $filterLabels[$currentFilter] ?? 'All appointments';
+                ?>
             </button>
             <ul class="dropdown-menu">
                 <li><a class="dropdown-item" href="?filter=all">All</a></li>
@@ -56,7 +65,7 @@ $activePage = "appointments";
                             <tr>
                                 <td><?= $a['appointment_id'] ?></td>
                                 <td><?= htmlspecialchars($a['full_name']) ?></td>
-                                <td><?= htmlspecialchars($a['phone']) ?></td>
+                                <td><?= htmlspecialchars($a['phone'] ?? 'N/A') ?></td>
                                 <td><?= htmlspecialchars($a['appointment_date']) ?></td>
                                 <td><?= htmlspecialchars(substr($a['appointment_time'], 0, 5)) ?></td>
                                 <td><?= htmlspecialchars($a['status']) ?></td>
