@@ -35,6 +35,7 @@ $activePage = "appointments";
             </ul>
         </div>
     </div>
+        <script src="/assets/js/appointments_modals.js"></script>
 
     <!-- CONTENT CARD -->
     <div class="card content-card p-3">
@@ -62,7 +63,7 @@ $activePage = "appointments";
                         </tr>
                     <?php else: ?>
                         <?php foreach ($appointments as $a): ?>
-                            <tr>
+                            <tr data-appointment='<?= json_encode($a) ?>'>
                                 <td><?= $a['appointment_id'] ?></td>
                                 <td><?= htmlspecialchars($a['full_name']) ?></td>
                                 <td><?= htmlspecialchars($a['phone'] ?? 'N/A') ?></td>
@@ -70,9 +71,9 @@ $activePage = "appointments";
                                 <td><?= htmlspecialchars(substr($a['appointment_time'], 0, 5)) ?></td>
                                 <td><?= htmlspecialchars($a['status']) ?></td>
                                 <td>
-                                    <a href="/admin/appointments/edit?id=<?= $a['appointment_id'] ?>" class="text-purple me-2">
+                                    <button type="button" class="text-purple me-2 btn btn-link p-0 openEditModal" aria-label="Edit">
                                         <i class="bi bi-pencil"></i>
-                                    </a>
+                                    </button>
                                     <a href="/admin/appointments/delete?id=<?= $a['appointment_id'] ?>" 
                                        onclick="return confirm('Delete appointment?')" 
                                        class="text-purple">
@@ -82,10 +83,55 @@ $activePage = "appointments";
                             </tr>
                         <?php endforeach; ?>
                     <?php endif; ?>
-
                 </tbody>
             </table>
         </div>
+<!-- Edit Modals -->
+
+<div class="custom-modal" id="editAppointmentModal" style="display:none;">
+    <div class="custom-modal-content">
+        <div class="modal-header">
+            <h5>Edit Appointment</h5>
+            <button class="close-modal">&times;</button>
+        </div>
+
+        <p class="text-muted mb-3">Update appointment details.</p>
+
+        <form action="/admin/appointments/update" method="POST">
+
+            <input type="hidden" name="id" id="edit_id">
+
+            <label class="modal-label">Appointment Date</label>
+            <input type="date" name="appointment_date" id="edit_appointment_date" class="modal-input" required>
+
+            <label class="modal-label mt-2">Appointment Time</label>
+            <select name="appointment_time" id="edit_appointment_time" class="modal-input" required>
+                <option value="">-- Select Time --</option>
+                <option value="09:00:00">09:00 AM</option>
+                <option value="10:00:00">10:00 AM</option>
+                <option value="11:00:00">11:00 AM</option>
+                <option value="12:00:00">12:00 PM</option>
+                <option value="13:00:00">01:00 PM</option>
+                <option value="14:00:00">02:00 PM</option>
+                <option value="15:00:00">03:00 PM</option>
+                <option value="16:00:00">04:00 PM</option>
+                <option value="17:00:00">05:00 PM</option>
+            </select>
+
+            <label class="modal-label mt-2">Status</label>
+            <select name="status" id="edit_status" class="modal-input" required>
+                <option value="pending">Pending</option>
+                <option value="confirmed">Confirmed</option>
+                <option value="completed">Completed</option>
+                <option value="cancelled">Cancelled</option>
+            </select>
+
+            <button class="btn btn-primary w-100 mt-3" style="background:#CD9FFE;border:none;">
+                Save Changes
+            </button>
+        </form>
+    </div>
+</div>
 
     </div>
 </div>

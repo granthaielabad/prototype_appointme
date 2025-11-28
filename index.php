@@ -67,6 +67,7 @@ $router->get("/analytics/service-popularity", "AnalyticsController@servicePopula
 $router->get("/admin/dashboard", "Admin\\DashboardController@index");
 $router->get("/admin/appointments", "Admin\\AppointmentController@index");
 $router->post("/admin/appointments/update-status", "Admin\\AppointmentController@updateStatus");
+$router->post("/admin/appointments/update", "Admin\\AppointmentController@update");
 
 $router->get("/admin/services", "Admin\\ServiceController@index");
 $router->get("/admin/services/create", "Admin\\ServiceController@create");
