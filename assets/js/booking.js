@@ -51,11 +51,15 @@ document.addEventListener("DOMContentLoaded", () => {
         return true;
     }
 
+
+    // CINOMMENT KO TONG PART. INSTEAD KASI NA "BOOKINGCONTROLLER.PHP" YUNG GAMITIN ITO YUNG GINAGAMIT NG BOOKING FORM. KAYA HINDI GUMAGANA YUNG LOGIC SA SAVING DATABASE.
+
+    
     // ===========================
     // SUBMIT BOOKING
     // ===========================
-    bookForm.addEventListener("submit", e => {
-        e.preventDefault();
+   /* bookForm.addEventListener("submit", e => {
+        e.preventDefault(); // hindi umaabot sa php because of this
 
         if (!validateForm()) return;
 
@@ -67,11 +71,11 @@ document.addEventListener("DOMContentLoaded", () => {
         })
         .then(res => res.text())
         .then(() => {
-            window.location.href = "/booking/history";
+            window.location.href = "/payment-qr"; // pinalitan ko ng location.
         })
         .catch(() => {
             alert("Something went wrong while booking your appointment.");
         });
-    });
+    });*/
 
 });

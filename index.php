@@ -50,6 +50,16 @@ $router->get("/logout", "AuthController@logout");
 $router->get("/book", "BookingController@index");
 $router->post("/book", "BookingController@store");
 
+
+
+/* added testing carl */
+$router->get("/my-appointments", "BookingController@myAppointments");
+$router->get("/cancel-appointment", "BookingController@cancel");
+$router->get("/payment-qr", "BookingController@paymentQr"); 
+$router->post("/webhook/paymongo", "PaymentWebhookController@handle");
+
+
+
 $router->get("/profile", "UserController@profile");
 $router->post("/profile/update", "UserController@updateProfile");
 

@@ -6,6 +6,9 @@ use App\Core\Auth;
 use App\Core\Session;
 use App\Models\Service;
 use App\Models\Appointment;
+use App\Models\User;
+use App\Models\Payment;
+
 
 class BookingController extends Controller
 {
@@ -36,6 +39,8 @@ class BookingController extends Controller
         ]);
     }
 
+
+   
     public function store(): void
     {
         Auth::requireRole(3);
@@ -63,27 +68,140 @@ class BookingController extends Controller
             exit();
         }
 
+        $serviceModel = new Service();
+        $service = $serviceModel->find($serviceId);
+
+        if (!$service) {
+            Session::flash("error", "Service not found. ", "danger");
+            header("Location: /book");
+            exit();
+        }
+
+        // combine
         $apptModel = new Appointment();
-        $apptModel->create([
-            "user_id" => $user["user_id"],
-            "service_id" => $serviceId,
+        $appointmentId = $apptModel->create([
+            "user_id"          => $user["user_id"],
+            "service_id"       => $serviceId,
             "appointment_date" => $date,
             "appointment_time" => $time,
-            "note" => $note,
-            "status" => "pending",
-            "created_at" => date("Y-m-d H:i:s"),
+            "notes"             => $note,
+            "status"           => "pending",
+            "created_at"       => date("Y-m-d H:i:s"),
         ]);
 
+         if (!$appointmentId) {
+            Session::flash("error", "Failed to create appointment.", "danger");
+            header("Location: /book");
+            exit();
+
+         }
+
+          $referenceNumber = 'APT-' . $appointmentId . '-' . time();
+
+          $paymentModel = new Payment();
+            $paymentModel->create([
+                'appointment_id' =>$appointmentId,
+                'amount' => $service['price'],
+                'status' => 'pending',
+
+            ]);
+
+              // billing part
+        $billing = [
+            'name' => $user['first_name']. ' ' . $user['last_name'],
+            'email' => $user['email'],
+            'phone' => $user['contact_number']
+        ];
+
+       
+        $lineItems = [
+            [
+                'name'     => $service['service_name'],
+                'amount'   => (int) round($service['price'] * 100),
+                'currency' => 'PHP',
+                'quantity' => 1,
+            ]
+        ];
+
+
+
+
+     $payload = json_encode([
+        'billing'          => $billing,
+        'line_items'       => $lineItems,
+        'reference_number' => $referenceNumber,
+    ]);
+
+        //temporary lipat sa env
+        $token   = "super-secret-string";
+        $nodeUrl = "http://localhost:4000/api/payments/checkout";
+
+        $ch = curl_init($nodeUrl);
+        curl_setopt_array($ch, [
+            CURLOPT_POST           => true,
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_HTTPHEADER     => [
+                'Content-Type: application/json',
+                "Authorization: Bearer $token",
+            ],
+            CURLOPT_POSTFIELDS     => $payload,
+        ]);
+
+        $response = curl_exec($ch);
+        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        curl_close($ch);
+
+        if ($httpCode !== 200 || !$response) {
+            Session::flash('error', 'Unable to start payment. Please try again.', 'danger');
+            header('Location: /my-appointments');
+            exit();
+        }
+
+        $result = json_decode($response, true);
+
+        if (empty($result['success']) || empty($result['checkout_url'])) {
+            Session::flash('error', 'Payment session failed to initialize.', 'danger');
+            header('Location: /my-appointments');
+            exit();
+        }
+
+      
+        $_SESSION['checkout_url'] = $result['checkout_url'];
+
         Session::flash(
-            "success",
-            "Appointment booked successfully. Wait for confirmation.",
-            "success",
+            'success',
+            'Appointment booked successfully! Please proceed to the payment.',
+            'success'
         );
 
-        // after booking send user to their booking history
-        header("Location: /book");
+        header("Location: /payment-qr");
         exit();
     }
+
+
+
+    public function paymentQr(): void
+    {
+        Auth::requireRole(3);
+
+        if (empty($_SESSION['checkout_url'])) {
+            Session::flash('error', 'No active paymentsession found. Please try booking again.', 'danger' );
+            header('Location: /my-appointments' );
+            exit;
+        }
+
+        $checkoutUrl = $_SESSION['checkout_url'];
+        
+
+         $this->renderCustomer('payment_qr', [
+             'pageTitle' => 'Payment QR',
+             'checkoutUrl' => $checkoutUrl,
+    ]);
+
+    }
+
+
+
 
     public function myAppointments(): void
     {
