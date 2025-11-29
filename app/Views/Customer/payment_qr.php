@@ -9,7 +9,7 @@ $qrData     = urlencode($checkoutUrl);
 ?>
 
 <div class="container my-5">
-    <h2 class="mb-4">Scan to Pay</h2>
+    <h2 class="mb-4 text-center">Scan to Pay</h2>
 
     <?php if (!empty($checkoutUrl)): ?>
         <div class="row justify-content-center">
