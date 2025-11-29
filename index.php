@@ -90,6 +90,7 @@ $router->get("/admin/inquiries", "Admin\\InquiryController@index");
 $router->get("/admin/inquiries/show", "Admin\\InquiryController@show");
 $router->post("/admin/inquiries/update-status", "Admin\\InquiryController@updateStatus");
 $router->post("/admin/inquiries/mark-as-read", "Admin\\InquiryController@markAsRead");
+$router->get("/admin/inquiries/fetch", "Admin\\InquiryController@fetch");
 
 $router->get("/admin/archives", "Admin\\ArchiveController@index");
 $router->get("/admin/archives/restore", "Admin\\ArchiveController@restore");

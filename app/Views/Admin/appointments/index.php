@@ -68,7 +68,7 @@ $activePage = "appointments";
                                 <td><?= htmlspecialchars($a['full_name']) ?></td>
                                 <td><?= htmlspecialchars($a['phone'] ?? 'N/A') ?></td>
                                 <td><?= htmlspecialchars($a['appointment_date']) ?></td>
-                                <td><?= htmlspecialchars(substr($a['appointment_time'], 0, 5)) ?></td>
+                                <td><?= date("h:i A", strtotime($a['appointment_time'])) ?></td>
                                 <td><?= htmlspecialchars($a['status']) ?></td>
                                 <td>
                                     <button type="button" class="text-purple me-2 btn btn-link p-0 openEditModal" aria-label="Edit">

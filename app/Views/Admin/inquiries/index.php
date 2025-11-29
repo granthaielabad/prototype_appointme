@@ -108,3 +108,4 @@ $activePage = "inquiry";
 </div>
 
 <script src="/assets/js/inquiry_modals.js"></script>
+<script src="/assets/js/inquiry_realtime.js"></script>
