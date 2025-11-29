@@ -144,15 +144,15 @@ class Appointment extends Model
         // Proceed with insertion
         $stmt = $this->db->prepare("
             INSERT INTO {$this->table} 
-            (user_id, service_id, appointment_date, appointment_time, note, status, created_at)
-            VALUES (:user_id, :service_id, :appointment_date, :appointment_time, :note, 'pending', NOW())
+            (user_id, service_id, appointment_date, appointment_time, notes, status, created_at)
+            VALUES (:user_id, :service_id, :appointment_date, :appointment_time, :notes, 'pending', NOW())
         ");
         $stmt->execute([
             'user_id' => $data['user_id'],
             'service_id' => $data['service_id'],
             'appointment_date' => $data['appointment_date'],
             'appointment_time' => $data['appointment_time'],
-            'note' => $data['note'] ?? null
+            'notes' => $data['notes'] ?? null
         ]);
 
         return (int)$this->db->lastInsertId();
