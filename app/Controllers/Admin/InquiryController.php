@@ -137,4 +137,36 @@ class InquiryController extends AdminController
         }
         exit;
     }
+
+    /**
+     * Fetch inquiries for real-time updates (AJAX endpoint)
+     */
+    public function fetch(): void
+    {
+        header('Content-Type: application/json');
+
+        try {
+            $filter = $_GET['filter'] ?? 'all';
+            
+            if ($filter === 'read') {
+                $inquiries = $this->inquiryModel->getByReadStatus('read');
+            } elseif ($filter === 'unread') {
+                $inquiries = $this->inquiryModel->getByReadStatus('unread');
+            } else {
+                $inquiries = $this->inquiryModel->getAll();
+            }
+            
+            echo json_encode([
+                'success' => true,
+                'inquiries' => $inquiries
+            ]);
+        } catch (\Throwable $e) {
+            http_response_code(500);
+            echo json_encode([
+                'success' => false,
+                'error' => 'Failed to fetch inquiries'
+            ]);
+        }
+        exit;
+    }
 }
