@@ -12,9 +12,22 @@ function initAppointmentRealtime() {
 
 function fetchAndUpdateAppointments() {
     const currentFilter = new URLSearchParams(window.location.search).get('filter') || 'all';
+    
+    // Use absolute path with query parameters
+    const apiUrl = window.location.origin + '/admin/appointments/fetch?filter=' + encodeURIComponent(currentFilter);
 
-    fetch(`/admin/appointments/fetch?filter=${currentFilter}`)
-        .then(res => res.json())
+    fetch(apiUrl)
+        .then(res => {
+            // Check if response is JSON
+            if (!res.ok) {
+                throw new Error(`HTTP ${res.status}: ${res.statusText}`);
+            }
+            const contentType = res.headers.get('content-type');
+            if (!contentType || !contentType.includes('application/json')) {
+                console.warn('Expected JSON but got:', contentType);
+            }
+            return res.json();
+        })
         .then(payload => {
             if (!payload.success || !payload.appointments) return;
 
@@ -133,10 +146,11 @@ function updateAppointmentRow(app, row) {
 
 function updateAppointmentEmptyState(tbody) {
     const rows = tbody.querySelectorAll('tr[data-appointment]');
-    const emptyRow = tbody.querySelector('tr.text-center');
+    const emptyRow = tbody.querySelector('tr[data-empty-state]');
     if (rows.length === 0) {
         if (!emptyRow) {
             const el = document.createElement('tr');
+            el.setAttribute('data-empty-state', 'true');
             el.innerHTML = '<td colspan="7" class="text-center text-muted py-4">No appointments available.</td>';
             tbody.appendChild(el);
         }

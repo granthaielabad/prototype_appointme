@@ -59,7 +59,7 @@ $activePage = "appointments";
                 <tbody>
 
                     <?php if (empty($appointments)): ?>
-                        <tr>
+                        <tr data-empty-state="true">
                             <td colspan="7" class="text-center text-muted py-4">No appointments available.</td>
                         </tr>
                     <?php else: ?>

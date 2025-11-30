@@ -113,9 +113,20 @@ class InquiryController extends AdminController
      */
     public function markAsRead(): void
     {
+        // Set JSON headers early
+        header('Content-Type: application/json; charset=utf-8');
+        
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
             http_response_code(405);
             echo json_encode(['error' => 'Method not allowed']);
+            exit;
+        }
+
+        // Check authentication
+        $user = \App\Core\Auth::user();
+        if (!$user || (int)($user['role_id'] ?? 0) !== 1) {
+            http_response_code(401);
+            echo json_encode(['error' => 'Unauthorized']);
             exit;
         }
 
@@ -126,14 +137,21 @@ class InquiryController extends AdminController
             exit;
         }
 
-        $success = $this->inquiryModel->markAsRead($id);
-        
-        header('Content-Type: application/json');
-        if ($success) {
-            echo json_encode(['success' => true, 'message' => 'Inquiry marked as read']);
-        } else {
+        try {
+            $success = $this->inquiryModel->markAsRead($id);
+            
+            if ($success) {
+                echo json_encode(['success' => true, 'message' => 'Inquiry marked as read']);
+            } else {
+                http_response_code(500);
+                echo json_encode(['error' => 'Failed to mark as read']);
+            }
+        } catch (\Throwable $e) {
             http_response_code(500);
-            echo json_encode(['error' => 'Failed to mark as read']);
+            echo json_encode([
+                'error' => 'Error marking as read',
+                'message' => getenv('APP_DEBUG') ? $e->getMessage() : 'Server error'
+            ]);
         }
         exit;
     }
@@ -143,9 +161,24 @@ class InquiryController extends AdminController
      */
     public function fetch(): void
     {
-        header('Content-Type: application/json');
+        // Set JSON headers early
+        header('Content-Type: application/json; charset=utf-8');
+        header('Cache-Control: no-cache, no-store, must-revalidate');
+        header('Pragma: no-cache');
+        header('Expires: 0');
 
         try {
+            // Check authentication for API endpoint
+            $user = \App\Core\Auth::user();
+            if (!$user || (int)($user['role_id'] ?? 0) !== 1) {
+                http_response_code(401);
+                echo json_encode([
+                    'success' => false,
+                    'error' => 'Unauthorized'
+                ]);
+                exit;
+            }
+
             $filter = $_GET['filter'] ?? 'all';
             
             if ($filter === 'read') {
@@ -156,15 +189,20 @@ class InquiryController extends AdminController
                 $inquiries = $this->inquiryModel->getAll();
             }
             
-            echo json_encode([
+            $response = [
                 'success' => true,
-                'inquiries' => $inquiries
-            ]);
+                'inquiries' => $inquiries,
+                'count' => count($inquiries),
+                'timestamp' => date('Y-m-d H:i:s')
+            ];
+
+            echo json_encode($response, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
         } catch (\Throwable $e) {
             http_response_code(500);
             echo json_encode([
                 'success' => false,
-                'error' => 'Failed to fetch inquiries'
+                'error' => 'Failed to fetch inquiries',
+                'message' => getenv('APP_DEBUG') ? $e->getMessage() : 'Server error'
             ]);
         }
         exit;

@@ -2,10 +2,42 @@
     RewriteEngine On
     RewriteBase /
     
-    # Allow requests to actual files and directories
-    RewriteCond %{REQUEST_FILENAME} !-f
-    RewriteCond %{REQUEST_FILENAME} !-d
+    # Allow all actual files and directories to be accessed directly
+    RewriteCond %{REQUEST_FILENAME} -f
+    RewriteRule ^ - [L]
     
-    # Rewrite all other requests to index.php
+    RewriteCond %{REQUEST_FILENAME} -d
+    RewriteRule ^ - [L]
+    
+    # Rewrite everything else to index.php
     RewriteRule ^(.*)$ index.php [QSA,L]
+</IfModule>
+
+# Improve security
+<IfModule mod_headers.c>
+    Header set X-Content-Type-Options "nosniff"
+</IfModule>
+
+# Set MIME types for static files
+<IfModule mod_mime.c>
+    AddType text/css .css
+    AddType application/javascript .js
+    AddType image/svg+xml .svg
+</IfModule>
+
+# Force correct MIME types
+<FilesMatch "\.css$">
+    ForceType text/css
+</FilesMatch>
+
+<FilesMatch "\.js$">
+    ForceType application/javascript
+</FilesMatch>
+
+# Set default character set
+AddDefaultCharset utf-8
+
+# Disable directory listing
+<IfModule mod_autoindex.c>
+    Options -Indexes
 </IfModule>

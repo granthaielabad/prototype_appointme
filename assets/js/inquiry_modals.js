@@ -18,29 +18,45 @@ document.addEventListener("DOMContentLoaded", () => {
             modal.style.display = "flex";
 
             // Mark as read via AJAX
-            if (data.inquiry_id && !data.is_read) {
-                const formData = new FormData();
-                formData.append('id', data.inquiry_id);
-
-                fetch('/admin/inquiries/mark-as-read', {
+            if (data.inquiry_id && !parseInt(data.is_read)) {
+                console.log('Marking inquiry as read:', data.inquiry_id, 'current is_read value:', data.is_read, 'type:', typeof data.is_read);
+                
+                fetch(window.location.origin + '/admin/inquiries/mark-as-read', {
                     method: 'POST',
-                    body: formData
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: 'id=' + encodeURIComponent(data.inquiry_id),
+                    credentials: 'same-origin'
                 })
-                .then(response => response.json())
+                .then(response => {
+                    console.log('Mark as read response status:', response.status);
+                    if (!response.ok) {
+                        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                    }
+                    return response.json();
+                })
                 .then(result => {
+                    console.log('Mark as read result:', result);
                     if (result.success) {
+                        console.log('Inquiry marked as read successfully:', data.inquiry_id);
                         // Update row styling to remove unread appearance
                         row.classList.remove('table-light', 'fw-bold');
                         // Update is_read in data
                         data.is_read = 1;
+                        row.setAttribute('data-inquiry', JSON.stringify(data));
                         // Remove NEW badge if present
                         const badge = row.querySelector('.badge');
                         if (badge) {
                             badge.remove();
                         }
+                    } else {
+                        console.error('Failed to mark as read:', result.error || result.message);
                     }
                 })
-                .catch(err => console.error('Error marking as read:', err));
+                .catch(err => {
+                    console.error('Error marking inquiry as read:', err);
+                });
             }
         });
     });

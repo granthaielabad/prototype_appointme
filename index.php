@@ -5,9 +5,14 @@ date_default_timezone_set("Asia/Manila");
 use App\Core\Session;
 use App\Core\Router;
 use App\Core\CSRF;
+use App\Core\Debug;
 use Dotenv\Dotenv;
 
 require_once __DIR__ . "/vendor/autoload.php";
+
+// Initialize debugging
+Debug::init(__DIR__ . '/logs');
+Debug::logRequest();
 
 // Load .env
 $dotenv = Dotenv::createImmutable(__DIR__);
