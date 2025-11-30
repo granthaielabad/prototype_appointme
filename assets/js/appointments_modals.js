@@ -3,9 +3,18 @@ document.addEventListener("DOMContentLoaded", () => {
     const closeBtns = document.querySelectorAll(".close-modal");
 
     const editModal = document.getElementById("editAppointmentModal");
+    // Function to attach edit listener to a button (reusable for dynamically added rows)
+    function formatTimeLabel(hms) {
+        try {
+            const d = new Date('1970-01-01T' + hms);
+            return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        } catch (e) {
+            return hms;
+        }
+    }
 
-    // Open edit modal when clicking edit button
-    document.querySelectorAll(".openEditModal").forEach(btn => {
+    function attachEditListener(btn) {
+        if (!btn) return;
         btn.addEventListener("click", () => {
             const row = btn.closest("tr");
             if (!row) return;
@@ -29,17 +38,42 @@ document.addEventListener("DOMContentLoaded", () => {
                 document.getElementById('edit_appointment_date').value = '';
             }
 
-            // appointment_time may include seconds, ensure HH:MM:SS format for option matching
+            // appointment_time may include seconds or be missing leading zero.
+            // Normalize to HH:MM:SS so it matches the <select> option values.
             if (data.appointment_time) {
-                // Ensure it's in HH:MM:SS format (09:00:00)
-                let timeStr = data.appointment_time;
-                if (timeStr.length === 5) {
-                    // Convert HH:MM to HH:MM:00
-                    timeStr = timeStr + ':00';
+                let timeStr = String(data.appointment_time).trim();
+                const m = timeStr.match(/^(\d{1,2}):(\d{2})(?::(\d{2}))?$/);
+                if (m) {
+                    let hh = m[1].padStart(2, '0');
+                    const mm = m[2];
+                    const ss = m[3] || '00';
+                    timeStr = `${hh}:${mm}:${ss}`;
+                } else {
+                    if (timeStr.length === 5) timeStr = timeStr + ':00';
                 }
-                document.getElementById('edit_appointment_time').value = timeStr;
+
+                const select = document.getElementById('edit_appointment_time');
+                if (select) {
+                    // remove any previous temporary options
+                    Array.from(select.querySelectorAll('option[data-temp]')).forEach(o => o.remove());
+
+                    const found = Array.from(select.options).some(opt => opt.value === timeStr);
+                    if (found) {
+                        select.value = timeStr;
+                    } else {
+                        // Insert a temporary option so the current appointment time is visible and selectable
+                        const opt = document.createElement('option');
+                        opt.value = timeStr;
+                        opt.text = formatTimeLabel(timeStr) + ' (current)';
+                        opt.setAttribute('data-temp', '1');
+                        // prepend so it's visible at top
+                        select.prepend(opt);
+                        select.value = timeStr;
+                    }
+                }
             } else {
-                document.getElementById('edit_appointment_time').value = '';
+                const select = document.getElementById('edit_appointment_time');
+                if (select) select.value = '';
             }
 
             if (data.status) {
@@ -49,12 +83,21 @@ document.addEventListener("DOMContentLoaded", () => {
             // show modal
             editModal.style.display = 'flex';
         });
-    });
+    }
+
+    // Expose attachment function globally so realtime script can reuse it
+    window.attachAppointmentEditListener = attachEditListener;
+
+    // Attach to initially present buttons
+    document.querySelectorAll(".openEditModal").forEach(btn => attachEditListener(btn));
 
     // Close modal buttons
     closeBtns.forEach(b => {
         b.addEventListener('click', () => {
             if (editModal) editModal.style.display = 'none';
+            // cleanup any temporary time option
+            const select = document.getElementById('edit_appointment_time');
+            if (select) Array.from(select.querySelectorAll('option[data-temp]')).forEach(o => o.remove());
         });
     });
 
@@ -63,6 +106,8 @@ document.addEventListener("DOMContentLoaded", () => {
         editModal.addEventListener('click', (e) => {
             if (e.target === editModal) {
                 editModal.style.display = 'none';
+                const select = document.getElementById('edit_appointment_time');
+                if (select) Array.from(select.querySelectorAll('option[data-temp]')).forEach(o => o.remove());
             }
         });
     }

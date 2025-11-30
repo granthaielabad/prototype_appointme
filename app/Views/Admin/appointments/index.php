@@ -36,6 +36,7 @@ $activePage = "appointments";
         </div>
     </div>
         <script src="/assets/js/appointments_modals.js"></script>
+        <script src="/assets/js/appointment_realtime.js"></script>
 
     <!-- CONTENT CARD -->
     <div class="card content-card p-3">

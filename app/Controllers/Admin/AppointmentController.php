@@ -92,4 +92,35 @@ class AppointmentController extends AdminController
         header('Location: /admin/appointments');
         exit();
     }
+
+    /**
+     * Fetch appointments for real-time updates (AJAX endpoint)
+     */
+    public function fetch(): void
+    {
+        header('Content-Type: application/json');
+
+        try {
+            $filter = $_GET['filter'] ?? 'all';
+            $allowedFilters = ['all', 'pending', 'confirmed', 'completed', 'cancelled'];
+            if (!in_array($filter, $allowedFilters, true)) {
+                $filter = 'all';
+            }
+
+            $model = new Appointment();
+            $appointments = $model->findAllWithUsersFiltered($filter);
+
+            echo json_encode([
+                'success' => true,
+                'appointments' => $appointments
+            ]);
+        } catch (\Throwable $e) {
+            http_response_code(500);
+            echo json_encode([
+                'success' => false,
+                'error' => 'Failed to fetch appointments'
+            ]);
+        }
+        exit;
+    }
 }
