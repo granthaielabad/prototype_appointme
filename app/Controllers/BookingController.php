@@ -214,9 +214,11 @@ class BookingController extends Controller
         $this->renderWithLayout("Customer/booking_history", "customer_layout", [
             "pageTitle" => "My Appointments",
             "appointments" => $appointments,
+            "user" => $user,
         ]);
     }
 
+    // nagagamit po ba ito? 
     public function cancel(): void
     {
         Auth::requireRole(3);
@@ -235,4 +237,52 @@ class BookingController extends Controller
         header("Location: /book");
         exit();
     }
+    
+   public function cancelFromHistory(): void
+                {
+            Auth::requireRole(3);
+
+            $id = (int) ($_GET["id"] ?? 0);
+            if ($id <= 0) {
+                Session::flash("error", "Invalid appointment ID.");
+                header("Location: /my-appointments");
+                exit();
+            }
+
+            $apptModel = new Appointment();
+            $appointment = $apptModel->find($id);
+
+            if (!$appointment) {
+                Session::flash("error", "Appointment not found.");
+                header("Location: /my-appointments");
+                exit();
+            }
+
+            if ($appointment["user_id"] !== Auth::user()["user_id"]) {
+                Session::flash("error", "Unauthorized action.");
+                header("Location: /my-appointments");
+                exit();
+            }
+
+            if ($appointment["status"] === "cancelled") {
+                Session::flash("warning", "This appointment is already cancelled.");
+                header("Location: /my-appointments");
+                exit();
+            }
+
+            $apptModel->update($id, [
+                "status" => "cancelled",
+                "updated_at" => date("Y-m-d H:i:s"),
+            ]);
+
+            Session::flash("success", "Appointment cancelled successfully.");
+            header("Location: /my-appointments");
+        }
+
+
+
+
+
+
+
 }
