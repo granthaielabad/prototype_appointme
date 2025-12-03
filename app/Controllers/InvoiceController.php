@@ -7,6 +7,9 @@ use App\Models\Invoice;
 
 class InvoiceController extends Controller
 {
+
+    // exisiting ? "        $this->renderPublic("pages/invoices", ["invoices" => $invoices, "pageTitle" => "Invoices"]);
+
     public function index(): void
     {
         Auth::requireRole(3);
@@ -19,6 +22,24 @@ class InvoiceController extends Controller
         $invoices = (new Invoice())->findAll();
         $this->renderPublic("pages/invoices", ["invoices" => $invoices, "pageTitle" => "Invoices"]);
     }
+
+
+    // invoice shower 
+    public function customerList(): void
+{
+    Auth::requireRole(3); // customers only
+    $user = Auth::user();
+
+    $invoices = (new Invoice())->findByUserWithDetails((int)$user['user_id']); // add this method in the Invoice model if not present
+
+    $this->renderCustomer("Customer/invoices", [
+        "pageTitle" => "My Invoices",
+        "user"      => $user,
+        "invoices"  => $invoices,
+    ]);
+}
+
+
 
     public function show($id): void
     {

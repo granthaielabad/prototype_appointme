@@ -20,6 +20,36 @@ class Invoice extends Model
         return $result ?: null;
     }
 
+    public function findByUserWithDetails(int $userId): array
+{
+    $sql = "
+        SELECT 
+            i.invoice_id,
+            i.invoice_number,
+            i.subtotal,
+            i.tax,
+            i.total,
+            i.issued_at,
+            a.appointment_id,
+            a.appointment_date,
+            a.appointment_time,
+            s.service_name,
+            s.price,
+            u.first_name,
+            u.last_name
+        FROM {$this->table} i
+        JOIN tbl_appointments a ON a.appointment_id = i.appointment_id
+        JOIN tbl_users u ON u.user_id = a.user_id
+        JOIN tbl_services s ON s.service_id = a.service_id
+        WHERE a.user_id = :uid
+        ORDER BY i.issued_at DESC
+    ";
+    $stmt = $this->db->prepare($sql);
+    $stmt->execute(['uid' => $userId]);
+    return $stmt->fetchAll(\PDO::FETCH_ASSOC);
+}
+
+
 
 }
 

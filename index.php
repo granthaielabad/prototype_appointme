@@ -53,6 +53,9 @@ $router->get("/appointment/cancel", "BookingController@cancelFromHistory");
 
 
 
+$router->get("/invoices", "InvoiceController@customerList");
+
+
 /* added testing carl */
 $router->get("/my-appointments", "BookingController@myAppointments");
 $router->get("/cancel-appointment", "BookingController@cancel");
