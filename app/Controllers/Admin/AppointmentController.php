@@ -92,4 +92,80 @@ class AppointmentController extends AdminController
         header('Location: /admin/appointments');
         exit();
     }
+
+    /**
+     * Fetch appointments for real-time updates (AJAX endpoint)
+     */
+    public function fetch(): void
+    {
+        // Set JSON headers early
+        header('Content-Type: application/json; charset=utf-8');
+        header('Cache-Control: no-cache, no-store, must-revalidate');
+        header('Pragma: no-cache');
+        header('Expires: 0');
+
+        try {
+            // Check authentication for API endpoint
+            $user = \App\Core\Auth::user();
+            if (!$user || (int)($user['role_id'] ?? 0) !== 1) {
+                http_response_code(401);
+                echo json_encode([
+                    'success' => false,
+                    'error' => 'Unauthorized'
+                ]);
+                exit;
+            }
+
+            $filter = $_GET['filter'] ?? 'all';
+            $allowedFilters = ['all', 'pending', 'confirmed', 'completed', 'cancelled'];
+            if (!in_array($filter, $allowedFilters, true)) {
+                $filter = 'all';
+            }
+
+            $model = new Appointment();
+            $appointments = $model->findAllWithUsersFiltered($filter);
+
+            $response = [
+                'success' => true,
+                'appointments' => $appointments,
+                'count' => count($appointments),
+                'timestamp' => date('Y-m-d H:i:s')
+            ];
+
+            echo json_encode($response, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+        } catch (\Throwable $e) {
+            http_response_code(500);
+            echo json_encode([
+                'success' => false,
+                'error' => 'Failed to fetch appointments',
+                'message' => getenv('APP_DEBUG') ? $e->getMessage() : 'Server error'
+            ]);
+        }
+        exit;
+    }
+
+    /**
+     * Archive an appointment
+     */
+    public function archive(): void
+    {
+        $id = $_GET['id'] ?? null;
+        if (!$id) {
+            Session::flash('error', 'Invalid archive request.', 'danger');
+            header('Location: /admin/appointments');
+            return;
+        }
+
+        $adminId = \App\Core\Auth::user()['user_id'] ?? null;
+        $success = (new Appointment())->archive($id, $adminId);
+        
+        if ($success) {
+            Session::flash('success', 'Appointment archived successfully.', 'success');
+        } else {
+            Session::flash('error', 'Failed to archive appointment.', 'danger');
+        }
+        
+        header('Location: /admin/appointments');
+        exit;
+    }
 }

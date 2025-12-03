@@ -36,6 +36,7 @@ $activePage = "appointments";
         </div>
     </div>
         <script src="/assets/js/appointments_modals.js"></script>
+        <script src="/assets/js/appointment_realtime.js"></script>
 
     <!-- CONTENT CARD -->
     <div class="card content-card p-3">
@@ -58,7 +59,7 @@ $activePage = "appointments";
                 <tbody>
 
                     <?php if (empty($appointments)): ?>
-                        <tr>
+                        <tr data-empty-state="true">
                             <td colspan="7" class="text-center text-muted py-4">No appointments available.</td>
                         </tr>
                     <?php else: ?>

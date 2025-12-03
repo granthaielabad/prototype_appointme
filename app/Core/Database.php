@@ -14,7 +14,7 @@ class Database
             $dsn = sprintf(
                 '%s:host=%s;port=%s;dbname=%s;charset=utf8mb4',
                 getenv('DB_CONNECTION') ?: 'mysql',
-                getenv('DB_HOST') ?: '127.0.0.1',
+                getenv('DB_HOST') ?: 'localhost',
                 getenv('DB_PORT') ?: '3306',
                 getenv('DB_DATABASE') ?: 'prototype_db'
             );

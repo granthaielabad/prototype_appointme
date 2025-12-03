@@ -34,9 +34,22 @@ function updateTableStateHash() {
 
 function fetchAndUpdateInquiries() {
     const currentFilter = new URLSearchParams(window.location.search).get('filter') || 'all';
+    
+    // Use absolute path with query parameters
+    const apiUrl = window.location.origin + '/admin/inquiries/fetch?filter=' + encodeURIComponent(currentFilter);
 
-    fetch(`/admin/inquiries/fetch?filter=${currentFilter}`)
-        .then(response => response.json())
+    fetch(apiUrl)
+        .then(response => {
+            // Check if response is JSON
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+            }
+            const contentType = response.headers.get('content-type');
+            if (!contentType || !contentType.includes('application/json')) {
+                console.warn('Expected JSON but got:', contentType);
+            }
+            return response.json();
+        })
         .then(data => {
             if (!data.success || !data.inquiries) {
                 console.error('Failed to fetch inquiries:', data.error);
@@ -163,7 +176,75 @@ function addInquiryRow(inquiry, tbody) {
     }
 
     // Reattach event listeners to new button
-    row.querySelector('.openInquiryModal').addEventListener('click', openInquiryModal);
+    const btn = row.querySelector('.openInquiryModal');
+    if (btn) {
+        btn.addEventListener('click', attachInquiryModalHandler);
+    }
+}
+
+/**
+ * Attach inquiry modal handler to a button
+ */
+function attachInquiryModalHandler(event) {
+    const btn = event.currentTarget;
+    const row = btn.closest("tr");
+    const data = JSON.parse(row.dataset.inquiry);
+    const modal = document.getElementById("inquiryDetailsModal");
+
+    if (!modal) {
+        console.error('Inquiry modal not found');
+        return;
+    }
+
+    document.getElementById("inq_name").textContent = data.full_name || "Unknown";
+    document.getElementById("inq_phone").textContent = data.phone || "N/A";
+    document.getElementById("inq_email").textContent = data.email || "N/A";
+    document.getElementById("inq_date").textContent = new Date(data.created_at).toDateString();
+    document.getElementById("inq_message").textContent = data.message || "";
+
+    modal.style.display = "flex";
+
+    // Mark as read via AJAX
+    if (data.inquiry_id && !parseInt(data.is_read)) {
+        console.log('Marking inquiry as read:', data.inquiry_id, 'current is_read value:', data.is_read, 'type:', typeof data.is_read);
+        
+        fetch(window.location.origin + '/admin/inquiries/mark-as-read', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: 'id=' + encodeURIComponent(data.inquiry_id),
+            credentials: 'same-origin'
+        })
+        .then(response => {
+            console.log('Mark as read response status:', response.status);
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+            }
+            return response.json();
+        })
+        .then(result => {
+            console.log('Mark as read result:', result);
+            if (result.success) {
+                console.log('Inquiry marked as read successfully:', data.inquiry_id);
+                // Update row styling to remove unread appearance
+                row.classList.remove('table-light', 'fw-bold');
+                // Update is_read in data
+                data.is_read = 1;
+                row.setAttribute('data-inquiry', JSON.stringify(data));
+                // Remove NEW badge if present
+                const badge = row.querySelector('.badge');
+                if (badge) {
+                    badge.remove();
+                }
+            } else {
+                console.error('Failed to mark as read:', result.error || result.message);
+            }
+        })
+        .catch(err => {
+            console.error('Error marking inquiry as read:', err);
+        });
+    }
 }
 
 function updateInquiryRow(inquiry, row) {
@@ -188,11 +269,12 @@ function updateInquiryRow(inquiry, row) {
 function updateEmptyState() {
     const tbody = document.querySelector('tbody');
     const rows = tbody.querySelectorAll('tr[data-inquiry]');
-    let emptyRow = tbody.querySelector('tr.text-center');
+    let emptyRow = tbody.querySelector('tr[data-empty-state]');
 
     if (rows.length === 0) {
         if (!emptyRow) {
             emptyRow = document.createElement('tr');
+            emptyRow.setAttribute('data-empty-state', 'true');
             emptyRow.innerHTML = '<td colspan="5" class="text-center text-muted py-4">No inquiries found.</td>';
             tbody.appendChild(emptyRow);
         }

@@ -70,52 +70,24 @@ class InquiryController extends AdminController
     }
 
     /**
-     * Update inquiry status (new, replied, archived).
-     */
-    public function updateStatus(): void
-    {
-        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-            Session::flash('error', 'Invalid request method.', 'danger');
-            header('Location: /admin/inquiries');
-            exit;
-        }
-
-        $id = isset($_POST['id']) ? (int) $_POST['id'] : 0;
-        $status = trim($_POST['status'] ?? '');
-
-        if ($id <= 0 || $status === '') {
-            Session::flash('error', 'Missing inquiry ID or status.', 'danger');
-            header('Location: /admin/inquiries');
-            exit;
-        }
-
-        $allowedStatuses = ['new', 'replied', 'archived'];
-        if (!in_array($status, $allowedStatuses, true)) {
-            Session::flash('error', 'Invalid status provided.', 'danger');
-            header('Location: /admin/inquiries');
-            exit;
-        }
-
-        $success = $this->inquiryModel->updateStatus($id, $status);
-
-        if ($success) {
-            Session::flash('success', 'Inquiry status updated successfully.', 'success');
-        } else {
-            Session::flash('error', 'Failed to update inquiry status.', 'danger');
-        }
-
-        header('Location: /admin/inquiries');
-        exit;
-    }
-
-    /**
      * Mark inquiry as read (AJAX endpoint)
      */
     public function markAsRead(): void
     {
+        // Set JSON headers early
+        header('Content-Type: application/json; charset=utf-8');
+        
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
             http_response_code(405);
             echo json_encode(['error' => 'Method not allowed']);
+            exit;
+        }
+
+        // Check authentication
+        $user = \App\Core\Auth::user();
+        if (!$user || (int)($user['role_id'] ?? 0) !== 1) {
+            http_response_code(401);
+            echo json_encode(['error' => 'Unauthorized']);
             exit;
         }
 
@@ -126,14 +98,21 @@ class InquiryController extends AdminController
             exit;
         }
 
-        $success = $this->inquiryModel->markAsRead($id);
-        
-        header('Content-Type: application/json');
-        if ($success) {
-            echo json_encode(['success' => true, 'message' => 'Inquiry marked as read']);
-        } else {
+        try {
+            $success = $this->inquiryModel->markAsRead($id);
+            
+            if ($success) {
+                echo json_encode(['success' => true, 'message' => 'Inquiry marked as read']);
+            } else {
+                http_response_code(500);
+                echo json_encode(['error' => 'Failed to mark as read']);
+            }
+        } catch (\Throwable $e) {
             http_response_code(500);
-            echo json_encode(['error' => 'Failed to mark as read']);
+            echo json_encode([
+                'error' => 'Error marking as read',
+                'message' => getenv('APP_DEBUG') ? $e->getMessage() : 'Server error'
+            ]);
         }
         exit;
     }
@@ -143,9 +122,24 @@ class InquiryController extends AdminController
      */
     public function fetch(): void
     {
-        header('Content-Type: application/json');
+        // Set JSON headers early
+        header('Content-Type: application/json; charset=utf-8');
+        header('Cache-Control: no-cache, no-store, must-revalidate');
+        header('Pragma: no-cache');
+        header('Expires: 0');
 
         try {
+            // Check authentication for API endpoint
+            $user = \App\Core\Auth::user();
+            if (!$user || (int)($user['role_id'] ?? 0) !== 1) {
+                http_response_code(401);
+                echo json_encode([
+                    'success' => false,
+                    'error' => 'Unauthorized'
+                ]);
+                exit;
+            }
+
             $filter = $_GET['filter'] ?? 'all';
             
             if ($filter === 'read') {
@@ -156,17 +150,47 @@ class InquiryController extends AdminController
                 $inquiries = $this->inquiryModel->getAll();
             }
             
-            echo json_encode([
+            $response = [
                 'success' => true,
-                'inquiries' => $inquiries
-            ]);
+                'inquiries' => $inquiries,
+                'count' => count($inquiries),
+                'timestamp' => date('Y-m-d H:i:s')
+            ];
+
+            echo json_encode($response, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
         } catch (\Throwable $e) {
             http_response_code(500);
             echo json_encode([
                 'success' => false,
-                'error' => 'Failed to fetch inquiries'
+                'error' => 'Failed to fetch inquiries',
+                'message' => getenv('APP_DEBUG') ? $e->getMessage() : 'Server error'
             ]);
         }
+        exit;
+    }
+
+    /**
+     * Archive an inquiry
+     */
+    public function archive(): void
+    {
+        $id = $_GET['id'] ?? null;
+        if (!$id) {
+            Session::flash('error', 'Invalid archive request.', 'danger');
+            header('Location: /admin/inquiries');
+            return;
+        }
+
+        $adminId = \App\Core\Auth::user()['user_id'] ?? null;
+        $success = (new Inquiry())->archive($id, $adminId);
+        
+        if ($success) {
+            Session::flash('success', 'Inquiry archived successfully.', 'success');
+        } else {
+            Session::flash('error', 'Failed to archive inquiry.', 'danger');
+        }
+        
+        header('Location: /admin/inquiries');
         exit;
     }
 }
