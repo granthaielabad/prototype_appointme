@@ -74,6 +74,7 @@ $router->get("/admin/appointments", "Admin\\AppointmentController@index");
 $router->post("/admin/appointments/update-status", "Admin\\AppointmentController@updateStatus");
 $router->post("/admin/appointments/update", "Admin\\AppointmentController@update");
 $router->get("/admin/appointments/fetch", "Admin\\AppointmentController@fetch");
+$router->get("/admin/appointments/delete", "Admin\\AppointmentController@archive");
 
 $router->get("/admin/services", "Admin\\ServiceController@index");
 $router->get("/admin/services/create", "Admin\\ServiceController@create");
@@ -84,9 +85,9 @@ $router->get("/admin/services/delete", "Admin\\ServiceController@delete");
 
 $router->get("/admin/inquiries", "Admin\\InquiryController@index");
 $router->get("/admin/inquiries/show", "Admin\\InquiryController@show");
-$router->post("/admin/inquiries/update-status", "Admin\\InquiryController@updateStatus");
 $router->post("/admin/inquiries/mark-as-read", "Admin\\InquiryController@markAsRead");
 $router->get("/admin/inquiries/fetch", "Admin\\InquiryController@fetch");
+$router->get("/admin/inquiries/delete", "Admin\\InquiryController@archive");;
 
 $router->get("/admin/archives", "Admin\\ArchiveController@index");
 $router->get("/admin/archives/restore", "Admin\\ArchiveController@restore");

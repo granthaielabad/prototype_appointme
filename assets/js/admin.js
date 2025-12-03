@@ -54,3 +54,13 @@ document.addEventListener("DOMContentLoaded", () => {
         dropdown.style.display = "none";
     });
 });
+
+/* ============================================================
+   ARCHIVE - View Details Modal
+   ============================================================ */
+function viewArchiveDetails(archiveId) {
+    // Placeholder for viewing full archived item details
+    // Could expand to show full JSON data from the 'details' column
+    alert('Viewing details for archive ID: ' + archiveId);
+    // TODO: Implement modal to show full details from tbl_archives.details (JSON)
+}

@@ -143,4 +143,29 @@ class AppointmentController extends AdminController
         }
         exit;
     }
+
+    /**
+     * Archive an appointment
+     */
+    public function archive(): void
+    {
+        $id = $_GET['id'] ?? null;
+        if (!$id) {
+            Session::flash('error', 'Invalid archive request.', 'danger');
+            header('Location: /admin/appointments');
+            return;
+        }
+
+        $adminId = \App\Core\Auth::user()['user_id'] ?? null;
+        $success = (new Appointment())->archive($id, $adminId);
+        
+        if ($success) {
+            Session::flash('success', 'Appointment archived successfully.', 'success');
+        } else {
+            Session::flash('error', 'Failed to archive appointment.', 'danger');
+        }
+        
+        header('Location: /admin/appointments');
+        exit;
+    }
 }

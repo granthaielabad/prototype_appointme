@@ -11,7 +11,7 @@ class ServiceController extends AdminController
 {
     public function index(): void
     {
-        $services = (new Service())->findAll();
+        $services = (new Service())->getAllActive();
         $this->render('services/index', ['services' => $services]);
     }
 
@@ -77,13 +77,20 @@ class ServiceController extends AdminController
     {
         $id = $_GET['id'] ?? null;
         if (!$id) {
-            Session::flash('error', 'Invalid delete request.', 'danger');
+            Session::flash('error', 'Invalid archive request.', 'danger');
             header('Location: /admin/services');
             return;
         }
 
-        (new Service())->delete($id);
-        Session::flash('success', 'Service deleted successfully.', 'success');
+        $adminId = \App\Core\Auth::user()['user_id'] ?? null;
+        $success = (new Service())->archive($id, $adminId);
+        
+        if ($success) {
+            Session::flash('success', 'Service archived successfully.', 'success');
+        } else {
+            Session::flash('error', 'Failed to archive service.', 'danger');
+        }
+        
         header('Location: /admin/services');
         exit;
     }

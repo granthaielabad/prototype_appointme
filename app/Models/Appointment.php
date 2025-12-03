@@ -31,6 +31,7 @@ class Appointment extends Model
             FROM {$this->table} a
             JOIN tbl_services s ON a.service_id = s.service_id
             WHERE a.user_id = :user_id
+              AND a.is_deleted = 0
             ORDER BY a.appointment_date DESC, a.appointment_time DESC
         ");
         $stmt->execute(['user_id' => $userId]);
@@ -52,6 +53,7 @@ class Appointment extends Model
             FROM {$this->table} a
             JOIN tbl_users u ON a.user_id = u.user_id
             JOIN tbl_services s ON a.service_id = s.service_id
+            WHERE a.is_deleted = 0
             ORDER BY a.appointment_date DESC, a.appointment_time DESC
         ");
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -72,6 +74,7 @@ class Appointment extends Model
             FROM {$this->table} a
             JOIN tbl_users u ON a.user_id = u.user_id
             JOIN tbl_services s ON a.service_id = s.service_id
+            WHERE a.is_deleted = 0
         ";
         
         // Add status filter if provided and not 'all'
@@ -104,6 +107,7 @@ class Appointment extends Model
             WHERE appointment_date = :date 
             AND appointment_time = :time 
             AND status NOT IN ('cancelled', 'completed')
+            AND is_deleted = 0
         ");
         $stmt->execute(['date' => $date, 'time' => $time]);
         return $stmt->fetchColumn() > 0;
@@ -120,6 +124,7 @@ class Appointment extends Model
             WHERE user_id = :user_id 
             AND appointment_date = :date
             AND status NOT IN ('cancelled')
+            AND is_deleted = 0
         ");
         $stmt->execute(['user_id' => $userId, 'date' => $date]);
         return (int)$stmt->fetchColumn();
@@ -156,6 +161,83 @@ class Appointment extends Model
         ]);
 
         return (int)$this->db->lastInsertId();
+    }
+
+    /**
+     * Archive an appointment (soft delete + snapshot to tbl_archives)
+     */
+    public function archive(int|string $id, ?int $adminId = null): bool
+    {
+        try {
+            error_log("Appointment::archive start - id={$id} admin={$adminId}");
+            // Get the appointment data with user name
+            $stmt = $this->db->prepare("
+                SELECT 
+                    a.*,
+                    CONCAT(u.first_name, ' ', u.last_name) AS full_name
+                FROM {$this->table} a
+                JOIN tbl_users u ON a.user_id = u.user_id
+                WHERE a.appointment_id = :id
+            ");
+            $stmt->execute(['id' => $id]);
+            $appointment = $stmt->fetch(PDO::FETCH_ASSOC);
+            
+            if (!$appointment) {
+                error_log("Appointment::archive - appointment not found id={$id}");
+                return false;
+            }
+
+            // 1) Snapshot to tbl_archives using the user's full name
+            $archive = new Archive();
+            $snapOk = $archive->archive(
+                'appointment',
+                (int)$id,
+                $appointment['full_name'],
+                $appointment,
+                $adminId
+            );
+
+            if (!$snapOk) {
+                error_log("Appointment::archive - snapshot failed for id={$id}");
+                return false;
+            }
+
+            // 2) Soft delete from main table
+            $sql = "UPDATE {$this->table}
+                    SET is_deleted = 1, deleted_at = NOW(), deleted_by = :admin_id
+                    WHERE {$this->primaryKey} = :id";
+            $update = $this->db->prepare($sql);
+            $ok = $update->execute(['id' => $id, 'admin_id' => $adminId]);
+            if (!$ok) {
+                error_log('Appointment::archive - soft delete failed: ' . json_encode($update->errorInfo()));
+            } else {
+                error_log("Appointment::archive - soft delete success id={$id}");
+            }
+            return $ok;
+        } catch (\Throwable $e) {
+            error_log('Error archiving appointment: ' . $e->getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * Restore a soft-deleted appointment.
+     */
+    public function restore(int|string $id): bool
+    {
+        $sql = "UPDATE {$this->table}
+                SET is_deleted = 0, deleted_at = NULL, deleted_by = NULL
+                WHERE {$this->primaryKey} = :id";
+        $stmt = $this->db->prepare($sql);
+        return $stmt->execute(['id' => $id]);
+    }
+
+    /**
+     * Permanently delete an appointment row.
+     */
+    public function hardDelete(int|string $id): bool
+    {
+        return $this->delete($id);
     }
 
 }

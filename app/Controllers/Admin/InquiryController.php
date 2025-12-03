@@ -70,45 +70,6 @@ class InquiryController extends AdminController
     }
 
     /**
-     * Update inquiry status (new, replied, archived).
-     */
-    public function updateStatus(): void
-    {
-        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-            Session::flash('error', 'Invalid request method.', 'danger');
-            header('Location: /admin/inquiries');
-            exit;
-        }
-
-        $id = isset($_POST['id']) ? (int) $_POST['id'] : 0;
-        $status = trim($_POST['status'] ?? '');
-
-        if ($id <= 0 || $status === '') {
-            Session::flash('error', 'Missing inquiry ID or status.', 'danger');
-            header('Location: /admin/inquiries');
-            exit;
-        }
-
-        $allowedStatuses = ['new', 'replied', 'archived'];
-        if (!in_array($status, $allowedStatuses, true)) {
-            Session::flash('error', 'Invalid status provided.', 'danger');
-            header('Location: /admin/inquiries');
-            exit;
-        }
-
-        $success = $this->inquiryModel->updateStatus($id, $status);
-
-        if ($success) {
-            Session::flash('success', 'Inquiry status updated successfully.', 'success');
-        } else {
-            Session::flash('error', 'Failed to update inquiry status.', 'danger');
-        }
-
-        header('Location: /admin/inquiries');
-        exit;
-    }
-
-    /**
      * Mark inquiry as read (AJAX endpoint)
      */
     public function markAsRead(): void
@@ -205,6 +166,31 @@ class InquiryController extends AdminController
                 'message' => getenv('APP_DEBUG') ? $e->getMessage() : 'Server error'
             ]);
         }
+        exit;
+    }
+
+    /**
+     * Archive an inquiry
+     */
+    public function archive(): void
+    {
+        $id = $_GET['id'] ?? null;
+        if (!$id) {
+            Session::flash('error', 'Invalid archive request.', 'danger');
+            header('Location: /admin/inquiries');
+            return;
+        }
+
+        $adminId = \App\Core\Auth::user()['user_id'] ?? null;
+        $success = (new Inquiry())->archive($id, $adminId);
+        
+        if ($success) {
+            Session::flash('success', 'Inquiry archived successfully.', 'success');
+        } else {
+            Session::flash('error', 'Failed to archive inquiry.', 'danger');
+        }
+        
+        header('Location: /admin/inquiries');
         exit;
     }
 }
