@@ -49,6 +49,7 @@ $router->get("/logout", "AuthController@logout");
 /* CUSTOMER */
 $router->get("/book", "BookingController@index");
 $router->post("/book", "BookingController@store");
+$router->get("/api/appointments/taken", "BookingController@takenSlots");
 $router->get("/appointment/cancel", "BookingController@cancelFromHistory");
 
 

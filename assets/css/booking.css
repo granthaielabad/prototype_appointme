@@ -149,6 +149,9 @@
   transform: translateX(-8px);
 }
 
+.slot-disabled { color: #9aa0a6; }
+
+
 .price-card-shape {
   width: 88%;
   background: #E1E1E1;
