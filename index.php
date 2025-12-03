@@ -89,6 +89,8 @@ $router->post("/admin/appointments/update-status", "Admin\\AppointmentController
 $router->post("/admin/appointments/update", "Admin\\AppointmentController@update");
 $router->get("/admin/appointments/fetch", "Admin\\AppointmentController@fetch");
 $router->get("/admin/appointments/delete", "Admin\\AppointmentController@archive");
+// also accept the `/archive` path for backwards-compatibility
+$router->get("/admin/appointments/archive", "Admin\\AppointmentController@archive");
 
 $router->get("/admin/services", "Admin\\ServiceController@index");
 $router->get("/admin/services/create", "Admin\\ServiceController@create");

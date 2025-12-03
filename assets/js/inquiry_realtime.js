@@ -72,6 +72,7 @@ function fetchAndUpdateInquiries() {
             // Add new inquiries (in server data but not in DOM)
             inquiries.forEach(inquiry => {
                 if (!currentRowIds.includes(inquiry.inquiry_id)) {
+                    console.log('Adding new inquiry:', inquiry.inquiry_id, 'is_read:', inquiry.is_read);
                     addInquiryRow(inquiry, tbody);
                 }
             });
@@ -140,11 +141,6 @@ function addInquiryRow(inquiry, tbody) {
     const row = document.createElement('tr');
     row.setAttribute('data-inquiry', JSON.stringify(inquiry));
     
-    // Add unread styling if new
-    if (!inquiry.is_read) {
-        row.classList.add('table-light', 'fw-bold');
-    }
-
     const dateFormatted = new Date(inquiry.created_at).toLocaleDateString('en-US', {
         year: 'numeric',
         month: 'short',
@@ -168,6 +164,17 @@ function addInquiryRow(inquiry, tbody) {
         </td>
     `;
 
+    // Apply unread styling directly with inline styles if necessary
+    if (!inquiry.is_read) {
+        row.classList.add('table-light', 'fw-bold');
+        // Force style application with inline styles as backup
+        row.style.backgroundColor = '#f8f9fa';
+        row.style.fontWeight = 'bold';
+        console.log('New unread inquiry added:', inquiry.inquiry_id, 'Classes:', row.className, 'is_read:', inquiry.is_read);
+    } else {
+        console.log('New read inquiry added:', inquiry.inquiry_id);
+    }
+
     // Insert at top for new inquiries
     if (tbody.firstElementChild && !tbody.firstElementChild.classList.contains('text-center')) {
         tbody.insertBefore(row, tbody.firstElementChild);
@@ -180,6 +187,19 @@ function addInquiryRow(inquiry, tbody) {
     if (btn) {
         btn.addEventListener('click', attachInquiryModalHandler);
     }
+    
+    // Force reflow to ensure styles are applied
+    void row.offsetHeight;
+}
+
+/**
+ * Format date to "Full Month Name, Day, Year"
+ */
+function formatFullDate(dateStr) {
+    if (!dateStr) return 'N/A';
+    const date = new Date(dateStr);
+    if (isNaN(date.getTime())) return dateStr;
+    return date.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
 }
 
 /**
@@ -199,7 +219,7 @@ function attachInquiryModalHandler(event) {
     document.getElementById("inq_name").textContent = data.full_name || "Unknown";
     document.getElementById("inq_phone").textContent = data.phone || "N/A";
     document.getElementById("inq_email").textContent = data.email || "N/A";
-    document.getElementById("inq_date").textContent = new Date(data.created_at).toDateString();
+    document.getElementById("inq_date").textContent = formatFullDate(data.created_at);
     document.getElementById("inq_message").textContent = data.message || "";
 
     modal.style.display = "flex";
@@ -255,15 +275,24 @@ function updateInquiryRow(inquiry, row) {
     // Update read status styling
     if (inquiry.is_read) {
         row.classList.remove('table-light', 'fw-bold');
+        row.style.backgroundColor = '';
+        row.style.fontWeight = '';
         const badge = row.querySelector('.badge');
         if (badge) badge.remove();
+        console.log('Updated inquiry to read:', inquiry.inquiry_id);
     } else {
         row.classList.add('table-light', 'fw-bold');
+        row.style.backgroundColor = '#f8f9fa';
+        row.style.fontWeight = 'bold';
         if (!row.querySelector('.badge')) {
             const nameCell = row.querySelector('td:nth-child(2)');
             nameCell.innerHTML += ' <span class="badge bg-warning text-dark ms-2">NEW</span>';
         }
+        console.log('Updated inquiry to unread:', inquiry.inquiry_id);
     }
+    
+    // Force reflow to ensure styles are applied
+    void row.offsetHeight;
 }
 
 function updateEmptyState() {

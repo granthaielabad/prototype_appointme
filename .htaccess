@@ -3,11 +3,8 @@
     RewriteBase /
     
     # Allow all actual files and directories to be accessed directly
-    RewriteCond %{REQUEST_FILENAME} -f
-    RewriteRule ^ - [L]
-    
-    RewriteCond %{REQUEST_FILENAME} -d
-    RewriteRule ^ - [L]
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{REQUEST_FILENAME} !-d
     
     # Rewrite everything else to index.php
     RewriteRule ^(.*)$ index.php [QSA,L]
