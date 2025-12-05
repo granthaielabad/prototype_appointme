@@ -75,12 +75,14 @@ $activePage = "archives";
                                 </a>
 
                                 <!-- Restore -->
-                                <a href="/admin/archives/restore?type=<?= $item['item_type'] ?>&id=<?= $item['item_id'] ?>" 
-                                   class="text-purple"
-                                   title="Restore Item"
-                                   onclick="return confirm('Restore this item?')">
+                                <button class="text-purple btn btn-link p-0 openRestoreWarningModal"
+                                   data-type="<?= $item['item_type'] ?>"
+                                   data-id="<?= $item['item_id'] ?>"
+                                   data-name="<?= htmlspecialchars($item['item_name']) ?>"
+                                   data-filter="<?= htmlspecialchars($currentFilter) ?>"
+                                   title="Restore Item">
                                     <i class="bi bi-arrow-counterclockwise"></i>
-                                </a>
+                                </button>
                             </div>
                         </div>
                     </div>
@@ -195,4 +197,30 @@ $activePage = "archives";
     </div>
 </div>
 
+<!-- Restore Warning Modal -->
+<div class="custom-modal" id="restoreWarningModal" style="display: none;">
+    <div class="custom-modal-content" style="max-width: 400px; text-align: center;">
+        <!-- Restore Icon -->
+        <div style="margin-bottom: 20px;">
+            <i class="bi bi-arrow-counterclockwise" style="font-size: 60px; color: #28a745;"></i>
+        </div>
+
+        <!-- Warning Text -->
+        <p style="font-size: 16px; margin-bottom: 20px;">
+            Are you sure you want to <span style="color: #28a745; font-weight: bold;">restore</span> <span id="restoreItemName">*Name*</span> from the system?
+        </p>
+
+        <!-- Action Buttons -->
+        <div style="display: flex; gap: 12px; margin-top: 20px;">
+            <button class="btn btn-success w-50" id="confirmRestoreBtn" style="background:#28a745; border:none; color: white;">
+                Restore
+            </button>
+            <button class="btn btn-outline-secondary w-50" id="cancelRestoreBtn" style="border: 1px solid #ccc;">
+                No
+            </button>
+        </div>
+    </div>
+</div>
+
 <script src="/assets/js/archive_modals.js"></script>
+<script src="/assets/js/restore_warning_modal.js"></script>

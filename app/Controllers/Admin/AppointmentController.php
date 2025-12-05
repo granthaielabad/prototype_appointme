@@ -25,10 +25,26 @@ class AppointmentController extends AdminController
         // Fetch appointments with filter
         $appointments = $appointmentModel->findAllWithUsersFiltered($filter);
         
-        // Pass filter to view so dropdown can show current selection
+        // Apply date filter if provided
+        $start = $_GET['start'] ?? null;
+        $end = $_GET['end'] ?? null;
+        
+        if ($start && $end) {
+            // Validate date formats (basic validation)
+            if (preg_match('/^\d{4}-\d{2}-\d{2}$/', $start) && preg_match('/^\d{4}-\d{2}-\d{2}$/', $end)) {
+                $appointments = array_filter($appointments, function ($appointment) use ($start, $end) {
+                    $apptDate = $appointment['appointment_date'];
+                    return $apptDate >= $start && $apptDate <= $end;
+                });
+            }
+        }
+        
+        // Pass filter and dates to view so dropdown can show current selection
         $this->render("appointments/index", [
             "appointments" => $appointments,
-            "currentFilter" => $filter
+            "currentFilter" => $filter,
+            "start" => $start,
+            "end" => $end
         ]);
     }
 
@@ -124,6 +140,20 @@ class AppointmentController extends AdminController
 
             $model = new Appointment();
             $appointments = $model->findAllWithUsersFiltered($filter);
+
+            // Apply date filter if provided
+            $start = $_GET['start'] ?? null;
+            $end = $_GET['end'] ?? null;
+            
+            if ($start && $end) {
+                // Validate date formats (basic validation)
+                if (preg_match('/^\d{4}-\d{2}-\d{2}$/', $start) && preg_match('/^\d{4}-\d{2}-\d{2}$/', $end)) {
+                    $appointments = array_filter($appointments, function ($appointment) use ($start, $end) {
+                        $apptDate = $appointment['appointment_date'];
+                        return $apptDate >= $start && $apptDate <= $end;
+                    });
+                }
+            }
 
             $response = [
                 'success' => true,

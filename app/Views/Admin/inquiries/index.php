@@ -66,11 +66,11 @@ $activePage = "inquiry";
                                         <i class="bi bi-eye"></i>
                                     </button>
 
-                                    <a href="/admin/inquiries/delete?id=<?= $inq['inquiry_id'] ?>" 
-                                       class="text-purple"
-                                       onclick="return confirm('Delete this inquiry?')">
+                                    <button class="text-purple openInquiryArchiveWarningModal" style="border:0;background:none;"
+                                            data-id="<?= $inq['inquiry_id'] ?>"
+                                            data-name="<?= htmlspecialchars($inq['full_name']) ?>">
                                         <i class="bi bi-trash"></i>
-                                    </a>
+                                    </button>
                                 </td>
                             </tr>
                         <?php endforeach; ?>
@@ -107,5 +107,31 @@ $activePage = "inquiry";
     </div>
 </div>
 
+<!-- Archive Warning Modal -->
+<div class="custom-modal" id="inquiryArchiveWarningModal" style="display: none;">
+    <div class="custom-modal-content" style="max-width: 400px; text-align: center;">
+        <!-- Warning Icon -->
+        <div style="margin-bottom: 20px;">
+            <i class="bi bi-exclamation-triangle" style="font-size: 60px; color: #8b0000;"></i>
+        </div>
+
+        <!-- Warning Text -->
+        <p style="font-size: 16px; margin-bottom: 20px;">
+            Are you sure you want to <span style="color: #8b0000; font-weight: bold;">archive</span> this inquiry?
+        </p>
+
+        <!-- Action Buttons -->
+        <div style="display: flex; gap: 12px; margin-top: 20px;">
+            <button class="btn btn-danger w-50" id="confirmInquiryArchiveBtn" style="background:#8b0000; border:none;">
+                Delete Service
+            </button>
+            <button class="btn btn-outline-secondary w-50" id="cancelInquiryArchiveBtn" style="border: 1px solid #ccc;">
+                No
+            </button>
+        </div>
+    </div>
+</div>
+
 <script src="/assets/js/inquiry_modals.js"></script>
 <script src="/assets/js/inquiry_realtime.js"></script>
+<script src="/assets/js/archive_warning_modal.js"></script>
