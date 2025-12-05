@@ -20,4 +20,32 @@ document.addEventListener('DOMContentLoaded', ()=>{
         </div>
       `).join('');
     }).catch(()=>{});
+
+  // invoice card to PNG download
+  document.querySelectorAll('.js-download-invoice').forEach(btn => {
+    btn.addEventListener('click', async (e) => {
+      e.preventDefault();
+
+      const card = btn.closest('.invoice-card');
+      if (!card || typeof html2canvas !== 'function') return;
+
+      const originalText = btn.textContent;
+      btn.disabled = true;
+      btn.textContent = 'Downloading';
+
+      try {
+        const canvas = await html2canvas(card, { scale: 2, useCORS: true });
+        const link = document.createElement('a');
+        link.download = `invoice-${btn.dataset.invoiceId || 'card'}.png`;
+        link.href = canvas.toDataURL('image/png');
+        link.click();
+      } catch (err) {
+        console.error(err);
+        alert('Could not generate image. Please try again.');
+      } finally {
+        btn.disabled = false;
+        btn.textContent = originalText;
+      }
+    });
+  });
 });
