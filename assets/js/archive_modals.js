@@ -29,9 +29,31 @@ document.addEventListener("DOMContentLoaded", () => {
 
             if (itemType === 'service') {
                 // Populate Service Modal
-                document.getElementById("archive_service_name").textContent = details.service_name || "N/A";
-                document.getElementById("archive_service_description").textContent = details.description || "No description available";
-                document.getElementById("archive_service_price").textContent = `PHP ${details.price ? parseInt(details.price).toLocaleString() : 0}`;
+                const getName = () => {
+                    return details.service_name || details.name || data.item_name || 'N/A';
+                };
+
+                const getDescription = () => {
+                    return details.description || details.desc || 'No description available';
+                };
+
+                const getPrice = () => {
+                    // Try multiple locations for price
+                    if (details.price !== undefined && details.price !== null && details.price !== '') return details.price;
+                    if (details.amount !== undefined && details.amount !== null) return details.amount;
+                    if (details.cost !== undefined && details.cost !== null) return details.cost;
+                    if (data.price !== undefined && data.price !== null) return data.price;
+                    return 0;
+                };
+
+                const nameVal = getName();
+                const descVal = getDescription();
+                const priceRaw = getPrice();
+                const priceNum = Number(String(priceRaw).replace(/[^0-9.-]+/g, '')) || 0;
+
+                document.getElementById("archive_service_name").textContent = nameVal;
+                document.getElementById("archive_service_description").textContent = descVal;
+                document.getElementById("archive_service_price").textContent = `PHP ${priceNum.toLocaleString()}`;
                 
                 // Category badge
                 const categoryBadge = document.getElementById("archive_service_category_badge");

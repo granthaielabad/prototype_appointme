@@ -93,6 +93,12 @@ $router->get("/admin/archives", "Admin\\ArchiveController@index");
 $router->get("/admin/archives/restore", "Admin\\ArchiveController@restore");
 $router->get("/admin/archives/delete", "Admin\\ArchiveController@delete");
 
+$router->get("/admin/reports", "Admin\\ReportController@index");
+$router->post("/admin/reports/export", "Admin\\ReportController@export");
+$router->get("/admin/reports/export-csv", "Admin\\ReportController@exportCsv");
+$router->get("/admin/reports/export-pdf", "Admin\\ReportController@exportPdf");
+$router->get("/admin/reports/summary", "Admin\\ReportController@summary");
+
 /* RESOURCE-LIKE (misc) */
 $router->get("/services", "ServiceController@index");
 $router->get("/services/show", "ServiceController@show");

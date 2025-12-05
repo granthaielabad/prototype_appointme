@@ -79,7 +79,7 @@ class Appointment extends Model
         
         // Add status filter if provided and not 'all'
         if (!empty($status) && $status !== 'all') {
-            $query .= " WHERE a.status = :status";
+            $query .= " AND a.status = :status";
         }
         
         $query .= " ORDER BY a.appointment_date DESC, a.appointment_time DESC";
