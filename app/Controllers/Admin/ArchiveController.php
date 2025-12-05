@@ -114,6 +114,7 @@ class ArchiveController extends AdminController
     {
         $type = $_GET['type'] ?? null;
         $id   = $_GET['id'] ?? null;
+        $filter = $_GET['filter'] ?? 'all';
 
         if (!$type || !$id) {
             Session::flash('error', 'Invalid restore request.', 'danger');
@@ -138,13 +139,30 @@ class ArchiveController extends AdminController
                 $ok = false;
         }
 
+        // Also update the archive record to mark it as not archived
+        if ($ok) {
+            try {
+                $db = (new Service())->getDb();
+                // Search in JSON details column for the item_id
+                $stmt = $db->prepare("UPDATE tbl_archives SET is_archived = 0 WHERE item_type = :type AND details LIKE :details_search");
+                $detailsSearch = '%"item_id":' . intval($id) . '%';
+                $stmt->execute(['type' => $type, 'details_search' => $detailsSearch]);
+                
+                error_log("Archive restore: Updated archives for type=$type, id=$id");
+            } catch (\Throwable $e) {
+                error_log("Failed to update archive status: " . $e->getMessage());
+                // Don't fail the restore just because archive update failed
+            }
+        }
+
         Session::flash(
             $ok ? 'success' : 'error',
             $ok ? 'Item restored successfully.' : 'Failed to restore item.',
             $ok ? 'success' : 'danger'
         );
 
-        header('Location: /admin/archives');
+        // Redirect back with the filter preserved
+        header('Location: /admin/archives?filter=' . urlencode($filter));
         exit;
     }
 

@@ -25,10 +25,24 @@ class AppointmentController extends AdminController
         // Fetch appointments with filter
         $appointments = $appointmentModel->findAllWithUsersFiltered($filter);
         
-        // Pass filter to view so dropdown can show current selection
+        // Apply date filter if provided
+        $date = $_GET['date'] ?? null;
+
+        if ($date) {
+            // Validate date format (basic validation)
+            if (preg_match('/^\d{4}-\d{2}-\d{2}$/', $date)) {
+                $appointments = array_filter($appointments, function ($appointment) use ($date) {
+                    $apptDate = $appointment['appointment_date'];
+                    return $apptDate === $date;
+                });
+            }
+        }
+        
+        // Pass filter and date to view so dropdown can show current selection
         $this->render("appointments/index", [
             "appointments" => $appointments,
-            "currentFilter" => $filter
+            "currentFilter" => $filter,
+            "date" => $date
         ]);
     }
 
@@ -124,6 +138,19 @@ class AppointmentController extends AdminController
 
             $model = new Appointment();
             $appointments = $model->findAllWithUsersFiltered($filter);
+
+            // Apply date filter if provided
+            $date = $_GET['date'] ?? null;
+
+            if ($date) {
+                // Validate date format (basic validation)
+                if (preg_match('/^\d{4}-\d{2}-\d{2}$/', $date)) {
+                    $appointments = array_filter($appointments, function ($appointment) use ($date) {
+                        $apptDate = $appointment['appointment_date'];
+                        return $apptDate === $date;
+                    });
+                }
+            }
 
             $response = [
                 'success' => true,

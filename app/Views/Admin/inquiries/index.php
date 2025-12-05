@@ -60,17 +60,17 @@ $activePage = "inquiry";
                                 <td><?= $i + 1 ?></td>
                                 <td><?= htmlspecialchars($inq['full_name']) ?><?= !$inq['is_read'] ? ' <span class="badge bg-warning text-dark ms-2">NEW</span>' : '' ?></td>
                                 <td><?= htmlspecialchars($inq['email']) ?></td>
-                                <td><?= date("M d, Y", strtotime($inq['created_at'])) ?></td>
+                                <td><?= date("F d, Y", strtotime($inq['created_at'])) ?></td>
                                 <td>
                                     <button class="text-purple me-2 openInquiryModal" style="border:0;background:none;">
                                         <i class="bi bi-eye"></i>
                                     </button>
 
-                                    <a href="/admin/inquiries/delete?id=<?= $inq['inquiry_id'] ?>" 
-                                       class="text-purple"
-                                       onclick="return confirm('Delete this inquiry?')">
+                                    <button class="text-purple openInquiryArchiveWarningModal" style="border:0;background:none;"
+                                            data-id="<?= $inq['inquiry_id'] ?>"
+                                            data-name="<?= htmlspecialchars($inq['full_name']) ?>">
                                         <i class="bi bi-trash"></i>
-                                    </a>
+                                    </button>
                                 </td>
                             </tr>
                         <?php endforeach; ?>
@@ -107,5 +107,31 @@ $activePage = "inquiry";
     </div>
 </div>
 
+<!-- Archive Warning Modal -->
+<div class="custom-modal" id="inquiryArchiveWarningModal" style="display: none;">
+    <div class="custom-modal-content" style="max-width: 400px; text-align: center;">
+        <!-- Warning Icon -->
+        <div style="margin-bottom: 20px;">
+            <i class="bi bi-exclamation-triangle" style="font-size: 60px; color: #8b0000;"></i>
+        </div>
+
+        <!-- Warning Text -->
+        <p style="font-size: 16px; margin-bottom: 20px;">
+            Are you sure you want to <span style="color: #8b0000; font-weight: bold;">archive</span> this inquiry?
+        </p>
+
+        <!-- Action Buttons -->
+        <div style="display: flex; gap: 12px; margin-top: 20px;">
+            <button class="btn btn-outline-danger w-50" id="confirmInquiryArchiveBtn" style="border: 1px solid #ccc;">
+                <strong>Delete Service</strong>
+            </button>
+            <button class="btn btn-outline-secondary w-50" id="cancelInquiryArchiveBtn" style="border: 1px solid #ccc;">
+                <strong>No</strong>
+            </button>
+        </div>
+    </div>
+</div>
+
 <script src="/assets/js/inquiry_modals.js"></script>
 <script src="/assets/js/inquiry_realtime.js"></script>
+<script src="/assets/js/archive_warning_modal.js"></script>

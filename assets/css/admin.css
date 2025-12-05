@@ -237,11 +237,30 @@ body {
     width: 350px !important;
 }
 
+.download-modal-content {
+    width: 500px !important;
+    max-width: 92%;
+}
+
 /* Modal header */
 .modal-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    margin-bottom: 24px;
+}
+
+.modal-title {
+    font-size: 20px;
+    font-weight: 700;
+    margin: 0;
+}
+
+.modal-subtitle {
+    font-size: 16px;
+    font-weight: 600;
+    margin: 0;
+    color: #000;
 }
 
 .close-modal {
@@ -249,12 +268,92 @@ body {
     border: none;
     font-size: 24px;
     cursor: pointer;
+    color: #000;
 }
 
 /* Modal inputs */
 .modal-label {
     font-weight: 600;
     margin-top: 10px;
+}
+
+/* Format and Report Options */
+.format-options,
+.report-options {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+}
+
+.format-option,
+.report-option {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.format-option input[type="radio"],
+.report-option input[type="radio"] {
+    position: absolute;
+    opacity: 0;
+    cursor: pointer;
+    width: 0;
+    height: 0;
+}
+
+.option-label {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 12px 16px;
+    border: 2px solid #ddd;
+    border-radius: 8px;
+    text-align: center;
+    cursor: pointer;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    user-select: none;
+    flex: 1;
+    position: relative;
+}
+
+.option-label::before {
+    content: '';
+    display: inline-block;
+    width: 18px;
+    height: 18px;
+    border: 2px solid #999;
+    border-radius: 50%;
+    margin-right: 8px;
+    transition: all 0.2s ease;
+}
+
+.format-option input[type="radio"]:checked + .option-label::before,
+.report-option input[type="radio"]:checked + .option-label::before {
+    border-color: #007bff;
+    background-color: #007bff;
+    box-shadow: inset 0 0 0 4px white;
+}
+
+.format-option input[type="radio"]:checked + .option-label,
+.report-option input[type="radio"]:checked + .option-label {
+    border-color: #ddd;
+    background-color: transparent;
+}
+
+.download-btn-modal {
+    background-color: #28a745;
+    border-color: #28a745;
+    color: white;
+    font-weight: 600;
+    padding: 12px 24px;
+    border-radius: 8px;
+    transition: all 0.2s ease;
+}
+
+.download-btn-modal:hover {
+    background-color: #218838;
+    border-color: #218838;
 }
 
 .modal-input,
@@ -411,4 +510,49 @@ body {
 
 .archive-item-card .gap-2 {
     gap: 8px;
+}
+
+/* ============================
+   Charts STYLING
+============================ */
+
+.chart-container {
+    height: 300px;
+    position: relative;
+    /* --- Centering Styles --- */
+    display: flex;
+    justify-content: center; /* Centers horizontally */
+    align-items: center;     /* Centers vertically */
+}
+
+.square-card {
+    display: flex;
+    flex-direction: column;
+    padding-bottom:  50px;
+    border-radius: 30px;
+    margin: 0 10px 0 10px;
+}
+
+.square-card h6 {
+    font-size: 15px;
+    text-align: left;
+}
+
+.square-card h2 {
+    margin-top: 40px;
+    font-size: 40px;
+    text-align: center;
+}
+
+.chart-card {
+    padding: 40px;
+    border-radius: 25px;
+}
+
+.weekly-sales-card {
+    border-radius: 10px;
+}
+
+.top-services-card {
+    border-radius: 10px;
 }
