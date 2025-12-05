@@ -12,7 +12,11 @@ document.addEventListener("DOMContentLoaded", () => {
             document.getElementById("inq_name").textContent = data.full_name || "Unknown";
             document.getElementById("inq_phone").textContent = data.phone || "N/A";
             document.getElementById("inq_email").textContent = data.email || "N/A";
-            document.getElementById("inq_date").textContent = new Date(data.created_at).toDateString();
+            document.getElementById("inq_date").textContent = new Date(data.created_at).toLocaleDateString('en-US', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+            });
             document.getElementById("inq_message").textContent = data.message || "";
 
             modal.style.display = "flex";

@@ -21,7 +21,7 @@ $activePage = "appointments";
                 </button>
 
                 <div class="dropdown-menu p-3" aria-labelledby="apptDateFilterDropdown" style="width: 320px;">
-                    <h6 class="dropdown-header px-0 py-0 mb-3">Pick a Date Range</h6>
+                    <h6 class="dropdown-header px-0 py-0 mb-3">Pick a Date</h6>
                     
                     <!-- Calendar Header -->
                     <div class="d-flex justify-content-between align-items-center mb-3">
@@ -44,14 +44,8 @@ $activePage = "appointments";
                         <div id="apptCalendarDays" class="row g-1"></div>
                     </div>
 
-                    <!-- Date Range Display -->
-                    <p class="text-muted small mb-3" id="apptFilterDateRange">
-                        <span id="apptStartDateDisplay">-</span> to <span id="apptEndDateDisplay">-</span>
-                    </p>
-
-                    <!-- Hidden inputs to store selected dates -->
-                    <input type="hidden" id="apptDateFilterStart">
-                    <input type="hidden" id="apptDateFilterEnd">
+                    <!-- Hidden input to store selected date -->
+                    <input type="hidden" id="apptDateFilter">
 
                     <!-- Action Buttons -->
                     <div class="d-flex gap-2">
@@ -202,11 +196,11 @@ $activePage = "appointments";
 
         <!-- Action Buttons -->
         <div style="display: flex; gap: 12px; margin-top: 20px;">
-            <button class="btn btn-danger w-50" id="confirmArchiveBtn" style="background:#8b0000; border:none;">
-                Delete Service
+            <button class="btn btn-outline-danger w-50" id="confirmArchiveBtn" ">
+                <strong>Delete Service</strong>
             </button>
             <button class="btn btn-outline-secondary w-50" id="cancelArchiveBtn" style="border: 1px solid #ccc;">
-                No
+                <strong>No</strong>
             </button>
         </div>
     </div>

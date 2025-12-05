@@ -26,25 +26,23 @@ class AppointmentController extends AdminController
         $appointments = $appointmentModel->findAllWithUsersFiltered($filter);
         
         // Apply date filter if provided
-        $start = $_GET['start'] ?? null;
-        $end = $_GET['end'] ?? null;
-        
-        if ($start && $end) {
-            // Validate date formats (basic validation)
-            if (preg_match('/^\d{4}-\d{2}-\d{2}$/', $start) && preg_match('/^\d{4}-\d{2}-\d{2}$/', $end)) {
-                $appointments = array_filter($appointments, function ($appointment) use ($start, $end) {
+        $date = $_GET['date'] ?? null;
+
+        if ($date) {
+            // Validate date format (basic validation)
+            if (preg_match('/^\d{4}-\d{2}-\d{2}$/', $date)) {
+                $appointments = array_filter($appointments, function ($appointment) use ($date) {
                     $apptDate = $appointment['appointment_date'];
-                    return $apptDate >= $start && $apptDate <= $end;
+                    return $apptDate === $date;
                 });
             }
         }
         
-        // Pass filter and dates to view so dropdown can show current selection
+        // Pass filter and date to view so dropdown can show current selection
         $this->render("appointments/index", [
             "appointments" => $appointments,
             "currentFilter" => $filter,
-            "start" => $start,
-            "end" => $end
+            "date" => $date
         ]);
     }
 
@@ -142,15 +140,14 @@ class AppointmentController extends AdminController
             $appointments = $model->findAllWithUsersFiltered($filter);
 
             // Apply date filter if provided
-            $start = $_GET['start'] ?? null;
-            $end = $_GET['end'] ?? null;
-            
-            if ($start && $end) {
-                // Validate date formats (basic validation)
-                if (preg_match('/^\d{4}-\d{2}-\d{2}$/', $start) && preg_match('/^\d{4}-\d{2}-\d{2}$/', $end)) {
-                    $appointments = array_filter($appointments, function ($appointment) use ($start, $end) {
+            $date = $_GET['date'] ?? null;
+
+            if ($date) {
+                // Validate date format (basic validation)
+                if (preg_match('/^\d{4}-\d{2}-\d{2}$/', $date)) {
+                    $appointments = array_filter($appointments, function ($appointment) use ($date) {
                         $apptDate = $appointment['appointment_date'];
-                        return $apptDate >= $start && $apptDate <= $end;
+                        return $apptDate === $date;
                     });
                 }
             }

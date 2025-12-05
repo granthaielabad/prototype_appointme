@@ -212,11 +212,11 @@ $activePage = "archives";
 
         <!-- Action Buttons -->
         <div style="display: flex; gap: 12px; margin-top: 20px;">
-            <button class="btn btn-success w-50" id="confirmRestoreBtn" style="background:#28a745; border:none; color: white;">
-                Restore
+            <button class="btn btn-outline-success w-50" id="confirmRestoreBtn" style="border: 1px solid #ccc">
+                <strong>Restore</strong>
             </button>
-            <button class="btn btn-outline-secondary w-50" id="cancelRestoreBtn" style="border: 1px solid #ccc;">
-                No
+            <button class="btn btn-outline-secondary  w-50" id="cancelRestoreBtn" style="border: 1px solid #ccc;">
+                <strong>No</strong>
             </button>
         </div>
     </div>

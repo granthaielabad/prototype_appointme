@@ -301,6 +301,9 @@ $activePage = "dashboard";
 
         <form method="POST" action="/admin/reports/export">
             <input type="hidden" name="period" value="<?= $currentPeriod ?? 'all' ?>">
+            <!-- Include selected date range from calendar -->
+            <input type="hidden" id="exportStartDate" name="from" value="">
+            <input type="hidden" id="exportEndDate" name="to" value="">
 
             <!-- File Format Options -->
             <div class="format-options mb-4">

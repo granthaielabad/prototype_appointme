@@ -157,8 +157,8 @@ $categories = [
         </p>
 
         <div class="d-flex gap-2 mt-3">
-            <a id="confirmDeleteBtn" class="btn btn-danger w-50" style="background:#8b0000;border:none;">Delete Service</a>
-            <button class="btn btn-outline-secondary w-50 close-modal">No</button>
+            <a id="confirmDeleteBtn" class="btn btn-outline-danger w-50" style="border: 1px solid #ccc; font-size: 16px; font-weight: 500;"><strong>Delete Service</strong></a>
+            <button class="btn btn-outline-secondary w-50 close-modal" style="border: 1px solid #ccc; font-size: 16px; font-weight: 500;"><strong>No</strong></button>
         </div>
     </div>
 </div>

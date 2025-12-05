@@ -60,7 +60,7 @@ $activePage = "inquiry";
                                 <td><?= $i + 1 ?></td>
                                 <td><?= htmlspecialchars($inq['full_name']) ?><?= !$inq['is_read'] ? ' <span class="badge bg-warning text-dark ms-2">NEW</span>' : '' ?></td>
                                 <td><?= htmlspecialchars($inq['email']) ?></td>
-                                <td><?= date("M d, Y", strtotime($inq['created_at'])) ?></td>
+                                <td><?= date("F d, Y", strtotime($inq['created_at'])) ?></td>
                                 <td>
                                     <button class="text-purple me-2 openInquiryModal" style="border:0;background:none;">
                                         <i class="bi bi-eye"></i>
@@ -122,11 +122,11 @@ $activePage = "inquiry";
 
         <!-- Action Buttons -->
         <div style="display: flex; gap: 12px; margin-top: 20px;">
-            <button class="btn btn-danger w-50" id="confirmInquiryArchiveBtn" style="background:#8b0000; border:none;">
-                Delete Service
+            <button class="btn btn-outline-danger w-50" id="confirmInquiryArchiveBtn" style="border: 1px solid #ccc;">
+                <strong>Delete Service</strong>
             </button>
             <button class="btn btn-outline-secondary w-50" id="cancelInquiryArchiveBtn" style="border: 1px solid #ccc;">
-                No
+                <strong>No</strong>
             </button>
         </div>
     </div>

@@ -1,14 +1,10 @@
 // ===== APPOINTMENT DATE FILTER CALENDAR =====
 // Modal calendar variables
 let apptCurrentMonth = new Date();
-let apptSelectedStartDate = null;
-let apptSelectedEndDate = null;
+let apptSelectedDate = null;
 
 const apptDateFilterDropdown = document.getElementById("apptDateFilterDropdown");
-const apptDateFilterStart = document.getElementById("apptDateFilterStart");
-const apptDateFilterEnd = document.getElementById("apptDateFilterEnd");
-const apptStartDateDisplay = document.getElementById("apptStartDateDisplay");
-const apptEndDateDisplay = document.getElementById("apptEndDateDisplay");
+const apptDateFilter = document.getElementById("apptDateFilter");
 const apptResetDateFilter = document.getElementById("apptResetDateFilter");
 
 // Prevent dropdown from closing when clicking inside calendar
@@ -19,17 +15,11 @@ if (apptDateFilterMenu) {
     });
 }
 
-// Check URL params for existing dates
+// Check URL params for existing date
 const apptParams = new URLSearchParams(window.location.search);
-if (apptParams.has('start')) {
-    apptSelectedStartDate = apptParams.get('start');
-    apptStartDateDisplay.textContent = apptSelectedStartDate;
-    apptDateFilterStart.value = apptSelectedStartDate;
-}
-if (apptParams.has('end')) {
-    apptSelectedEndDate = apptParams.get('end');
-    apptEndDateDisplay.textContent = apptSelectedEndDate;
-    apptDateFilterEnd.value = apptSelectedEndDate;
+if (apptParams.has('date')) {
+    apptSelectedDate = apptParams.get('date');
+    apptDateFilter.value = apptSelectedDate;
 }
 
 // Render calendar when dropdown opens
@@ -125,13 +115,7 @@ function apptCreateDayElement(day, dateStr, isMuted = false) {
     dayEl.textContent = day;
 
     // Determine styling
-    let isStart = apptSelectedStartDate === dateStr;
-    let isEnd = apptSelectedEndDate === dateStr;
-    let isBetween = false;
-
-    if (apptSelectedStartDate && apptSelectedEndDate) {
-        isBetween = dateStr > apptSelectedStartDate && dateStr < apptSelectedEndDate;
-    }
+    let isSelected = apptSelectedDate === dateStr;
 
     if (isMuted) {
         // Muted days from other months
@@ -142,10 +126,8 @@ function apptCreateDayElement(day, dateStr, isMuted = false) {
         // Active days from current month
         dayEl.style.cursor = 'pointer';
 
-        if (isStart || isEnd) {
+        if (isSelected) {
             dayEl.classList.add('bg-primary', 'text-white', 'fw-bold');
-        } else if (isBetween) {
-            dayEl.classList.add('bg-light');
         }
 
         // Click handler only for non-muted days
@@ -156,51 +138,23 @@ function apptCreateDayElement(day, dateStr, isMuted = false) {
 }
 
 function apptSelectDate(dateStr) {
-    if (!apptSelectedStartDate) {
-        // First click: set start date
-        apptSelectedStartDate = dateStr;
-        apptSelectedEndDate = null;
-        apptStartDateDisplay.textContent = dateStr;
-        apptEndDateDisplay.textContent = '-';
-    } else if (!apptSelectedEndDate) {
-        // Second click
-        if (dateStr > apptSelectedStartDate) {
-            // If after start date, set as end date and instantly apply
-            apptSelectedEndDate = dateStr;
-            apptEndDateDisplay.textContent = dateStr;
-            apptApplyFilter();
-        } else if (dateStr < apptSelectedStartDate) {
-            // If before start date, swap them
-            apptSelectedEndDate = apptSelectedStartDate;
-            apptSelectedStartDate = dateStr;
-            apptStartDateDisplay.textContent = dateStr;
-            apptEndDateDisplay.textContent = apptSelectedEndDate;
-            apptApplyFilter();
-        } else {
-            // If same date, reset
-            apptSelectedStartDate = null;
-            apptSelectedEndDate = null;
-            apptStartDateDisplay.textContent = '-';
-            apptEndDateDisplay.textContent = '-';
-        }
+    if (apptSelectedDate === dateStr) {
+        // If same date clicked, deselect it
+        apptSelectedDate = null;
     } else {
-        // Both dates selected, reset and start over
-        apptSelectedStartDate = dateStr;
-        apptSelectedEndDate = null;
-        apptStartDateDisplay.textContent = dateStr;
-        apptEndDateDisplay.textContent = '-';
+        // Select the new date and apply filter
+        apptSelectedDate = dateStr;
+        apptApplyFilter();
     }
-    
-    apptDateFilterStart.value = apptSelectedStartDate || '';
-    apptDateFilterEnd.value = apptSelectedEndDate || '';
+
+    apptDateFilter.value = apptSelectedDate || '';
     apptRenderCalendar();
 }
 
 function apptApplyFilter() {
-    if (apptSelectedStartDate && apptSelectedEndDate) {
+    if (apptSelectedDate) {
         const url = new URL(window.location);
-        url.searchParams.set('start', apptSelectedStartDate);
-        url.searchParams.set('end', apptSelectedEndDate);
+        url.searchParams.set('date', apptSelectedDate);
         window.location.href = url.toString();
     }
 }
@@ -231,17 +185,12 @@ if (apptNextMonthBtn) {
 if (apptResetDateFilter) {
     apptResetDateFilter.onclick = (e) => {
         e.preventDefault();
-        apptSelectedStartDate = null;
-        apptSelectedEndDate = null;
-        apptDateFilterStart.value = '';
-        apptDateFilterEnd.value = '';
-        apptStartDateDisplay.textContent = '-';
-        apptEndDateDisplay.textContent = '-';
+        apptSelectedDate = null;
+        apptDateFilter.value = '';
         apptCurrentMonth = new Date();
         apptRenderCalendar();
         const url = new URL(window.location);
-        url.searchParams.delete('start');
-        url.searchParams.delete('end');
+        url.searchParams.delete('date');
         window.location.href = url.toString();
     };
 }

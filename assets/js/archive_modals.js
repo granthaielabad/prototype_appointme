@@ -25,7 +25,11 @@ document.addEventListener("DOMContentLoaded", () => {
             const data = JSON.parse(card.dataset.archive);
             const details = typeof data.details === 'string' ? JSON.parse(data.details) : data.details;
             const itemType = data.item_type.toLowerCase();
-            const archivedDate = new Date(data.archived_at).toDateString();
+            const archivedDate = new Date(data.archived_at).toLocaleDateString('en-US', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+            });
 
             if (itemType === 'service') {
                 // Populate Service Modal
@@ -136,7 +140,11 @@ document.addEventListener("DOMContentLoaded", () => {
                 document.getElementById("archive_inq_name").textContent = details.full_name || "Unknown";
                 document.getElementById("archive_inq_phone").textContent = details.phone || "N/A";
                 document.getElementById("archive_inq_email").textContent = details.email || "N/A";
-                document.getElementById("archive_inq_date").textContent = new Date(details.created_at || details.inquiry_date).toDateString();
+                document.getElementById("archive_inq_date").textContent = new Date(details.created_at || details.inquiry_date).toLocaleDateString('en-US', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric'
+                });
                 document.getElementById("archive_inq_message").textContent = details.message || "";
                 document.getElementById("archive_inq_archived_date").textContent = archivedDate;
 

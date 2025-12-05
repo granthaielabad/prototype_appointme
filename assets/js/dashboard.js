@@ -519,7 +519,16 @@ updatePeriodDropdownLabel();
 
 // ===== DOWNLOAD MODAL =====
 const modal = document.getElementById("downloadModal");
-document.getElementById("openDownloadModal").onclick = () => modal.style.display = "flex";
+document.getElementById("openDownloadModal").onclick = () => {
+    // Populate export date inputs with current calendar selections
+    const exportStartDate = document.getElementById("exportStartDate");
+    const exportEndDate = document.getElementById("exportEndDate");
+
+    if (exportStartDate) exportStartDate.value = selectedStartDate || '';
+    if (exportEndDate) exportEndDate.value = selectedEndDate || '';
+
+    modal.style.display = "flex";
+};
 modal.querySelector(".close-modal").onclick = () => modal.style.display = "none";
 
 // Store chart instances for animation updates

@@ -10,7 +10,57 @@ class ReportController extends AdminController
 {
     public function index(): void
     {
-        $this->render('reports/index', ['pageTitle' => 'Reports']);
+        // Get current month summary by default
+        $start = $_GET['from'] ?? date('Y-m-01');
+        $end = $_GET['end'] ?? date('Y-m-d');
+
+        $summary = $this->getSummaryData($start, $end);
+
+        $this->render('reports/index', [
+            'pageTitle' => 'Reports',
+            'summary' => $summary
+        ]);
+    }
+
+    private function getSummaryData(string $start, string $end): array
+    {
+        $a = new Appointment();
+        $db = $a->getDb();
+
+        // Total appointments
+        $stmt = $db->prepare("
+            SELECT COUNT(*) AS total
+            FROM tbl_appointments
+            WHERE appointment_date BETWEEN :start AND :end
+        ");
+        $stmt->execute(['start' => $start, 'end' => $end]);
+        $appointments = $stmt->fetchColumn();
+
+        // Total customers (unique users with appointments in date range)
+        $stmt = $db->prepare("
+            SELECT COUNT(DISTINCT user_id) AS total
+            FROM tbl_appointments
+            WHERE appointment_date BETWEEN :start AND :end
+        ");
+        $stmt->execute(['start' => $start, 'end' => $end]);
+        $customers = $stmt->fetchColumn();
+
+        // Total revenue (from completed appointments)
+        $stmt = $db->prepare("
+            SELECT SUM(s.price) AS total
+            FROM tbl_appointments a
+            JOIN tbl_services s ON a.service_id = s.service_id
+            WHERE a.appointment_date BETWEEN :start AND :end
+            AND a.status = 'completed'
+        ");
+        $stmt->execute(['start' => $start, 'end' => $end]);
+        $revenue = $stmt->fetchColumn() ?? 0;
+
+        return [
+            'appointments' => (int)$appointments,
+            'customers' => (int)$customers,
+            'revenue' => (float)$revenue
+        ];
     }
 
     public function summary(): void
@@ -73,36 +123,46 @@ class ReportController extends AdminController
 
     public function export(): void
     {
-        $format = $_POST['format'] ?? 'pdf';
-        $type = $_POST['type'] ?? 'appointments';
-        $period = $_POST['period'] ?? 'all';
+        $format = $_POST['format'] ?? $_GET['format'] ?? 'pdf';
+        $type = $_POST['type'] ?? $_GET['type'] ?? 'appointments';
+        $period = $_POST['period'] ?? $_GET['period'] ?? 'all';
+        
+        // Check for custom date filter - POST takes priority, then GET, then null
+        $customFrom = $_POST['from'] ?? $_GET['from'] ?? null;
+        $customTo = $_POST['to'] ?? $_GET['to'] ?? null;
 
-        // Determine date range based on period
+        // Determine date range based on period or custom filter
         $start = null;
         $end = null;
 
-        switch ($period) {
-            case 'daily':
-                $start = date('Y-m-d');
-                $end = date('Y-m-d');
-                break;
-            case 'weekly':
-                $start = date('Y-m-d', strtotime('monday this week'));
-                $end = date('Y-m-d', strtotime('sunday this week'));
-                break;
-            case 'monthly':
-                $start = date('Y-m-01');
-                $end = date('Y-m-t');
-                break;
-            case 'all':
-                // For "all" period, don't filter by date - show all historical data
-                $start = null;
-                $end = null;
-                break;
-            default:
-                $start = date('Y-m-01', strtotime('first day of january this year'));
-                $end = date('Y-m-d');
-                break;
+        // Custom date filter takes priority
+        if ($customFrom && $customTo) {
+            $start = $customFrom;
+            $end = $customTo;
+        } else {
+            switch ($period) {
+                case 'daily':
+                    $start = date('Y-m-d');
+                    $end = date('Y-m-d');
+                    break;
+                case 'weekly':
+                    $start = date('Y-m-d', strtotime('monday this week'));
+                    $end = date('Y-m-d', strtotime('sunday this week'));
+                    break;
+                case 'monthly':
+                    $start = date('Y-m-01');
+                    $end = date('Y-m-t');
+                    break;
+                case 'all':
+                    // For "all" period, don't filter by date - show all historical data
+                    $start = null;
+                    $end = null;
+                    break;
+                default:
+                    $start = date('Y-m-01', strtotime('first day of january this year'));
+                    $end = date('Y-m-d');
+                    break;
+            }
         }
 
         if ($format === 'csv') {
@@ -119,6 +179,7 @@ class ReportController extends AdminController
         $query = "";
         $filename = "";
         $headers = [];
+        $params = [];
 
         switch ($type) {
             case 'appointments':
@@ -127,26 +188,27 @@ class ReportController extends AdminController
                     FROM tbl_appointments a
                     JOIN tbl_services s ON a.service_id = s.service_id
                     JOIN tbl_users u ON a.user_id = u.user_id
-                    WHERE a.appointment_date BETWEEN ? AND ?
+                    WHERE 1=1 " . ($start && $end ? "AND a.appointment_date BETWEEN :start AND :end" : "") . "
                     ORDER BY a.appointment_date, a.appointment_time
                 ";
-                $filename = "appointments_{$start}_to_{$end}";
+                $filename = "appointments" . ($start ? "_{$start}_to_{$end}" : "_all");
                 $headers = ['Date', 'Time', 'Service', 'Status', 'Customer Name', 'Email'];
+                $params = $start && $end ? [':start' => $start, ':end' => $end] : [];
                 break;
 
             case 'sales':
                 $query = "
-                    SELECT a.appointment_date, s.service_name, s.price, u.first_name, u.last_name
+                    SELECT a.appointment_date, s.service_name, u.first_name, u.last_name, s.price
                     FROM tbl_appointments a
                     JOIN tbl_services s ON a.service_id = s.service_id
                     JOIN tbl_users u ON a.user_id = u.user_id
-                    WHERE a.status = 'completed' AND a.appointment_date BETWEEN ? AND ?
+                    WHERE a.status = 'completed' " . ($start && $end ? "AND a.appointment_date BETWEEN :start AND :end" : "") . "
                     ORDER BY a.appointment_date
                 ";
-                $filename = "sales_{$start}_to_{$end}";
-                $headers = ['Date', 'Service', 'Amount', 'Customer Name'];
+                $filename = "sales" . ($start ? "_{$start}_to_{$end}" : "_all");
+                $headers = ['Date', 'Service', 'Customer Name', 'Amount'];
+                $params = $start && $end ? [':start' => $start, ':end' => $end] : [];
                 break;
-
 
             case 'customer_list':
                 $query = "
@@ -155,8 +217,9 @@ class ReportController extends AdminController
                     WHERE u.role_id = 3
                     ORDER BY u.date_created DESC
                 ";
-                $filename = "customer_list_{$start}_to_{$end}";
+                $filename = "customer_list" . ($start ? "_{$start}_to_{$end}" : "_all");
                 $headers = ['Customer Name', 'ID', 'Mobile Number', 'Email Address', 'Created Account Since', 'Status'];
+                $params = []; // No date parameters for customer_list
                 break;
 
             case 'all':
@@ -165,10 +228,10 @@ class ReportController extends AdminController
                     FROM tbl_appointments a
                     JOIN tbl_services s ON a.service_id = s.service_id
                     JOIN tbl_users u ON a.user_id = u.user_id
-                    WHERE a.appointment_date BETWEEN ? AND ?
+                    WHERE 1=1 $dateCondition
                     ORDER BY a.appointment_date, a.appointment_time
                 ";
-                $filename = "all_reports_{$start}_to_{$end}";
+                $filename = "all_reports" . ($start ? "_{$start}_to_{$end}" : "_all");
                 $headers = ['Date', 'Time', 'Service', 'Status', 'Customer Name', 'Email', 'Amount'];
                 break;
         }
@@ -180,13 +243,20 @@ class ReportController extends AdminController
         }
 
         $stmt = $db->prepare($query);
-        $stmt->execute([$start, $end]);
+        $stmt->execute($params);
         $rows = $stmt->fetchAll(\PDO::FETCH_ASSOC);
 
         header('Content-Type: text/csv; charset=utf-8');
         header('Content-Disposition: attachment; filename=' . $filename . '.csv');
 
         $out = fopen('php://output', 'w');
+
+        // Add report metadata as comment
+        fputcsv($out, ['# Report: ' . $title]);
+        fputcsv($out, ['# As of: ' . date('F d, Y')]);
+        fputcsv($out, ['# Generated: ' . date('F d, Y H:i:s')]);
+        fputcsv($out, ['']); // Empty row for separation
+
         fputcsv($out, $headers);
 
         foreach ($rows as $row) {
@@ -246,6 +316,7 @@ class ReportController extends AdminController
         $query = "";
         $title = "";
         $headers = [];
+        $params = [];
 
         switch ($type) {
             case 'appointments':
@@ -254,28 +325,34 @@ class ReportController extends AdminController
                     FROM tbl_appointments a
                     JOIN tbl_services s ON a.service_id = s.service_id
                     JOIN tbl_users u ON a.user_id = u.user_id
-                    " . ($start && $end ? "WHERE a.appointment_date BETWEEN ? AND ?" : "") . "
+                    WHERE 1=1 " . ($start && $end ? "AND a.appointment_date BETWEEN :start AND :end" : "") . "
                     ORDER BY a.appointment_date, a.appointment_time
                 ";
                 $title = "Appointments Report";
                 $headers = ['Date', 'Time', 'Service', 'Status', 'Customer Name', 'Email'];
+                if ($start && $end) {
+                    $params = [':start' => $start, ':end' => $end];
+                }
                 break;
 
             case 'sales':
                 $query = "
-                    SELECT a.appointment_date, s.service_name, s.price, u.first_name, u.last_name
+                    SELECT a.appointment_date, s.service_name, u.first_name, u.last_name, s.price
                     FROM tbl_appointments a
                     JOIN tbl_services s ON a.service_id = s.service_id
                     JOIN tbl_users u ON a.user_id = u.user_id
-                    WHERE a.status = 'completed' " . ($start && $end ? "AND a.appointment_date BETWEEN ? AND ?" : "") . "
+                    WHERE a.status = 'completed' " . ($start && $end ? "AND a.appointment_date BETWEEN :start AND :end" : "") . "
                     ORDER BY a.appointment_date
                 ";
                 $title = "Sales Report";
-                $headers = ['Date', 'Service', 'Amount', 'Customer Name'];
+                $headers = ['Date', 'Service', 'Customer Name', 'Amount'];
+                if ($start && $end) {
+                    $params = [':start' => $start, ':end' => $end];
+                }
                 break;
 
-
             case 'customer_list':
+                // Customer list doesn't filter by appointment dates - shows all customers
                 $query = "
                     SELECT u.user_id, u.first_name, u.last_name, u.contact_number, u.email, u.date_created, u.is_active
                     FROM tbl_users u
@@ -284,6 +361,7 @@ class ReportController extends AdminController
                 ";
                 $title = "Customer List";
                 $headers = ['Customer Name', 'ID', 'Mobile Number', 'Email Address', 'Created Account Since', 'Status'];
+                // No date parameters for customer_list
                 break;
 
             case 'all':
@@ -292,11 +370,14 @@ class ReportController extends AdminController
                     FROM tbl_appointments a
                     JOIN tbl_services s ON a.service_id = s.service_id
                     JOIN tbl_users u ON a.user_id = u.user_id
-                    " . ($start && $end ? "WHERE a.appointment_date BETWEEN ? AND ?" : "") . "
+                    WHERE 1=1 " . ($start && $end ? "AND a.appointment_date BETWEEN :start AND :end" : "") . "
                     ORDER BY a.appointment_date, a.appointment_time
                 ";
                 $title = "All Appointments Report";
                 $headers = ['Date', 'Time', 'Service', 'Status', 'Customer Name', 'Email', 'Amount'];
+                if ($start && $end) {
+                    $params = [':start' => $start, ':end' => $end];
+                }
                 break;
         }
 
@@ -307,11 +388,7 @@ class ReportController extends AdminController
         }
 
         $stmt = $db->prepare($query);
-        if ($start && $end) {
-            $stmt->execute([$start, $end]);
-        } else {
-            $stmt->execute();
-        }
+        $stmt->execute($params);
         $rows = $stmt->fetchAll(\PDO::FETCH_ASSOC);
 
 
@@ -413,7 +490,7 @@ class ReportController extends AdminController
         }
         
         td { 
-            padding: 6px; 
+            padding: 8px 12px; 
             border-bottom: 1px solid #e5e7eb; 
             font-size: 8px;
         }
@@ -422,13 +499,37 @@ class ReportController extends AdminController
             background-color: #f9fafb;
         }
         
-        .currency { text-align: right; }
+        .currency { 
+            text-align: right; 
+        }
         .center { text-align: center; }
+        
+        .as-of-text {
+            font-size: 11px;
+            color: #666;
+            margin-top: 8px;
+            font-weight: 500;
+        }
     </style>
 </head>
 <body>';
 
         // Header with company info
+        // Generate "as of" text based on date range
+        $asOfText = '';
+        if ($start && $end) {
+            if ($start === $end) {
+                // Daily report
+                $asOfText = 'as of ' . date('F d, Y', strtotime($start));
+            } else {
+                // Date range report
+                $asOfText = 'from ' . date('F d, Y', strtotime($start)) . ' to ' . date('F d, Y', strtotime($end));
+            }
+        } else {
+            // All time report
+            $asOfText = 'as of ' . date('F d, Y');
+        }
+
         $html .= '<div class="header">
             <div class="header-left">
                 <div class="company-info">
@@ -439,6 +540,7 @@ class ReportController extends AdminController
             <div class="header-right">
                 <h1>' . htmlspecialchars($title) . '</h1>
                 <p>Record Count: <span style="color: #a855f7; font-weight: bold;">' . count($rows) . '</span></p>
+                <p class="as-of-text">' . htmlspecialchars($asOfText) . '</p>
             </div>
         </div>';
 
@@ -446,7 +548,14 @@ class ReportController extends AdminController
         $html .= '<thead><tr>';
 
         foreach ($headers as $header) {
-            $html .= '<th>' . htmlspecialchars($header) . '</th>';
+            $headerKey = strtolower(str_replace([' ', '-'], '_', $header));
+            $class = '';
+            if ($headerKey === 'amount' || $headerKey === 'total_spent' || $headerKey === 'total_revenue') {
+                $class = ' class="currency"';
+            } elseif ($headerKey === 'total_appointments') {
+                $class = ' class="center"';
+            }
+            $html .= '<th' . $class . '>' . htmlspecialchars($header) . '</th>';
         }
         $html .= '</tr></thead><tbody>';
 
