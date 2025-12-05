@@ -251,12 +251,6 @@ class ReportController extends AdminController
 
         $out = fopen('php://output', 'w');
 
-        // Add report metadata as comment
-        fputcsv($out, ['# Report: ' . $title]);
-        fputcsv($out, ['# As of: ' . date('F d, Y')]);
-        fputcsv($out, ['# Generated: ' . date('F d, Y H:i:s')]);
-        fputcsv($out, ['']); // Empty row for separation
-
         fputcsv($out, $headers);
 
         foreach ($rows as $row) {
