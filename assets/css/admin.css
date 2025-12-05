@@ -224,6 +224,7 @@ body {
 }
 
 .custom-modal-content {
+    position: relative;
     background: white;
     border-radius: 16px;
     padding: 26px;
@@ -356,4 +357,58 @@ body {
     border-radius: 6px;
     background: #F4ECFF;
     color: #AF62FF;
+}
+
+/* ============================
+   ARCHIVE PAGE STYLING
+============================ */
+
+.archive-items-container {
+    display: flex;
+    flex-direction: column;
+}
+
+.archive-item-card {
+    background: #ffffff;
+    border: 1px solid #e5e5e5;
+    border-radius: 12px;
+    transition: all 0.2s ease;
+}
+
+.archive-item-card:hover {
+    box-shadow: 0px 4px 12px rgba(175, 98, 255, 0.1);
+    border-color: #AF62FF;
+}
+
+.archive-item-card h6 {
+    color: #2a2a2a;
+    font-size: 16px;
+    font-weight: 600;
+    margin: 0;
+}
+
+.archive-item-card .badge {
+    font-size: 16px;
+    padding: 4px 10px;
+    border-radius: 6px;
+    background: #F4ECFF;
+    color: #AF62FF;
+    font-weight: 500;
+    white-space: nowrap;
+}
+
+.archive-item-card .text-purple {
+    color: #AF62FF;
+    text-decoration: none;
+    transition: 0.2s ease;
+    cursor: pointer;
+}
+
+.archive-item-card .text-purple:hover {
+    color: #CD9FFE;
+    font-size: 1.1em;
+}
+
+.archive-item-card .gap-2 {
+    gap: 8px;
 }

@@ -5,9 +5,14 @@ date_default_timezone_set("Asia/Manila");
 use App\Core\Session;
 use App\Core\Router;
 use App\Core\CSRF;
+use App\Core\Debug;
 use Dotenv\Dotenv;
 
 require_once __DIR__ . "/vendor/autoload.php";
+
+// Initialize debugging
+Debug::init(__DIR__ . '/logs');
+Debug::logRequest();
 
 // Load .env
 $dotenv = Dotenv::createImmutable(__DIR__);
@@ -83,6 +88,10 @@ $router->get("/admin/dashboard", "Admin\\DashboardController@index");
 $router->get("/admin/appointments", "Admin\\AppointmentController@index");
 $router->post("/admin/appointments/update-status", "Admin\\AppointmentController@updateStatus");
 $router->post("/admin/appointments/update", "Admin\\AppointmentController@update");
+$router->get("/admin/appointments/fetch", "Admin\\AppointmentController@fetch");
+$router->get("/admin/appointments/delete", "Admin\\AppointmentController@archive");
+// also accept the `/archive` path for backwards-compatibility
+$router->get("/admin/appointments/archive", "Admin\\AppointmentController@archive");
 
 $router->get("/admin/services", "Admin\\ServiceController@index");
 $router->get("/admin/services/create", "Admin\\ServiceController@create");
@@ -93,9 +102,9 @@ $router->get("/admin/services/delete", "Admin\\ServiceController@delete");
 
 $router->get("/admin/inquiries", "Admin\\InquiryController@index");
 $router->get("/admin/inquiries/show", "Admin\\InquiryController@show");
-$router->post("/admin/inquiries/update-status", "Admin\\InquiryController@updateStatus");
 $router->post("/admin/inquiries/mark-as-read", "Admin\\InquiryController@markAsRead");
 $router->get("/admin/inquiries/fetch", "Admin\\InquiryController@fetch");
+$router->get("/admin/inquiries/delete", "Admin\\InquiryController@archive");;
 
 $router->get("/admin/archives", "Admin\\ArchiveController@index");
 $router->get("/admin/archives/restore", "Admin\\ArchiveController@restore");
