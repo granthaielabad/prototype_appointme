@@ -1,12 +1,59 @@
-<aside>
-    <div class="p-3 border-bottom">
-        <h4 class="text-white">AppointMe</h4>
-        <small class="text-muted"><?= htmlspecialchars($_SESSION['user']['role'] ?? 'Admin') ?></small>
+<aside class="sidebar">
+
+    <!-- LOGO -->
+    <div class="logo mb-4">
+        <img src="/assets/img/admin/adminLogo.svg" alt="Admin Logo">
     </div>
-    <a href="/admin/dashboard" class="active"><i class="bi bi-speedometer2"></i> Dashboard</a>
-    <a href="/admin/services"><i class="bi bi-scissors"></i> Services</a>
-    <a href="/admin/appointments"><i class="bi bi-calendar-check"></i> Appointments</a>
-    <a href="/admin/users"><i class="bi bi-people"></i> Users</a>
-    <a href="/logout"><i class="bi bi-box-arrow-right"></i> Logout</a>
+
+    <!-- NAVIGATION -->
+    <nav>
+        <ul class="p-0 m-0" style="list-style: none;">
+
+            <!-- Dashboard -->
+            <?php $isActive = str_starts_with($_SERVER['REQUEST_URI'], '/admin/dashboard'); ?>
+            <li>
+                <a class="nav-link <?= $isActive ? 'active-nav' : '' ?>" href="/admin/dashboard">
+                    <img src="/assets/img/admin/<?= $isActive ? 'active_DashboardIcon.svg' : 'DashboardIcon.svg' ?>">
+                    Dashboard
+                </a>
+            </li>
+
+            <!-- Appointments -->
+            <?php $isActive = str_starts_with($_SERVER['REQUEST_URI'], '/admin/appointments'); ?>
+            <li>
+                <a class="nav-link <?= $isActive ? 'active-nav' : '' ?>" href="/admin/appointments">
+                    <img src="/assets/img/admin/<?= $isActive ? 'active_AppointmentsIcon.svg' : 'AppointmentsIcon.svg' ?>">
+                    Appointments
+                </a>
+            </li>
+
+            <!-- Services -->
+            <?php $isActive = str_starts_with($_SERVER['REQUEST_URI'], '/admin/services'); ?>
+            <li>
+                <a class="nav-link <?= $isActive ? 'active-nav' : '' ?>" href="/admin/services">
+                    <img src="/assets/img/admin/<?= $isActive ? 'active_ServicesIcon.svg' : 'ServicesIcon.svg' ?>">
+                    Services
+                </a>
+            </li>
+
+            <!-- Inquiries -->
+            <?php $isActive = str_starts_with($_SERVER['REQUEST_URI'], '/admin/inquiries'); ?>
+            <li>
+                <a class="nav-link <?= $isActive ? 'active-nav' : '' ?>" href="/admin/inquiries">
+                    <img src="/assets/img/admin/<?= $isActive ? 'active_InquiryIcon.svg' : 'InquiryIcon.svg' ?>">
+                    Inquiries
+                </a>
+            </li>
+
+            <!-- Archives -->
+            <?php $isActive = str_starts_with($_SERVER['REQUEST_URI'], '/admin/archives'); ?>
+            <li>
+                <a class="nav-link <?= $isActive ? 'active-nav' : '' ?>" href="/admin/archives">
+                    <img src="/assets/img/admin/<?= $isActive ? 'active_ArchiveIcon.svg' : 'ArchiveIcon.svg' ?>">
+                    Archives
+                </a>
+            </li>
+
+        </ul>
+    </nav>
 </aside>
-<main>

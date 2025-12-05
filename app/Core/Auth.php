@@ -3,54 +3,62 @@ namespace App\Core;
 
 class Auth
 {
-    public static function user()
+    public static function user(): ?array
     {
-        return Session::get('user');
+        Session::start();
+        return Session::get('user', null);
+    }
+
+    public static function login(array $user): void
+    {
+        Session::start();
+        unset($user['password']);
+        Session::set('user', $user);
+    }
+
+    public static function logout(): void
+    {
+        Session::start();
+        Session::remove('user');
     }
 
     public static function check(): bool
     {
-        return isset($_SESSION['user']);
+        Session::start();
+        return (bool) Session::get('user', false);
     }
 
-    public static function requireLogin(): void
+    public static function requireLogin(int|array|null $roles = null): void
     {
+        Session::start();
         if (!self::check()) {
-            Session::flash('error', 'Please log in first.', 'danger');
+            Session::flash('error', 'Please login to continue', 'danger');
             header('Location: /login');
             exit;
         }
-    }
-
-    public static function requireRole(int|array $allowedRoles): void
-    {
-        self::requireLogin();
-        $user = self::user();
-        $roles = (array)$allowedRoles; // supports single or multiple roles
-
-        if (!in_array($user['role_id'], $roles)) {
-            http_response_code(403);
-            echo "<h1>403 Forbidden</h1><p>You do not have permission to access this page.</p>";
-            exit;
+        if ($roles !== null) {
+            self::requireRole($roles);
         }
     }
 
-    public static function isAdmin(): bool
+    public static function requireRole(int|array $roles): void
     {
-        return isset($_SESSION['user']) && ($_SESSION['user']['role_id'] == 1);
-    }
-
-    public static function isCustomer(): bool
-    {
-        return isset($_SESSION['user']) && ($_SESSION['user']['role_id'] == 3);
-    }
-
-
-    public static function logout(): void
-    {
-        Session::remove('user');
-        Session::flash('success', 'You have been logged out.', 'success');
-        header('Location: /');
-        exit;
+        Session::start();
+        if (!self::check()) {
+            Session::flash('error', 'Please login to continue', 'danger');
+            header('Location: /login');
+            exit;
+        }
+        $user = self::user();
+        $allowed = is_array($roles) ? $roles : [$roles];
+        if (!in_array((int)($user['role_id'] ?? 0), $allowed, true)) {
+            if (($user['role_id'] ?? 0) == 1) {
+                header('Location: /admin/dashboard');
+                exit;
+            }
+            http_response_code(403);
+            echo "<h1>403 Forbidden</h1><p>You don't have access to this page.</p>";
+            exit;
+        }
     }
 }

@@ -28,6 +28,14 @@ abstract class Model
         return $result ?: null;
     }
 
+    public function count(): int
+    {
+        $sql = "SELECT COUNT(*) FROM {$this->table}";
+        $stmt = $this->db->query($sql);
+        return (int) $stmt->fetchColumn();
+    }
+
+
     public function create(array $data): int
     {
         $columns = array_keys($data);
@@ -51,4 +59,15 @@ abstract class Model
         $stmt = $this->db->prepare("DELETE FROM {$this->table} WHERE {$this->primaryKey} = :id");
         return $stmt->execute(['id' => $id]);
     }
+
+    public function getDb(): \PDO
+    {
+        return $this->db;
+    }
+
+    public function getTable(): string
+    {
+        return $this->table;
+    }
+
 }

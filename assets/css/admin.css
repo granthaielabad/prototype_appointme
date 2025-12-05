@@ -1,0 +1,414 @@
+/* ============================================================
+   ADMIN UI — CLEAN + CONSISTENT + MATCHES PROVIDED MOCKUPS
+   (Everything in your screenshots: Services, Inquiry, Reports,
+    Dashboard, Modals, Filters, Sidebar)
+   Theme colors:
+     Purple primary: #AF62FF
+     Purple light:   #CD9FFE
+     Light background: #FFF9FE
+   ============================================================ */
+
+/* ------------- GLOBAL RESETS ------------- */
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+    font-family: "Inter", sans-serif;
+}
+
+html,
+body {
+    margin: 0;
+    padding: 0;
+    background: #FFF9FE;
+    color: #2a2a2a;
+}
+
+/* Wrapper */
+.admin-wrapper {
+    display: flex;
+    min-height: 100vh;
+}
+
+/* ------------- SIDEBAR ------------- */
+.sidebar {
+    width: 240px;
+    background: #ffffff;
+    border-right: 1px solid #E5E5E5;
+    padding: 24px 16px;
+    position: fixed;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    overflow-y: auto;
+}
+
+.sidebar .logo img {
+    width: 180px;
+    display: block;
+    margin: 0 auto 28px auto;
+}
+
+/* NAV ITEMS */
+.sidebar ul {
+    padding: 0;
+    list-style: none;
+}
+
+.sidebar ul li {
+    margin-bottom: 6px;
+}
+
+.nav-link {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 12px;
+    border-radius: 10px;
+    text-decoration: none;
+    font-weight: 500;
+    color: #333;
+    transition: 0.2s;
+}
+
+.nav-link img {
+    width: 22px;
+}
+
+/* Hover */
+.nav-link:hover {
+    background: #F4ECFF;
+    color: #AF62FF !important;
+}
+
+/* Active */
+.active-nav {
+    background: #F4ECFF;
+    color: #AF62FF !important;
+    font-weight: 600;
+}
+
+/* ------------- MAIN AREA ------------- */
+.admin-main {
+    margin-left: 240px;
+    width: calc(100% - 240px);
+    padding-bottom: 50px;
+}
+
+/* ------------- HEADER AREA ------------- */
+.admin-header {
+    background: #ffffff;
+    border-bottom: 1px solid #e5e5e5;
+    padding: 18px 28px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.admin-header h2 {
+    margin: 0;
+    font-weight: 700;
+    font-size: 20px;
+}
+
+/* Profile / Notification icons */
+.header-right img {
+    cursor: pointer;
+    transition: .2s ease;
+}
+
+.header-right img:hover {
+    opacity: .7;
+}
+
+/* ------------- PROFILE DROPDOWN ------------- */
+.profile-wrapper {
+    position: relative;
+}
+
+.profile-dropdown {
+    display: none;
+    position: absolute;
+    top: 38px;
+    right: 0;
+    width: 160px;
+    background: #ffffff;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    padding: 6px 0;
+    z-index: 200;
+}
+
+.profile-dropdown .dropdown-item {
+    display: block;
+    padding: 10px 16px;
+    color: #333;
+    text-decoration: none;
+    transition: .15s;
+}
+
+.profile-dropdown .dropdown-item:hover {
+    background: #F4ECFF;
+    color: #AF62FF;
+}
+
+/* ------------- PAGE CONTENT ------------- */
+.admin-page {
+    padding: 28px;
+}
+
+/* ------------- CARDS ------------- */
+.stats-card {
+    background: #ffffff;
+    border-radius: 14px;
+    padding: 20px;
+    border: 1px solid #ececec;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, .05);
+}
+
+/* Tables */
+.weekly-table td {
+    padding: 10px 0 !important;
+}
+
+/* Top service list */
+.top-service-list .list-group-item {
+    background: transparent;
+    border: none;
+    padding: 10px 0;
+    font-size: 14px;
+}
+
+/* ------------- FILTER BUTTONS ------------- */
+.filter-btn {
+    background: #fff;
+    border: 1px solid #ddd;
+    padding: 6px 16px;
+    border-radius: 8px;
+    font-size: 14px;
+}
+
+.filter-btn:hover {
+    border-color: #AF62FF;
+}
+
+.download-btn {
+    background: #37D449 !important;
+    color: white !important;
+    border-radius: 8px;
+    padding: 6px 16px;
+    border: none;
+    font-size: 14px;
+}
+
+.download-btn:hover {
+    background: #28b83a !important;
+}
+
+/* ------------- CONTENT CARDS ------------- */
+.content-card {
+    background: #ffffff;
+    border-radius: 14px;
+    border: 1px solid #e5e5e5;
+}
+
+/* ------------- MODALS (UNIVERSAL) ------------- */
+.custom-modal {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, .35);
+    align-items: center;
+    justify-content: center;
+    z-index: 3000;
+}
+
+.custom-modal-content {
+    position: relative;
+    background: white;
+    border-radius: 16px;
+    padding: 26px;
+    width: 420px;
+    max-width: 92%;
+    animation: fadeIn .25s ease;
+}
+
+.small-modal {
+    width: 350px !important;
+}
+
+/* Modal header */
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.close-modal {
+    background: none;
+    border: none;
+    font-size: 24px;
+    cursor: pointer;
+}
+
+/* Modal inputs */
+.modal-label {
+    font-weight: 600;
+    margin-top: 10px;
+}
+
+.modal-input,
+.custom-modal textarea {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+}
+
+.modal-input:focus {
+    border-color: #AF62FF;
+    outline: none;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(12px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* ------------- UTILITIES ------------- */
+.text-purple {
+    color: #AF62FF;
+}
+
+.text-purple:hover {
+    color: #CD9FFE;
+}
+
+/* Responsive sidebar collapse */
+@media (max-width: 900px) {
+    .sidebar {
+        position: relative;
+        width: 100%;
+        height: auto;
+    }
+
+    .admin-main {
+        margin-left: 0;
+        width: 100%;
+    }
+}
+
+
+/* ============================
+   SERVICES PAGE STYLING
+============================ */
+
+/* Add Service Button */
+.add-service-btn {
+    background: #AF62FF;
+    border: none;
+    padding: 8px 16px;
+    font-weight: 500;
+    border-radius: 8px;
+    color: white;
+    transition: 0.2s ease;
+}
+
+.add-service-btn:hover {
+    background: #CD9FFE;
+    color: #fff;
+}
+
+/* Service Cards */
+.service-card {
+    background: #ffffff;
+    border-radius: 14px;
+    border: 1px solid #e5e5e5;
+    padding: 18px;
+    transition: 0.2s ease;
+}
+
+.service-card:hover {
+    box-shadow: 0px 4px 14px rgba(0, 0, 0, 0.08);
+}
+
+.service-card h5 {
+    font-weight: 600;
+    margin-bottom: 6px;
+}
+
+.service-price {
+    color: #AF62FF;
+    font-weight: 700;
+    font-size: 20px;
+}
+
+/* Category Badge */
+.service-card .badge {
+    font-size: 11px;
+    padding: 3px 8px;
+    border-radius: 6px;
+    background: #F4ECFF;
+    color: #AF62FF;
+}
+
+/* ============================
+   ARCHIVE PAGE STYLING
+============================ */
+
+.archive-items-container {
+    display: flex;
+    flex-direction: column;
+}
+
+.archive-item-card {
+    background: #ffffff;
+    border: 1px solid #e5e5e5;
+    border-radius: 12px;
+    transition: all 0.2s ease;
+}
+
+.archive-item-card:hover {
+    box-shadow: 0px 4px 12px rgba(175, 98, 255, 0.1);
+    border-color: #AF62FF;
+}
+
+.archive-item-card h6 {
+    color: #2a2a2a;
+    font-size: 16px;
+    font-weight: 600;
+    margin: 0;
+}
+
+.archive-item-card .badge {
+    font-size: 16px;
+    padding: 4px 10px;
+    border-radius: 6px;
+    background: #F4ECFF;
+    color: #AF62FF;
+    font-weight: 500;
+    white-space: nowrap;
+}
+
+.archive-item-card .text-purple {
+    color: #AF62FF;
+    text-decoration: none;
+    transition: 0.2s ease;
+    cursor: pointer;
+}
+
+.archive-item-card .text-purple:hover {
+    color: #CD9FFE;
+    font-size: 1.1em;
+}
+
+.archive-item-card .gap-2 {
+    gap: 8px;
+}

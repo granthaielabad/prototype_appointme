@@ -1,0 +1,196 @@
+<?php
+namespace App\Controllers\Admin;
+
+use App\Models\Inquiry;
+use App\Core\Session;
+
+/**
+ * Admin Inquiry Management Controller
+ */
+class InquiryController extends AdminController
+{
+    protected Inquiry $inquiryModel;
+
+    public function __construct()
+    {
+        parent::__construct();
+        $this->inquiryModel = new Inquiry();
+    }
+
+    /**
+     * Display all inquiries in descending order by creation date.
+     */
+    public function index(): void
+    {
+        try {
+            $filter = $_GET['filter'] ?? 'all';
+            
+            if ($filter === 'read') {
+                $inquiries = $this->inquiryModel->getByReadStatus('read');
+            } elseif ($filter === 'unread') {
+                $inquiries = $this->inquiryModel->getByReadStatus('unread');
+            } else {
+                $inquiries = $this->inquiryModel->getAll();
+            }
+            
+            $this->render('inquiries/index', [
+                'inquiries' => $inquiries,
+                'currentFilter' => $filter
+            ]);
+        } catch (\Throwable $e) {
+            Session::flash('error', 'Failed to load inquiries: ' . $e->getMessage(), 'danger');
+            $this->render('inquiries/index', ['inquiries' => [], 'currentFilter' => 'all']);
+        }
+    }
+
+    /**
+     * Display a single inquiry.
+     */
+    public function show(): void
+    {
+        $id = isset($_GET['id']) ? (int) $_GET['id'] : 0;
+
+        if ($id <= 0) {
+            Session::flash('error', 'Invalid inquiry ID.', 'danger');
+            header('Location: /admin/inquiries');
+            exit;
+        }
+
+        $inquiry = $this->inquiryModel->find($id);
+        if (!$inquiry) {
+            Session::flash('error', 'Inquiry not found.', 'danger');
+            header('Location: /admin/inquiries');
+            exit;
+        }
+
+        // Mark as read
+        $this->inquiryModel->markAsRead($id);
+
+        $this->render('inquiries/show', ['inquiry' => $inquiry]);
+    }
+
+    /**
+     * Mark inquiry as read (AJAX endpoint)
+     */
+    public function markAsRead(): void
+    {
+        // Set JSON headers early
+        header('Content-Type: application/json; charset=utf-8');
+        
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            http_response_code(405);
+            echo json_encode(['error' => 'Method not allowed']);
+            exit;
+        }
+
+        // Check authentication
+        $user = \App\Core\Auth::user();
+        if (!$user || (int)($user['role_id'] ?? 0) !== 1) {
+            http_response_code(401);
+            echo json_encode(['error' => 'Unauthorized']);
+            exit;
+        }
+
+        $id = isset($_POST['id']) ? (int) $_POST['id'] : 0;
+        if ($id <= 0) {
+            http_response_code(400);
+            echo json_encode(['error' => 'Invalid inquiry ID']);
+            exit;
+        }
+
+        try {
+            $success = $this->inquiryModel->markAsRead($id);
+            
+            if ($success) {
+                echo json_encode(['success' => true, 'message' => 'Inquiry marked as read']);
+            } else {
+                http_response_code(500);
+                echo json_encode(['error' => 'Failed to mark as read']);
+            }
+        } catch (\Throwable $e) {
+            http_response_code(500);
+            echo json_encode([
+                'error' => 'Error marking as read',
+                'message' => getenv('APP_DEBUG') ? $e->getMessage() : 'Server error'
+            ]);
+        }
+        exit;
+    }
+
+    /**
+     * Fetch inquiries for real-time updates (AJAX endpoint)
+     */
+    public function fetch(): void
+    {
+        // Set JSON headers early
+        header('Content-Type: application/json; charset=utf-8');
+        header('Cache-Control: no-cache, no-store, must-revalidate');
+        header('Pragma: no-cache');
+        header('Expires: 0');
+
+        try {
+            // Check authentication for API endpoint
+            $user = \App\Core\Auth::user();
+            if (!$user || (int)($user['role_id'] ?? 0) !== 1) {
+                http_response_code(401);
+                echo json_encode([
+                    'success' => false,
+                    'error' => 'Unauthorized'
+                ]);
+                exit;
+            }
+
+            $filter = $_GET['filter'] ?? 'all';
+            
+            if ($filter === 'read') {
+                $inquiries = $this->inquiryModel->getByReadStatus('read');
+            } elseif ($filter === 'unread') {
+                $inquiries = $this->inquiryModel->getByReadStatus('unread');
+            } else {
+                $inquiries = $this->inquiryModel->getAll();
+            }
+            
+            $response = [
+                'success' => true,
+                'inquiries' => $inquiries,
+                'count' => count($inquiries),
+                'timestamp' => date('Y-m-d H:i:s')
+            ];
+
+            echo json_encode($response, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+        } catch (\Throwable $e) {
+            http_response_code(500);
+            echo json_encode([
+                'success' => false,
+                'error' => 'Failed to fetch inquiries',
+                'message' => getenv('APP_DEBUG') ? $e->getMessage() : 'Server error'
+            ]);
+        }
+        exit;
+    }
+
+    /**
+     * Archive an inquiry
+     */
+    public function archive(): void
+    {
+        $id = $_GET['id'] ?? null;
+        if (!$id) {
+            Session::flash('error', 'Invalid archive request.', 'danger');
+            header('Location: /admin/inquiries');
+            return;
+        }
+
+        $adminId = \App\Core\Auth::user()['user_id'] ?? null;
+        $success = (new Inquiry())->archive($id, $adminId);
+        
+        if ($success) {
+            Session::flash('success', 'Inquiry archived successfully.', 'success');
+        } else {
+            Session::flash('error', 'Failed to archive inquiry.', 'danger');
+        }
+        
+        header('Location: /admin/inquiries');
+        exit;
+    }
+}

@@ -13,6 +13,7 @@ composer.lock
 
 # === Node / Frontend Dependencies (if used) ===
 /node_modules/
+node_modules
 package-lock.json
 yarn.lock
 
@@ -44,6 +45,7 @@ yarn.lock
 *.iml
 *.sublime-workspace
 *.sublime-project
+.prettierrc
 
 # === Build / Generated Files ===
 /dist/
