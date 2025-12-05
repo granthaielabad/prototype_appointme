@@ -12,11 +12,16 @@ document.addEventListener("DOMContentLoaded", () => {
             document.getElementById("inq_name").textContent = data.full_name || "Unknown";
             document.getElementById("inq_phone").textContent = data.phone || "N/A";
             document.getElementById("inq_email").textContent = data.email || "N/A";
-            document.getElementById("inq_date").textContent = new Date(data.created_at).toLocaleDateString('en-US', {
-                year: 'numeric',
-                month: 'long',
-                day: 'numeric'
-            });
+            
+            // Format date as "Full Month Name, Day, Year"
+            const formatFullDate = (dateStr) => {
+                if (!dateStr) return 'N/A';
+                const date = new Date(dateStr);
+                if (isNaN(date.getTime())) return dateStr;
+                return date.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+            };
+            
+            document.getElementById("inq_date").textContent = formatFullDate(data.created_at);
             document.getElementById("inq_message").textContent = data.message || "";
 
             modal.style.display = "flex";

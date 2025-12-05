@@ -99,35 +99,29 @@ class Archive extends Model
     }
 
     /**
-     * Soft delete (mark row as deleted).
+     * Soft delete (mark archive as deleted by setting is_archived to 0).
      * @param int|string $id The primary key of the archive record to soft delete.
-     * @param int|null $deletedBy The ID of the user performing the deletion.
+     * @param int|null $deletedBy The ID of the user performing the deletion (not used since no column for it).
      * @return bool
      */
     public function softDelete(int|string $id, ?int $deletedBy = null): bool
     {
         try {
+            // tbl_archives only has is_archived column, set it to 0 to "soft delete"
             $sql = "UPDATE {$this->table}
-                    SET is_deleted = 1,
-                        deleted_at = NOW(),
-                        deleted_by = :deleted_by
+                    SET is_archived = 0
                     WHERE {$this->primaryKey} = :id";
 
             $stmt = $this->getDb()->prepare($sql);
-            $success = $stmt->execute([
-                'id' => $id,
-                'deleted_by' => $deletedBy
-            ]);
+            $success = $stmt->execute(['id' => $id]);
 
             if (!$success) {
-                // Log detailed error info if execute failed
                 error_log('DB Error: Soft delete execution failed for ID ' . $id . ': ' . json_encode($stmt->errorInfo()));
                 return false;
             }
 
             $affectedRows = $stmt->rowCount();
             if ($affectedRows === 0) {
-                // Log if no rows were found/updated (e.g., wrong ID)
                 error_log('Warning: Soft delete executed but 0 rows affected for ID ' . $id);
             }
 
@@ -139,7 +133,7 @@ class Archive extends Model
     }
 
     /**
-     * Restore soft-deleted row (set is_deleted = 0).
+     * Restore soft-deleted archive row (set is_archived = 1).
      * @param int|string $id The primary key of the archive record to restore.
      * @return bool
      */
@@ -147,23 +141,19 @@ class Archive extends Model
     {
         try {
             $sql = "UPDATE {$this->table}
-                    SET is_deleted = 0,
-                        deleted_at = NULL,
-                        deleted_by = NULL
+                    SET is_archived = 1
                     WHERE {$this->primaryKey} = :id";
 
             $stmt = $this->getDb()->prepare($sql);
             $success = $stmt->execute(['id' => $id]);
 
             if (!$success) {
-                // Log detailed error info if execute failed
                 error_log('DB Error: Restore execution failed for ID ' . $id . ': ' . json_encode($stmt->errorInfo()));
                 return false;
             }
 
             $affectedRows = $stmt->rowCount();
             if ($affectedRows === 0) {
-                // Log if no rows were found/updated
                 error_log('Warning: Restore executed but 0 rows affected for ID ' . $id);
             }
 
@@ -186,13 +176,13 @@ class Archive extends Model
     }
 
     /**
-     * Get all active (non-deleted) rows.
+     * Get all active (non-deleted) archives.
      * @return array
      */
     public function getAllActive(): array
     {
         $sql = "SELECT * FROM {$this->table}
-                WHERE is_deleted = 0
+                WHERE is_archived = 1
                 ORDER BY {$this->primaryKey} DESC";
 
         return $this->getDb()
@@ -201,14 +191,14 @@ class Archive extends Model
     }
 
     /**
-     * Get all soft-deleted rows.
+     * Get all soft-deleted (inactive) archives.
      * @return array
      */
     public function getAllDeleted(): array
     {
         $sql = "SELECT * FROM {$this->table}
-                WHERE is_deleted = 1
-                ORDER BY deleted_at DESC";
+                WHERE is_archived = 0
+                ORDER BY archived_at DESC";
 
         return $this->getDb()
             ->query($sql)

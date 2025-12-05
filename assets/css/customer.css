@@ -8,3 +8,55 @@
     font-family: "Italiana", serif !important;
     font-weight: 400;
 }
+
+
+
+/* CSS ooking History */
+
+.appointments-container {
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 15px;
+}
+
+.appointments-card {
+    background: #ffffff;
+    padding: 25px;
+    border-radius: 14px;
+    box-shadow: 0px 2px 15px rgba(0,0,0,0.06);
+}
+
+.table-responsive {
+    overflow-x: auto;
+}
+
+.appointments-table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 900px; 
+}
+
+.appointments-table th,
+.appointments-table td {
+    padding: 12px 14px;
+    border-bottom: 1px solid #eee;
+    white-space: nowrap;
+    text-align: left;
+}
+
+.no-appointments {
+    text-align: center;
+    padding: 20px 0;
+    font-style: italic;
+    color: #777;
+}
+
+.action-col a {
+    margin-right: 8px;
+}
+
+
+.cancel-btn {
+    color: #ff4444; 
+}

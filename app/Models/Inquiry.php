@@ -84,9 +84,9 @@ class Inquiry extends Model
         ";
         
         if ($readStatus === 'read') {
-            $sql .= " WHERE is_read = 1";
+            $sql .= " AND is_read = 1";
         } elseif ($readStatus === 'unread') {
-            $sql .= " WHERE is_read = 0";
+            $sql .= " AND is_read = 0";
         }
         
         $sql .= " ORDER BY is_read ASC, created_at DESC";
@@ -237,11 +237,53 @@ class Inquiry extends Model
      */
     public function restore(int|string $id): bool
     {
-        $sql = "UPDATE {$this->table}
-                SET is_deleted = 0, deleted_at = NULL, deleted_by = NULL
-                WHERE {$this->primaryKey} = :id";
-        $stmt = $this->getDb()->prepare($sql);
-        return $stmt->execute(['id' => $id]);
+        try {
+            error_log("Inquiry::restore start - id={$id}");
+            
+            // 1) Restore in main table
+            $sql = "UPDATE {$this->table}
+                    SET is_deleted = 0, deleted_at = NULL, deleted_by = NULL
+                    WHERE {$this->primaryKey} = :id";
+            $stmt = $this->getDb()->prepare($sql);
+            $ok = $stmt->execute(['id' => $id]);
+            
+            if (!$ok) {
+                error_log('Inquiry::restore - main table restore failed: ' . json_encode($stmt->errorInfo()));
+                return false;
+            }
+            
+            // 2) Mark ALL archive snapshots for this inquiry as inactive (is_archived = 0)
+            // Use a simpler approach compatible with x10hosting: find archives then update by ID
+            $findSql = "SELECT archive_id FROM tbl_archives 
+                        WHERE item_type = 'inquiry' AND is_archived = 1";
+            $findStmt = $this->getDb()->query($findSql);
+            $archives = $findStmt->fetchAll(\PDO::FETCH_ASSOC);
+            
+            foreach ($archives as $archive) {
+                // Decode the JSON to check if it matches this inquiry_id
+                $archiveSql = "SELECT item_data FROM tbl_archives WHERE archive_id = :archive_id";
+                $archiveStmt = $this->getDb()->prepare($archiveSql);
+                $archiveStmt->execute(['archive_id' => $archive['archive_id']]);
+                $archiveRow = $archiveStmt->fetch(\PDO::FETCH_ASSOC);
+                
+                if ($archiveRow && !empty($archiveRow['item_data'])) {
+                    $itemData = json_decode($archiveRow['item_data'], true);
+                    // If this archive is for the inquiry being restored, deactivate it
+                    if (isset($itemData['inquiry_id']) && $itemData['inquiry_id'] == $id) {
+                        $updateSql = "UPDATE tbl_archives SET is_archived = 0 WHERE archive_id = :archive_id";
+                        $updateStmt = $this->getDb()->prepare($updateSql);
+                        $updateStmt->execute(['archive_id' => $archive['archive_id']]);
+                        error_log("Inquiry::restore - deactivated archive " . $archive['archive_id']);
+                    }
+                }
+            }
+            
+            error_log("Inquiry::restore - completed id={$id}");
+            return true;
+        } catch (\Throwable $e) {
+            error_log('Error restoring inquiry: ' . $e->getMessage());
+            return false;
+        }
     }
 
     /**

@@ -6,6 +6,17 @@ document.addEventListener("DOMContentLoaded", () => {
     const closeBtns = document.querySelectorAll(".close-modal");
 
     /* -------------------------------------------
+       HELPER: Format Full Date
+    ------------------------------------------- */
+    const formatFullDate = (dateStr) => {
+        if (!dateStr) return 'N/A';
+        // Handle various date formats (ISO, timestamps, etc.)
+        const date = new Date(dateStr);
+        if (isNaN(date.getTime())) return dateStr; // fallback to original if parsing fails
+        return date.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+    };
+
+    /* -------------------------------------------
        HELPER: Close All Modals
     ------------------------------------------- */
     const closeAllModals = () => {
@@ -25,28 +36,32 @@ document.addEventListener("DOMContentLoaded", () => {
             const data = JSON.parse(card.dataset.archive);
             const details = typeof data.details === 'string' ? JSON.parse(data.details) : data.details;
             const itemType = data.item_type.toLowerCase();
-            const archivedDate = new Date(data.archived_at).toLocaleDateString('en-US', {
-                year: 'numeric',
-                month: 'long',
-                day: 'numeric'
-            });
 
             if (itemType === 'service') {
-                // Populate Service Modal
+                // Defensive retrieval of service fields since archived JSON shape can vary.
                 const getName = () => {
-                    return details.service_name || details.name || data.item_name || 'N/A';
+                    if (details && typeof details === 'object') {
+                        return details.service_name || details.name || details.item_name || data.item_name || 'N/A';
+                    }
+                    return data.item_name || 'N/A';
                 };
 
                 const getDescription = () => {
-                    return details.description || details.desc || 'No description available';
+                    if (details && typeof details === 'object') {
+                        return details.description || details.desc || details.details || 'No description available';
+                    }
+                    return 'No description available';
                 };
 
                 const getPrice = () => {
-                    // Try multiple locations for price
-                    if (details.price !== undefined && details.price !== null && details.price !== '') return details.price;
-                    if (details.amount !== undefined && details.amount !== null) return details.amount;
-                    if (details.cost !== undefined && details.cost !== null) return details.cost;
-                    if (data.price !== undefined && data.price !== null) return data.price;
+                    let priceVal = null;
+                    if (details && typeof details === 'object') {
+                        if (details.price !== undefined && details.price !== null && details.price !== '') return details.price;
+                        if (details.service && details.service.price !== undefined) return details.service.price;
+                        if (details.amount !== undefined) return details.amount;
+                        if (details.cost !== undefined) return details.cost;
+                    }
+                    if (data.price !== undefined) return data.price;
                     return 0;
                 };
 
@@ -61,9 +76,12 @@ document.addEventListener("DOMContentLoaded", () => {
                 
                 // Category badge
                 const categoryBadge = document.getElementById("archive_service_category_badge");
-                categoryBadge.textContent = details.category || "Service";
+                const categoryVal = (details && details.category) || (details?.service?.category) || "Service";
+                categoryBadge.textContent = categoryVal;
 
-                document.getElementById("archive_service_archived_date").textContent = archivedDate;
+                // Format archived date as "Full Month Name, Day, Year"
+                const archivedDateFormatted = formatFullDate(data.archived_at || details.archived_at);
+                document.getElementById("archive_service_archived_date").textContent = archivedDateFormatted;
 
                 closeAllModals();
                 serviceModal.style.display = "flex";
@@ -84,12 +102,6 @@ document.addEventListener("DOMContentLoaded", () => {
                 statusBadge.textContent = `Status: ${status.charAt(0).toUpperCase() + status.slice(1)}`;
                 statusBadge.style.backgroundColor = statusColors[status] || '#6c757d';
 
-                // Format dates to "Full Month Name, Day, Year" format
-                const formatFullDate = (dateStr) => {
-                    const date = new Date(dateStr + 'T00:00:00');
-                    return date.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
-                };
-
                 // Format times
                 const formatTime = (timeStr) => {
                     if (!timeStr) return '';
@@ -100,10 +112,10 @@ document.addEventListener("DOMContentLoaded", () => {
                     }
                 };
 
-                const archivedDate = new Date(details.archived_at || new Date()).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+                const archivedDateFormatted = formatFullDate(details.archived_at || new Date());
                 
                 // "Booked on: [Archived Date]" and "Booked Date: [Appointment Date Time]"
-                document.getElementById("archive_appointment_booked_on").textContent = `Booked on: ${archivedDate}`;
+                document.getElementById("archive_appointment_booked_on").textContent = `Booked on: ${archivedDateFormatted}`;
                 
                 const appointmentDateTime = `Booked Date: ${formatFullDate(details.appointment_date || '')}${
                     details.appointment_time ? ' at ' + formatTime(details.appointment_time) : ''
@@ -130,7 +142,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 }
 
                 document.getElementById("archive_appointment_note").textContent = details.note || 'No notes provided';
-                document.getElementById("archive_appointment_archived_date").textContent = archivedDate;
+                document.getElementById("archive_appointment_archived_date").textContent = archivedDateFormatted;
 
                 closeAllModals();
                 appointmentModal.style.display = "flex";
@@ -140,13 +152,13 @@ document.addEventListener("DOMContentLoaded", () => {
                 document.getElementById("archive_inq_name").textContent = details.full_name || "Unknown";
                 document.getElementById("archive_inq_phone").textContent = details.phone || "N/A";
                 document.getElementById("archive_inq_email").textContent = details.email || "N/A";
-                document.getElementById("archive_inq_date").textContent = new Date(details.created_at || details.inquiry_date).toLocaleDateString('en-US', {
-                    year: 'numeric',
-                    month: 'long',
-                    day: 'numeric'
-                });
-                document.getElementById("archive_inq_message").textContent = details.message || "";
-                document.getElementById("archive_inq_archived_date").textContent = archivedDate;
+                
+                // Format inquiry date as "Full Month Name, Day, Year"
+                const inquiryDateFormatted = formatFullDate(details.created_at || details.inquiry_date);
+                document.getElementById("archive_inq_date").textContent = inquiryDateFormatted;
+                
+                const archivedDateFormatted = formatFullDate(details.archived_at);
+                document.getElementById("archive_inq_archived_date").textContent = archivedDateFormatted;
 
                 closeAllModals();
                 inquiryModal.style.display = "flex";

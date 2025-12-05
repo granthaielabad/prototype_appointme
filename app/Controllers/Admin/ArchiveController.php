@@ -12,43 +12,93 @@ class ArchiveController extends AdminController
     public function index(): void
     {
         $filter = $_GET['filter'] ?? 'all';
-
         $items = [];
 
-        $serviceModel = new Service();
-
-        /*
-        |--------------------------------------------------------------------------
-        | Fetch from tbl_archives directly (x10hosting compatible)
-        |--------------------------------------------------------------------------
-        */
-        $archiveQuery = "SELECT * FROM tbl_archives WHERE is_archived = 1";
+        // Simple approach: read snapshots directly from tbl_archives and decode
+        // This is more compatible across hosting environments than complex JSON subqueries
+        // Query all active archives (is_archived = 1)
+        $sql = "SELECT * FROM tbl_archives 
+                WHERE is_archived = 1
+                ORDER BY archived_at DESC";
         
         if ($filter !== 'all') {
-            $filterType = $filter === 'service' ? 'service' : ($filter === 'appointment' ? 'appointment' : 'inquiry');
-            $archiveQuery .= " AND item_type = '" . $filterType . "'";
+            $sql = "SELECT * FROM tbl_archives 
+                    WHERE item_type = :item_type 
+                    AND is_archived = 1
+                    ORDER BY archived_at DESC";
         }
-        
-        $archiveQuery .= " ORDER BY archived_at DESC";
-        
-        $archiveRows = $serviceModel->getDb()->query($archiveQuery)->fetchAll(PDO::FETCH_ASSOC);
-        
-        // Process each archive record
-        foreach ($archiveRows as $archive) {
-            $decoded = json_decode($archive['item_data'], true);
-            $details = $decoded ?: [];
+
+        try {
+            $db = (new Service())->getDb();
             
-            // Get additional details from the details JSON column
-            $detailsObj = json_decode($archive['details'], true);
-            $itemId = $detailsObj['item_id'] ?? null;
-            
-            $items[] = [
-                'item_type' => $archive['item_type'],
-                'item_id' => $itemId,
-                'item_name' => $archive['item_name'],
-                'archived_at' => $archive['archived_at'],
-                'details' => $details
-            ];
+            if ($filter === 'all') {
+                $stmt = $db->query($sql);
+                $rows = $stmt ? $stmt->fetchAll(PDO::FETCH_ASSOC) : [];
+            } else {
+                $stmt = $db->prepare($sql);
+                $success = $stmt->execute(['item_type' => $filter]);
+                $rows = $success ? $stmt->fetchAll(PDO::FETCH_ASSOC) : [];
+            }
+
+            // Log for debugging
+            error_log("ArchiveController::index - filter={$filter}, found " . count($rows) . " rows");
+
+            foreach ($rows as $archive) {
+                // Decode the snapshot JSON
+                $itemData = !empty($archive['item_data']) 
+                    ? json_decode($archive['item_data'], true) 
+                    : [];
+
+                // Extract the item_id from snapshot (service_id, appointment_id, or inquiry_id)
+                $itemId = null;
+                $itemType = $archive['item_type'] ?? 'unknown';
+                if ($itemType === 'service' && isset($itemData['service_id'])) {
+                    $itemId = $itemData['service_id'];
+                } elseif ($itemType === 'appointment' && isset($itemData['appointment_id'])) {
+                    $itemId = $itemData['appointment_id'];
+                } elseif ($itemType === 'inquiry' && isset($itemData['inquiry_id'])) {
+                    $itemId = $itemData['inquiry_id'];
+                }
+
+                // Build the item for display
+                $item = [
+                    'archive_id' => $archive['archive_id'] ?? null,
+                    'item_type' => $itemType,
+                    'item_id' => $itemId,
+                    'item_name' => $archive['item_name'] ?? 'Unknown',
+                    'archived_at' => $archive['archived_at'] ?? date('Y-m-d H:i:s'),
+                    'archived_by' => $archive['archived_by'] ?? null,
+                    'details' => $itemData ?: []
+                ];
+
+                // Normalize details for the modal
+                if ($item['item_type'] === 'service') {
+                    $item['details']['service_name'] = $item['details']['service_name'] ?? $item['details']['name'] ?? $item['item_name'] ?? 'Unknown Service';
+                    $item['details']['price'] = $item['details']['price'] ?? 0;
+                    $item['details']['description'] = $item['details']['description'] ?? $item['details']['desc'] ?? '';
+                    $item['details']['category'] = $item['details']['category'] ?? 'Service';
+                    // Include archived_at in details for modal
+                    $item['details']['archived_at'] = $item['archived_at'];
+                } elseif ($item['item_type'] === 'appointment') {
+                    $item['details']['appointment_id'] = $item['details']['appointment_id'] ?? 'N/A';
+                    $item['details']['appointment_date'] = $item['details']['appointment_date'] ?? null;
+                    $item['details']['appointment_time'] = $item['details']['appointment_time'] ?? null;
+                    $item['details']['status'] = $item['details']['status'] ?? 'pending';
+                    $item['details']['archived_at'] = $item['archived_at'];
+                } elseif ($item['item_type'] === 'inquiry') {
+                    $item['details']['full_name'] = $item['details']['full_name'] ?? $item['item_name'] ?? 'Unknown';
+                    $item['details']['phone'] = $item['details']['phone'] ?? 'N/A';
+                    $item['details']['email'] = $item['details']['email'] ?? 'N/A';
+                    $item['details']['message'] = $item['details']['message'] ?? '';
+                    $item['details']['created_at'] = $item['details']['created_at'] ?? $item['archived_at'];
+                    $item['details']['archived_at'] = $item['archived_at'];
+                }
+
+                $items[] = $item;
+            }
+
+        } catch (\Throwable $e) {
+            error_log('ArchiveController::index error: ' . $e->getMessage());
         }
 
         $this->render('archives/index', [
