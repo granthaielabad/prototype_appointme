@@ -60,3 +60,18 @@
 .cancel-btn {
     color: #ff4444; 
 }
+
+/* invoices css */
+
+  .invoice-card { border-radius: 14px; border: 1px solid #cfcfcf; box-shadow: 0 10px 22px rgba(0,0,0,0.08); overflow: hidden; }
+  .invoice-header { border-bottom: 1px solid #cfcfcf; padding: 14px 18px; }
+  .invoice-logo img { height: 50px; object-fit: contain; }
+  .invoice-title { font-size: 22px; font-weight: 800; margin: 0; }
+  .invoice-date { color: #6c6c6c; font-size: 13px; margin-top: 4px; }
+  .invoice-meta { font-size: 14px; }
+  .invoice-meta .label { font-weight: 600; color: #444; }
+  .invoice-meta .value { color: #2f2f2f; }
+  .invoice-table thead th { border-top: 1px solid #9c9c9c; border-bottom: 1px solid #9c9c9c; }
+  .invoice-table tbody td { border-bottom: 1px solid #e5e5e5; }
+  .invoice-table tfoot th { border-top: 1px solid #9c9c9c; }
+  .invoice-btn { border-radius: 12px; font-weight: 600; }

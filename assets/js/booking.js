@@ -21,7 +21,7 @@ document.addEventListener("DOMContentLoaded", () => {
         TIME_SLOTS.forEach(t => {
             const opt = document.createElement("option");
             opt.value = t;
-            opt.textContent = taken.includes(t) ? `${t} sarado` : t;
+            opt.textContent = taken.includes(t) ? `${t} Booked` : t;
             if (taken.includes(t)) opt.disabled = true;
             apptTime.appendChild(opt);
         });
