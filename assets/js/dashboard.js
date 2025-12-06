@@ -239,6 +239,7 @@ if (nextMonthBtn) {
 if (resetDateFilter) {
     resetDateFilter.onclick = (e) => {
         e.preventDefault();
+        e.stopPropagation(); // Prevent dropdown from closing
         selectedStartDate = null;
         selectedEndDate = null;
         dateFilterStart.value = '';
@@ -247,10 +248,12 @@ if (resetDateFilter) {
         endDateDisplay.textContent = '-';
         currentMonth = new Date();
         renderCalendar();
+
+        // Update URL without page reload using history API
         const url = new URL(window.location);
         url.searchParams.delete('start');
         url.searchParams.delete('end');
-        window.location.href = url.toString();
+        window.history.replaceState(null, '', url.toString());
     };
 }
 
