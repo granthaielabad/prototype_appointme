@@ -19,20 +19,18 @@
 </head>
 
 <body class="customer-layout-body">
+<?php include __DIR__ . "/customerprofile_sidebar.php"; ?>
 
     <div class="customer-wrapper d-flex">
-        <nav class="customer-sidebar d-none d-md-block">
-            <div class="p-3">
-                <a href="/"><img src="/assets/img/logo.svg" alt="logo" style="max-width:160px;"></a>
-            </div>
-        </nav>
 
         <main class="flex-grow-1 min-vh-100">
             <header class="d-flex justify-content-between align-items-center p-3 border-bottom bg-white">
                 <div class="d-flex align-items-center gap-3">
-                    <a class="me-3" href="/"><img src="/assets/img/logo.svg" height="36" alt=""></a>
+                    <a class="me-3" href="#home"><img src="/assets/img/apple-touch-icon.png" height="70" alt=""></a>
                     <h5 class="m-0"><?= htmlspecialchars($pageTitle ?? "") ?></h5>
                 </div>
+
+                
 
                 <div class="d-flex align-items-center gap-3">
                     <button id="notifBtn" class="btn btn-ghost position-relative" data-bs-toggle="modal"
@@ -46,7 +44,7 @@
                     <div class="dropdown">
                         <a class="btn" href="/profile" id="profileDropdown" data-bs-toggle="dropdown"
                             aria-expanded="false">
-                            <img src="/assets/img/avatar_placeholder.png" class="rounded-circle" width="36" height="36"
+                            <img src="/assets/img/ProfileIcon.svg" class="rounded-circle" width="36" height="36"
                                 alt="Profile">
                         </a>
                         <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="profileDropdown">
@@ -67,8 +65,90 @@
 
 echo $content; ?>
             </div>
+
+            <div class="body-body">
+                <div class="body-body-1">
+                  <div class="container-inside1-body1">
+                     <h3>Hello, *Name!*</h3>
+                     <p>This is your space. Review your details and make sure everything looks good</p>
+
+                   <div class="appointment-container">
+                        <h5>Appointment Status</h5>
+                   </div>
+
+                  </div>
+                <div class="container-inside2-body1">
+
+                <div class="clock">
+                <div class="hand hour" id="hourHand"></div>
+                <div class="hand minute" id="minuteHand"></div>
+                <div class="hand second" id="secondHand"></div>
+                <div class="numbers">
+                <span style="--i:1">1</span>
+                <span style="--i:2">2</span>
+                <span style="--i:3">3</span>
+                <span style="--i:4">4</span>
+                <span style="--i:5">5</span>
+                <span style="--i:6">6</span>
+                <span style="--i:7">7</span>
+                <span style="--i:8">8</span>
+                <span style="--i:9">9</span>
+                <span style="--i:10">10</span>
+                <span style="--i:11">11</span>
+                <span style="--i:12">12</span>
+                </div>
+
+                <div class="center"></div>
+                </div>
+
+                <div class="digital">
+                <div id="digTime">--:--:--</div>
+                <div class="label">Philippine Time (UTC +8)</div>
+                </div>
+
+                </div>
+                
+                </div>
+
+                <div class="body-body-2">
+                    <div class="container-inside1-body2">
+                        <h5>Juan Dela Cruz</h5>
+                        <p>Created Since mm yyyy</p>
+                        <img src="/assets/img/apple-touch-icon.png" height="300" width="300">
+                    </div>
+                    <div class="container-inside2-body2">
+                        <div class="container-inside2-body2-1">
+                          <h4>Personal Information</h4>
+                          <h6>Full Name</h6>
+                          <p>Admin User</p>
+                          <h6>Email</h6>
+                          <p>admin@gmail.com</p>
+                          <h6>Phone</h6>
+                          <p>0912312312</p>
+                          <h6>Bio</h6>
+                          <p>Administrator</p>
+
+                        </div>
+                        <div class="container-inside2-body2-2">
+                          <button class="deleteprofile">D</button>
+                          <button class="editprofile">Edit Profile</button>
+                          
+                          <h4>Contact & Security</h4>
+                          <h6>Address</h6>
+                          <p>123 Luzon, Quezon City</p>
+                          <h6>Emergency Contact</h6>
+                          <p>Admin User</p>
+                          <p>Admin User</p>
+                          <p>Admin User</p>
+                          <button class="changepass" data-bs-toggle="modal" data-bs-target="#changePasswordModal"><img src="/assets/img/settings.png" class="icon" > Change password</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </main>
     </div>
+
+    
 
     <?php
   // optional modals: make sure these files exist or remove these includes
@@ -82,6 +162,8 @@ echo $content; ?>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="/assets/js/customer.js"></script>
+ 
+
 
 </body>
 

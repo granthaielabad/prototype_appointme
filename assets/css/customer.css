@@ -60,3 +60,382 @@
 .cancel-btn {
     color: #ff4444; 
 }
+
+.customer-layout-body {
+    background-color: #fff9fe;
+    height: 1100px;
+}
+
+.body-body-1 {
+  display: flex;
+  width: 100%;
+  height: 400px;
+}
+
+.body-body-2 {
+  display: flex;
+  width: 100%;
+  height: 400px;
+}
+
+.container-inside1-body1 {
+    height: 300px;
+    width: 60%;
+    float: left;
+}
+
+.container-inside2-body1 {
+    height: 300px;
+    width: 40%;
+    float: right;
+}
+
+.body-body-1 h3 {
+    font-size: 45px;
+    margin-left: 250px;
+}
+
+.body-body-1 p {
+    font-size: 17px;
+    margin-left: 250px;
+    font-weight: 200;
+}
+
+.appointment-container {
+   height: 100%;
+   width: 90%;
+   border-radius: 15px;
+   outline: 1px solid rgba(0, 0, 0, 0.192);
+   box-shadow: 0 10px 15px rgba(0,0,0,0.1);
+   padding: 10px;
+   margin-left: 250px;
+   margin-top: 25px;
+}
+
+.digital {
+        background: #ffffff;
+        padding: 20px 35px;
+        border-radius: 15px;
+        font-size: 40px;
+        font-weight: bold;
+        color: #0a3d62;
+        box-shadow: 0 6px 15px rgba(0,0,0,0.15);
+        text-align: center;
+        width: 200px;
+        margin-left: 280px;
+        margin-top: 50px;
+    }
+
+    .label {
+        font-size: 14px;
+        color: #555;
+        margin-top: 5px;
+    }
+
+    /* Analog Clock Style */
+    .clock {
+        width: 220px;
+        height: 220px;
+        background: white;
+        border-radius: 50%;
+        position: relative;
+        box-shadow: 0 8px 15px rgba(0,0,0,0.1);
+        border: 6px solid #e3e3e3;
+        margin-left: 270px;
+    }
+
+    .center {
+        width: 14px;
+        height: 14px;
+        background: #0a3d62;
+        border-radius: 50%;
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+    }
+
+    .hand {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform-origin: 50% 100%; /* rotate from center pivot */
+}
+
+.hour {
+    width: 6px;
+    height: 55px;
+    background: #0a3d62;
+    border-radius: 5px;
+    transform: translate(-50%, -100%);
+}
+
+.minute {
+    width: 4px;
+    height: 75px;
+    background: #1e90ff;
+    border-radius: 5px;
+    transform: translate(-50%, -100%);
+}
+
+.second {
+    width: 2px;
+    height: 90px;
+    background: #ff4757;
+    border-radius: 5px;
+    transform: translate(-50%, -100%);
+}
+
+.numbers {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.numbers span {
+    position: absolute;
+    font-size: 22px;
+    font-weight: 700;
+    color: #0a3d62;
+
+    /* Circle positioning using CSS variable --i */
+    transform: rotate(calc(var(--i) * 30deg)) translate(0, -125px)
+               rotate(calc(var(--i) * -30deg));
+}
+
+.container-inside1-body2 {
+    height: 100%;
+    width: 25%;
+    outline: 1px solid rgba(0, 0, 0, 0.192);
+    border-radius: 15px;
+    display: flex;
+    text-align: center;
+    flex-direction: column;
+    margin-top: 70px;
+    margin-left: 250px;
+    box-shadow: 10px 8px 20px rgba(0, 0, 0, 0.342);
+}
+
+.container-inside1-body2 h5 {
+    font-size: 35px;
+}
+
+.container-inside1-body2 p {
+    font-size: 15px;
+}
+
+.container-inside1-body2 img {
+    margin-left: 80px;
+}
+
+.container-inside2-body2 {
+    height: 100%;
+    width: 900px;
+    outline: 1px solid rgba(0, 0, 0, 0.192);
+    border-radius: 15px;
+    display: flex;
+    margin-top: 70px;
+    margin-left: 30px;
+    box-shadow: 10px 8px 20px rgba(0, 0, 0, 0.342);
+    padding: 20px;
+}
+
+.container-inside2-body2-1 {
+    float: left;
+    height: 100%;
+    width: 40%;
+    border-right: 1px solid #ccc;
+    padding: 10px;
+}
+
+.container-inside2-body2-2 {
+    float: right;
+    height: 100%;
+    width: 50%;
+    padding: 10px;
+    padding-left: 40px;
+}
+
+.container-inside2-body2-1 p {
+    font-size: 15px;
+}
+
+.container-inside2-body2-1 h6 {
+    font-weight: 700;
+    margin-top: 30px;
+}
+
+.container-inside2-body2-2 p {
+    font-size: 15px;
+}
+
+.container-inside2-body2-2 h6 {
+    font-weight: 700;
+    margin-top: 30px;
+}
+
+.changepass {
+    border: none;
+    outline: 1px solid rgba(0, 0, 0, 0.192);
+    border-radius: 15px;
+    background-color: white;
+    font-weight: 500;
+    width: 400px;
+    height: 50px;
+    margin-left: 25px;
+}
+
+.icon {
+    width: 40px;
+}
+
+.editprofile {
+  float: right;
+  border: none;
+  background-color: #af62ff;
+  outline: 1px solid #7730c4;
+  width: 120px;
+  height: 40px;
+  border-radius: 15px;
+  color: white;
+  margin-right: -30px;
+}
+
+.deleteprofile {
+  float: right;
+  border: none;
+  background-color: #e24444;
+  outline: 1px solid #5a0101;
+  width: 40px;
+  height: 40px;
+  border-radius: 15px;
+  color: white;
+  margin-left: -800px;
+  margin-right: -80px;
+}
+
+/* --- SIDEBAR BASE --- */
+.customer-sidebar {
+    position: fixed;
+    top: 0;
+    left: -260px; /* hidden initially */
+    width: 260px;
+    height: 100vh;
+     background: linear-gradient(120deg, #e0abff , #ffffff);
+    box-shadow: 3px 0 10px rgba(0,0,0,0.1);
+    padding: 20px;
+    transition: left .35s ease;
+    z-index: 2000;
+    font-family: 'Poppins', sans-serif;
+}
+
+/* --- When Sidebar is Open --- */
+.customer-sidebar.open {
+    left: 0;
+}
+
+/* --- Sidebar Header --- */
+.customer-sidebar .logo {
+   
+    margin-bottom: 10px;
+}
+
+.sidebar-header h4 {
+    font-size: 1rem;
+    margin: 0;
+    color: #8a5fd1; /* purple accent */
+}
+
+/* --- Sidebar Links --- */
+.sidebar-links {
+    margin-top: 30px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.sidebar-links a {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: .95rem;
+    color: #333;
+    padding: 10px 12px;
+    border-radius: 10px;
+    transition: .25s;
+    text-decoration: none;
+}
+
+.sidebar-links a:hover {
+    background: #f2e9ff;
+    color: #8a5fd1;
+}
+
+.sidebar-links i {
+    font-size: 1.2rem;
+    color: #8a5fd1;
+}
+
+/* SIDEBAR TOGGLE BUTTON — FIXED VERSION */
+.sidebar-toggle-btn {
+    position: absolute;
+    top: 50%;
+    right: -35px; /* sticks outside sidebar edge */
+    width: 70px;
+    height: 70px;
+    border-radius: 50%;
+    border: none;
+    background: #8a5fd1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    transform: translateY(-50%);
+    z-index: 3000;
+    transition: right .35s ease, transform .35s ease;
+}
+
+.sidebar-toggle-btn img {
+    width: 16px;
+    transition: transform .35s ease;
+}
+
+/* Rotate arrow when sidebar is open */
+.customer-sidebar.open .sidebar-toggle-btn img {
+    transform: rotate(180deg);
+}
+
+.logo {
+    width: 230px;
+}
+
+.rounded-circle {
+  filter: brightness(0) saturate(100%);
+}
+
+.modalmain {
+    width: 1000px !important;
+}
+.modal-content2 {
+    height: 404px;
+    width: 404px;
+    border-radius: 7px;
+    background-color: white;
+    outline: 1px solid rgba(0, 0, 0, 0.192);
+}
+
+.password {
+    background-color: #af62ff;
+    outline: 1px solid rgba(127, 5, 175, 0.637);
+    border: none;
+}
+
+.password:hover {
+     background-color: #8b43d8;
+}
+
+
+
+
