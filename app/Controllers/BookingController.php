@@ -79,7 +79,7 @@ class BookingController extends Controller
 
         // combine
         $apptModel = new Appointment();
-        $appointmentId = $apptModel->create([
+        $appointmentId = $apptModel->createAppointment([
             "user_id"          => $user["user_id"],
             "service_id"       => $serviceId,
             "appointment_date" => $date,
@@ -200,6 +200,25 @@ class BookingController extends Controller
 
     }
 
+    // GREY OUT THE TAKEN SLOTS 
+    public function takenSlots(): void
+{
+    Auth::requireRole(3);
+
+    $date = $_GET['date'] ?? null;
+    if (!$date) {
+        http_response_code(400);
+        echo json_encode(['error' => 'date is required']);
+        return;
+    }
+
+    header('Content-Type: application/json');
+
+    $apptModel = new Appointment();
+    $slots = $apptModel->getTakenSlotsForDate($date);
+
+    echo json_encode(['slots' => $slots]);
+}
 
 
 

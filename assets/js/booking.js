@@ -15,22 +15,42 @@ document.addEventListener("DOMContentLoaded", () => {
         "04:00 PM", "05:00 PM"
     ];
 
+    // Render slots, disabling taken ones
+    const renderSlots = (taken = []) => {
+        apptTime.innerHTML = `<option value="">Appointment Time</option>`;
+        TIME_SLOTS.forEach(t => {
+            const opt = document.createElement("option");
+            opt.value = t;
+            opt.textContent = taken.includes(t) ? `${t} Booked` : t;
+            if (taken.includes(t)) opt.disabled = true;
+            apptTime.appendChild(opt);
+        });
+    };
+
+    // Fetch taken slots for a date
+    const fetchTakenSlots = async (date) => {
+        if (!date) {
+            renderSlots();
+            return;
+        }
+        try {
+            const res = await fetch(`/api/appointments/taken?date=${encodeURIComponent(date)}`);
+            const data = await res.json();
+            renderSlots(data.slots || []);
+        } catch (err) {
+            renderSlots(); // fallback to all enabled if API fails
+        }
+    };
+
     // ===========================
     // Populate times once date is selected
     // ===========================
     apptDate.addEventListener("change", () => {
-        apptTime.innerHTML = `<option value="">Appointment Time</option>`;
-
-        if (!apptDate.value) return;
-
-        TIME_SLOTS.forEach(t => {
-            const opt = document.createElement("option");
-            opt.value = t;
-            opt.textContent = t;
-            apptTime.appendChild(opt);
-        });
+        fetchTakenSlots(apptDate.value);
     });
 
+    // Initial render (no date selected -> all enabled)
+    renderSlots();
 
     // ===========================
     // VALIDATION HANDLING
@@ -50,7 +70,6 @@ document.addEventListener("DOMContentLoaded", () => {
         }
         return true;
     }
-
 
     // CINOMMENT KO TONG PART. INSTEAD KASI NA "BOOKINGCONTROLLER.PHP" YUNG GAMITIN ITO YUNG GINAGAMIT NG BOOKING FORM. KAYA HINDI GUMAGANA YUNG LOGIC SA SAVING DATABASE.
 
