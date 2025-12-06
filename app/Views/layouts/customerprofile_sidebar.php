@@ -14,12 +14,21 @@
     </div>
 
     <nav class="sidebar-links">
-        <a href="http://localhost:8000/Customer/invoices.php">
+
+        <a href="/profile">
+            <i class="bi bi-receipt"></i> Profile
+        </a>
+
+        <a href="/invoices">
             <i class="bi bi-receipt"></i> Invoice History
         </a>
 
-        <a href="./../../booking_history.php">
+        <a href="/my-appointments">
             <i class="bi bi-arrow-counterclockwise"></i> Booking History
+        </a>
+
+        <a href="/book">
+            <i class="bi bi-receipt"></i> Book Now
         </a>
     </nav>
 </aside>
