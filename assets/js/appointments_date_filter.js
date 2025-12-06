@@ -185,12 +185,15 @@ if (apptNextMonthBtn) {
 if (apptResetDateFilter) {
     apptResetDateFilter.onclick = (e) => {
         e.preventDefault();
+        e.stopPropagation(); // Prevent dropdown from closing
         apptSelectedDate = null;
         apptDateFilter.value = '';
         apptCurrentMonth = new Date();
         apptRenderCalendar();
+
+        // Update URL without page reload using history API
         const url = new URL(window.location);
         url.searchParams.delete('date');
-        window.location.href = url.toString();
+        window.history.replaceState(null, '', url.toString());
     };
 }
