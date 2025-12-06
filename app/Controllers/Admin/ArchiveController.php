@@ -84,11 +84,31 @@ class ArchiveController extends AdminController
                     $item['details']['appointment_date'] = $item['details']['appointment_date'] ?? null;
                     $item['details']['appointment_time'] = $item['details']['appointment_time'] ?? null;
                     $item['details']['status'] = $item['details']['status'] ?? 'pending';
+                    $item['details']['note'] = $item['details']['notes'] ?? $item['details']['note'] ?? '';
+
+                    // Add service information
+                    if (isset($item['details']['service_id'])) {
+                        $serviceStmt = $db->prepare("SELECT service_name, category FROM tbl_services WHERE service_id = :service_id");
+                        $serviceStmt->execute(['service_id' => $item['details']['service_id']]);
+                        $service = $serviceStmt->fetch(PDO::FETCH_ASSOC);
+                        if ($service) {
+                            $item['details']['services'] = [[
+                                'name' => $service['service_name'],
+                                'category' => $service['category'] ?? 'Service'
+                            ]];
+                        } else {
+                            $item['details']['services'] = [['name' => 'Unknown Service', 'category' => 'Service']];
+                        }
+                    } else {
+                        $item['details']['services'] = [['name' => 'Unknown Service', 'category' => 'Service']];
+                    }
+
                     $item['details']['archived_at'] = $item['archived_at'];
                 } elseif ($item['item_type'] === 'inquiry') {
                     $item['details']['full_name'] = $item['details']['full_name'] ?? $item['item_name'] ?? 'Unknown';
                     $item['details']['phone'] = $item['details']['phone'] ?? 'N/A';
                     $item['details']['email'] = $item['details']['email'] ?? 'N/A';
+                    $item['details']['status'] = $item['details']['status'] ?? 'pending';
                     $item['details']['message'] = $item['details']['message'] ?? '';
                     $item['details']['created_at'] = $item['details']['created_at'] ?? $item['archived_at'];
                     $item['details']['archived_at'] = $item['archived_at'];
@@ -194,7 +214,7 @@ class ArchiveController extends AdminController
                 break;
 
             case 'inquiry':
-                $ok = (new Inquiry())->archive($id, $adminId);
+                $ok = (new Inquiry())->archive($id, $adminId, 'deleted');
                 $redirect = '/admin/inquiries';
                 break;
 

@@ -122,19 +122,31 @@ document.addEventListener("DOMContentLoaded", () => {
                 }`;
                 document.getElementById("archive_appointment_date_time").textContent = appointmentDateTime;
 
-                // Populate Services List as badges
+                // Populate Services List as badges with categories
                 const servicesContainer = document.getElementById("archive_appointment_services");
                 servicesContainer.innerHTML = "";
                 if (details.services && Array.isArray(details.services)) {
                     const servicesList = details.services.map(s => {
-                        const serviceName = typeof s === 'string' ? s : (s.service_name || s);
-                        return `<span class="badge rounded-pill" style="background-color: #6c757d; padding: 0.5rem 1rem; font-size: 0.85rem;">
-                            <i class="bi bi-scissors me-1"></i>${htmlEscape(serviceName)}
-                        </span>`;
+                        if (typeof s === 'string') {
+                            // Legacy format - just service name
+                            return `<span class="badge rounded-pill me-2" style="background-color: #6c757d; padding: 0.5rem 1rem; font-size: 0.85rem;">
+                                <i class="bi bi-scissors me-1"></i>${htmlEscape(s)}
+                            </span>`;
+                        } else if (s && typeof s === 'object' && s.name) {
+                            // New format with name and category
+                            const serviceBadge = `<span class="badge rounded-pill me-2" style="background-color: #6c757d; padding: 0.5rem 1rem; font-size: 0.85rem;">
+                                <i class="bi bi-scissors me-1"></i>${htmlEscape(s.name)}
+                            </span>`;
+                            const categoryBadge = `<span class="badge rounded-pill" style="background-color: #6c757d; padding: 0.5rem 1rem; font-size: 0.85rem;">
+                                <i class="bi bi-brush me-1"></i>${htmlEscape(s.category || 'Service')}
+                            </span>`;
+                            return serviceBadge + categoryBadge;
+                        }
+                        return '';
                     }).join("");
                     servicesContainer.innerHTML = servicesList;
                 } else if (typeof details.services === 'string') {
-                    servicesContainer.innerHTML = `<span class="badge rounded-pill" style="background-color: #6c757d; padding: 0.5rem 1rem; font-size: 0.85rem;">
+                    servicesContainer.innerHTML = `<span class="badge rounded-pill me-2" style="background-color: #6c757d; padding: 0.5rem 1rem; font-size: 0.85rem;">
                         <i class="bi bi-scissors me-1"></i>${htmlEscape(details.services)}
                     </span>`;
                 } else {
@@ -152,11 +164,37 @@ document.addEventListener("DOMContentLoaded", () => {
                 document.getElementById("archive_inq_name").textContent = details.full_name || "Unknown";
                 document.getElementById("archive_inq_phone").textContent = details.phone || "N/A";
                 document.getElementById("archive_inq_email").textContent = details.email || "N/A";
-                
+
+                // Set status badge
+                const statusElement = document.getElementById("archive_inq_status");
+                const status = details.status || 'pending'; // Use stored status or default to pending
+                let statusBadge = '';
+
+                switch (status) {
+                    case 'pending':
+                        statusBadge = '<span class="badge bg-warning text-dark">Pending</span>';
+                        break;
+                    case 'read':
+                        statusBadge = '<span class="badge bg-info text-white">Read</span>';
+                        break;
+                    case 'replied':
+                        statusBadge = '<span class="badge bg-success">Replied</span>';
+                        break;
+                    case 'deleted':
+                        statusBadge = '<span class="badge bg-danger">Deleted</span>';
+                        break;
+                    default:
+                        statusBadge = '<span class="badge bg-secondary">Unknown</span>';
+                }
+                statusElement.innerHTML = statusBadge;
+
+                // Populate message content
+                document.getElementById("archive_inq_message").textContent = details.message || "No message provided";
+
                 // Format inquiry date as "Full Month Name, Day, Year"
                 const inquiryDateFormatted = formatFullDate(details.created_at || details.inquiry_date);
                 document.getElementById("archive_inq_date").textContent = inquiryDateFormatted;
-                
+
                 const archivedDateFormatted = formatFullDate(details.archived_at);
                 document.getElementById("archive_inq_archived_date").textContent = archivedDateFormatted;
 

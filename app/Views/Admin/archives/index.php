@@ -189,6 +189,7 @@ $activePage = "archives";
             <p><strong>Name:</strong> <span id="archive_inq_name"></span></p>
             <p><strong>Mobile Number:</strong> <span id="archive_inq_phone"></span></p>
             <p><strong>Email Address:</strong> <span id="archive_inq_email"></span></p>
+            <p><strong>Status:</strong> <span id="archive_inq_status"></span></p>
             <p><strong>Inquiry Date:</strong> <span id="archive_inq_date"></span></p>
             <p class="mt-3"><strong>Message:</strong></p>
             <p id="archive_inq_message" class="p-2 bg-light rounded"></p>

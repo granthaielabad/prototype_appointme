@@ -76,7 +76,7 @@ document.addEventListener("DOMContentLoaded", () => {
         if (confirmBtn) {
             confirmBtn.addEventListener("click", () => {
                 if (currentArchiveId) {
-                    window.location.href = `/admin/inquiries/delete?id=${currentArchiveId}`;
+                    window.location.href = `/admin/inquiries/delete?id=${currentArchiveId}&action=delete`;
                 }
             });
         }
