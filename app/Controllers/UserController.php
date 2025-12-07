@@ -176,6 +176,45 @@ class UserController extends Controller
         exit();
     }
 
+        public function deleteAccount(): void
+    {
+        Auth::requireRole(3);
+
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            header('Location: /profile');
+            exit();
+        }
+
+        $token = $_POST['_csrf'] ?? '';
+        if (!CSRF::verify($token)) {
+            Session::flash('error', 'Invalid form submission.', 'danger');
+            header('Location: /profile');
+            exit();
+        }
+
+        $sessionUser = Auth::user();
+        $userId = (int) ($sessionUser['user_id'] ?? 0);
+        if ($userId <= 0) {
+            Session::flash('error', 'User not found.', 'danger');
+            header('Location: /login');
+            exit();
+        }
+
+        $m = new User();
+        $updated = $m->update($userId, ['is_active' => 0]);
+        if (!$updated) {
+            Session::flash('error', 'Could not delete account. Please try again.', 'danger');
+            header('Location: /profile');
+            exit();
+        }
+
+        Auth::logout();
+        Session::flash('success', 'Your account has been deactivated.', 'success');
+        header('Location: /login');
+        exit();
+    }
+
+
 
 
 }

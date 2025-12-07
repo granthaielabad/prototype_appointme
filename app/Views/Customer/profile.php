@@ -127,7 +127,7 @@ $emgPhone = $user['emergency_phone'] ?? '';
     <div class="container-inside2-body2-2">
       <div class="d-flex justify-content-end gap-2 mb-2">
         <button type="button" id="editProfileBtn" class="editprofile">Edit Profile</button>
-        <button type="button" class="deleteprofile" aria-label="Delete profile">D</button>
+<button type="button" class="deleteprofile" data-bs-toggle="modal" data-bs-target="#deleteAccountModal" aria-label="Delete account">🗑</button>
       </div>
 
       <h4>Contact &amp; Security</h4>

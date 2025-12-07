@@ -71,7 +71,7 @@ $router->get("/payment-qr", "BookingController@paymentQr");
 $router->post("/webhook/paymongo", "PaymentWebhookController@handle");
 
 
-
+$router->post("/profile/delete-account", "UserController@deleteAccount");
 $router->get("/profile", "UserController@profile");
 $router->post("/profile/update", "UserController@updateProfile");
 
