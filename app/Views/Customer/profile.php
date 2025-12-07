@@ -7,6 +7,17 @@ $phone = $user['contact_number'] ?? '';
 $email = $user['email'] ?? '';
 $bio = $user['bio'] ?? '';
 $todayAppt = $todayAppointment ?? null;
+// additional db 
+$photo = $user['profile_photo'] ?? '/assets/img/apple-touch-icon.png';
+$address = $user['address'] ?? '';
+$emgName = $user['emergency_name'] ?? '';
+$emgRel  = $user['emergency_relation'] ?? '';
+$emgPhone = $user['emergency_phone'] ?? '';
+
+
+
+
+
 ?>
 <div class="body-body">
     <div class="body-body-1">
@@ -35,9 +46,8 @@ $todayAppt = $todayAppointment ?? null;
         <?php endif; ?>
     </div>
 </div>
-
-
         </div>
+
 
         <div class="container-inside2-body1">
             <div class="clock">
@@ -67,40 +77,90 @@ $todayAppt = $todayAppointment ?? null;
         </div>
     </div>
 
+       
+
     <div class="body-body-2">
         <div class="container-inside1-body2">
             <h5><?= htmlspecialchars($fullName ?: 'Your Name') ?></h5>
             <p><?= $created ? 'Created since ' . htmlspecialchars($created) : '' ?></p>
-            <img src="/assets/img/apple-touch-icon.png" height="300" width="300" alt="Profile photo">
+            <img src="<?= htmlspecialchars($photo) ?>" height="300" width="300" alt="Profile photo">
         </div>
 
-        <div class="container-inside2-body2">
-            <div class="container-inside2-body2-1">
-                <h4>Personal Information</h4>
-                <h6>Full Name</h6>
-                <p><?= htmlspecialchars($fullName) ?></p>
-                <h6>Email</h6>
-                <p><?= htmlspecialchars($email) ?></p>
-                <h6>Phone</h6>
-                <p><?= htmlspecialchars($phone) ?></p>
-                <h6>Bio</h6>
-                <p><?= htmlspecialchars($bio) ?></p>
-            </div>
 
-            <div class="container-inside2-body2-2">
-                <button class="deleteprofile" aria-label="Delete profile">D</button>
-                <button class="editprofile">Edit Profile</button>
 
-                <h4>Contact &amp; Security</h4>
-                <h6>Address</h6>
-                <p><!-- TODO: add address when available --></p>
-                <h6>Emergency Contact</h6>
-                <p><!-- TODO: add name/relation/phone when available --></p>
+         <!--TRANFSFER DETAILS TO A FORM 
+        --> 
+        <form id="profileEditForm" class="profile-inline-form" method="POST" action="/profile/update" enctype="multipart/form-data">
+  <input type="hidden" name="_csrf" value="<?= \App\Core\CSRF::getToken() ?>">
 
-                <button class="changepass" data-bs-toggle="modal" data-bs-target="#changePasswordModal">
-                    <img src="/assets/img/settings.png" class="icon" alt=""> Change password
-                </button>
-            </div>
-        </div>
+  <div class="container-inside2-body2">
+    <div class="container-inside2-body2-1">
+      <h4>Personal Information</h4>
+
+      <h6>Full Name</h6>
+      <div class="view-mode"><?= htmlspecialchars($fullName) ?></div>
+      <div class="edit-mode d-none">
+        <input class="form-control mb-2" name="first_name" value="<?= htmlspecialchars($first) ?>" placeholder="First name">
+        <input class="form-control" name="last_name" value="<?= htmlspecialchars($last) ?>" placeholder="Last name">
+      </div>
+
+      <h6>Email</h6>
+      <div class="view-mode"><?= htmlspecialchars($email) ?></div>
+      <div class="edit-mode d-none">
+        <input class="form-control" name="email" value="<?= htmlspecialchars($email) ?>" disabled>
+        <small class="text-muted">Email not editable here</small>
+      </div>
+
+      <h6>Phone</h6>
+      <div class="view-mode"><?= htmlspecialchars($phone) ?></div>
+      <div class="edit-mode d-none">
+        <input class="form-control" name="contact_number" value="<?= htmlspecialchars($phone) ?>">
+      </div>
+
+      <h6>Bio</h6>
+      <div class="view-mode"><?= htmlspecialchars($bio) ?></div>
+      <div class="edit-mode d-none">
+        <textarea class="form-control" name="bio" rows="2"><?= htmlspecialchars($bio) ?></textarea>
+      </div>
     </div>
+
+    <div class="container-inside2-body2-2">
+      <div class="d-flex justify-content-end gap-2 mb-2">
+        <button type="button" id="editProfileBtn" class="editprofile">Edit Profile</button>
+        <button type="button" class="deleteprofile" aria-label="Delete profile">D</button>
+      </div>
+
+      <h4>Contact &amp; Security</h4>
+
+      <h6>Address</h6>
+      <div class="view-mode"><?= htmlspecialchars($address ?? '') ?></div>
+      <div class="edit-mode d-none">
+        <input class="form-control" name="address" value="<?= htmlspecialchars($address ?? '') ?>">
+      </div>
+
+      <h6>Emergency Contact</h6>
+      <div class="view-mode">
+        <?= htmlspecialchars($emgName ?? '') ?><?= !empty($emgRel) ? " (" . htmlspecialchars($emgRel) . ")" : "" ?><br>
+        <?= htmlspecialchars($emgPhone ?? '') ?>
+      </div>
+      <div class="edit-mode d-none">
+        <input class="form-control mb-2" name="emergency_name" value="<?= htmlspecialchars($emgName ?? '') ?>" placeholder="Name">
+        <input class="form-control mb-2" name="emergency_relation" value="<?= htmlspecialchars($emgRel ?? '') ?>" placeholder="Relation">
+        <input class="form-control" name="emergency_phone" value="<?= htmlspecialchars($emgPhone ?? '') ?>" placeholder="Phone">
+      </div>
+
+      <div class="mt-3 view-mode">
+        <button class="changepass" type="button" data-bs-toggle="modal" data-bs-target="#changePasswordModal">
+          <img src="/assets/img/settings.png" class="icon" alt=""> Change password
+        </button>
+      </div>
+
+      <div class="edit-mode d-none mt-3 d-flex gap-2">
+        <button type="submit" class="btn btn-primary">Save</button>
+        <button type="button" id="cancelEditBtn" class="btn btn-outline-secondary">Cancel</button>
+      </div>
+    </div>
+  </div>
+</form>
+
 </div>

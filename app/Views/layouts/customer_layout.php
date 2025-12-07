@@ -59,11 +59,10 @@
                     </div>
                 </div>
             </header>
-
-            <div class="container-fluid p-4">
-                <?php // $content is injected by Controller::renderWithLayout
-
-echo $content; ?>
+                
+          <div class="container-fluid p-4">
+                <?php include __DIR__ . "/alerts.php"; ?>
+                <?= $content ?>
             </div>
 
         </main>

@@ -7,8 +7,8 @@
       </div>
 
       <form method="POST" action="/profile/change-password">
+        <input type="hidden" name="_csrf" value="<?= App\Core\CSRF::getToken() ?>">
         <div class="modal-body">
-
           <div class="row">
             
             <div class="col-md-6">
@@ -27,6 +27,8 @@
                 <input required name="confirm_password" class="form-control" type="password">
               </div>
             </div>
+
+            
 
             <div class="col-md-6">
               <div class="p-2">

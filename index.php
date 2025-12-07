@@ -2,6 +2,7 @@
 declare(strict_types=1);
 date_default_timezone_set("Asia/Manila");
 
+use App\Controllers\UserController;
 use App\Core\Session;
 use App\Core\Router;
 use App\Core\CSRF;
@@ -60,6 +61,7 @@ $router->get("/appointment/cancel", "BookingController@cancelFromHistory");
 
 
 $router->get("/invoices", "InvoiceController@customerList");
+$router->post("/profile/change-password", "UserController@changePassword");
 
 
 /* added testing carl */
