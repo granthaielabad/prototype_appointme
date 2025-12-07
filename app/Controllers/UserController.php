@@ -6,6 +6,7 @@ use App\Core\Auth;
 use App\Core\Session;
 use App\Core\CSRF;
 use App\Models\User;
+use App\Models\Appointment;
 
 class UserController extends Controller
 {
@@ -44,11 +45,18 @@ class UserController extends Controller
 
         $user = Auth::user();
 
+        $apptModel = new Appointment();
+        $today = date('Y-m-d');
+        $todayAppointment = $user ? $apptModel->findForUserOnDate((int)$user['user_id'], $today) : null;
+
         $this->renderCustomer("Customer/profile", [
             "user" => $user,
+            "todayAppointment" => $todayAppointment,
             "pageTitle" => "My Profile"
         ]);
     }
+
+
 
     /**
      * Update customer profile

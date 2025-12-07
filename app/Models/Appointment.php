@@ -310,4 +310,25 @@ public function findByUser(int $userId, ?int $limit = null): array
         return $this->delete($id);
     }
 
+    // For Appointment in Profile: Fetching Today appointment.
+
+  public function findForUserOnDate(int $userId, string $date): ?array
+    {
+        $stmt = $this->db->prepare("
+            SELECT a.*, s.service_name
+            FROM {$this->table} a
+            JOIN tbl_services s ON a.service_id = s.service_id
+            WHERE a.user_id = :user_id
+            AND a.appointment_date = :date
+            AND a.is_deleted = 0
+            AND a.status NOT IN ('cancelled', 'failed')
+            ORDER BY a.appointment_time ASC
+            LIMIT 1
+        ");
+        $stmt->execute(['user_id' => $userId, 'date' => $date]);
+        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+        return $row ?: null;
+    }
+
+
 }

@@ -457,3 +457,63 @@
   .invoice-table tfoot th { border-top: 1px solid #9c9c9c; }
   .invoice-btn { border-radius: 12px; font-weight: 600; }
 
+.appointment-container {
+    height: auto;
+    width: 90%;
+    margin-left: 250px;
+    margin-top: 25px;
+}
+
+.appt-card {
+    background: #fff9fe;
+    border: 1px solid rgba(0, 0, 0, 0.12);
+    border-radius: 18px;
+    box-shadow: 0 8px 18px rgba(0, 0, 0, 0.08);
+    padding: 18px 22px;
+}
+
+.appt-card-header h5 {
+    margin: 0 0 12px;
+    font-weight: 600;
+    font-size: 18px;
+}
+
+.appt-card-body {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    min-height: 110px;
+}
+
+.appt-id {
+    font-size: 32px;
+    font-weight: 400;
+    color: #111;
+}
+
+.appt-meta {
+    text-align: right;
+    color: #1f7a1f;
+    font-style: italic;
+    line-height: 1.4;
+    min-width: 180px;
+}
+
+.appt-meta .appt-date,
+.appt-meta .appt-time {
+    font-size: 15px;
+    display: block;
+}
+
+.appt-meta .appt-status {
+    font-size: 20px;
+    font-weight: 500;
+}
+
+.appt-card-body.empty {
+    text-align: center;
+    color: #777;
+    font-style: italic;
+    justify-content: center;
+}
