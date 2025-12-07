@@ -346,6 +346,7 @@ $activePage = "dashboard";
     </div>
 </div>
 
+
 <!-- Data for Charts (hidden) -->
 <script type="application/json" id="monthlyLabels"><?= json_encode($monthlyLabels) ?></script>
 <script type="application/json" id="monthlyValues"><?= json_encode($monthlyValues) ?></script>
@@ -354,5 +355,4 @@ $activePage = "dashboard";
 
 <!-- Chart.js Library -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
 <script src="/assets/js/dashboard.js"></script>

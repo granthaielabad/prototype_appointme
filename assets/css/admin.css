@@ -192,6 +192,31 @@ body {
     border-color: #AF62FF;
 }
 
+/* Filter Dropdown Menu - Ensure it displays */
+#employeeFilterDropdownWrapper .dropdown-menu {
+    display: none !important;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    z-index: 1000;
+    min-width: 160px;
+    padding: 0.5rem 0;
+    margin: 0.125rem 0 0;
+    font-size: 0.875rem;
+    color: #212529;
+    text-align: left;
+    background-color: #fff;
+    background-clip: padding-box;
+    border: 1px solid rgba(0, 0, 0, 0.15);
+    border-radius: 0.375rem;
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+}
+
+#employeeFilterDropdownWrapper .dropdown-menu.show {
+    display: block !important;
+}
+
+
 .download-btn {
     background: #37D449 !important;
     color: white !important;
@@ -555,4 +580,183 @@ body {
 
 .top-services-card {
     border-radius: 10px;
+}
+
+/* ============================
+   Employee STYLING
+============================ */
+
+.email-link {
+    cursor: pointer;
+    transition: color 0.3s ease;
+    color: inherit;
+}
+
+.email-link:hover {
+    color: #AF62FF !important;
+}
+
+.employee-card {
+    background: white;
+    border: 1px solid #e5e7eb;
+    border-radius: 15px;
+    padding: 15px;
+    margin-bottom: 12px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.employee-avatar {
+    width: 48px;
+    height: 48px;
+    background: #f3f4f6;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.employee-badge {
+    display: inline-block;
+    padding: 4px 12px;
+    border-radius: 9999px;
+    font-size: 0.75rem;
+    font-weight: 500;
+    margin-left: 12px;
+}
+
+.badge-active {
+    background: #d1fae5;
+    color: #065f46;
+    font-size: 0.75rem;
+    padding: 4px 8px;
+    border-radius: 9999px;
+    font-weight: 500;
+    margin-left: 8px;
+}
+
+.badge-inactive {
+    background: #fee2e2;
+    color: #991b1b;
+    font-size: 0.75rem;
+    padding: 4px 8px;
+    border-radius: 9999px;
+    font-weight: 500;
+    margin-left: 8px;
+}
+
+.action-btn {
+    background: none;
+    border: none;
+    color: #9333ea;
+    cursor: pointer;
+    padding: 8px;
+    border-radius: 4px;
+    transition: all 0.2s;
+    margin-top: 20px;
+}
+
+.action-btn:hover {
+    background: #f3e8ff;
+}
+
+
+.action-btn.trash-btn:hover {
+    background: #f3f4f6;
+}
+
+/* Employee Dropdown - Hide Arrow */
+.employee-card .dropdown-toggle::after {
+    display: none !important;
+}
+
+/* Employee Dropdown - Fix positioning */
+.employee-card .dropdown-menu {
+    position: absolute;
+    top: 100%;
+    left: auto;
+    right: 0;
+    z-index: 1050;
+    min-width: 160px;
+    padding: 0.5rem 0;
+    margin: 0.125rem 0 0;
+    font-size: 0.875rem;
+    color: #212529;
+    text-align: left;
+    background-color: #fff;
+    background-clip: padding-box;
+    border: 1px solid rgba(0, 0, 0, 0.15);
+    border-radius: 0.375rem;
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+    transform: translateX(-10px); /* Slight adjustment to prevent overlap */
+}
+
+/* ============================
+   DROPDOWN MENU
+============================ */
+
+.dropdown-archive {
+    position: relative;
+    display: inline-block;
+}
+
+.dropdown-archive-toggle {
+    border: none;
+    background: none;
+    cursor: pointer;
+}
+
+.dropdown-archive-toggle::after {
+    display: none !important;
+}
+
+.dropdown-archive-menu {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    z-index: 1000;
+    display: none;
+    min-width: 160px;
+    padding: 0.5rem 0;
+    margin: 0;
+    font-size: 0.875rem;
+    color: #212529;
+    text-align: left;
+    background-color: #fff;
+    background-clip: padding-box;
+    border: 1px solid rgba(0, 0, 0, 0.15);
+    border-radius: 0.375rem;
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+}
+
+.dropdown-archive-menu.show {
+    display: block;
+}
+
+.dropdown-archive-item {
+    display: block;
+    width: 100%;
+    padding: 0.375rem 1rem;
+    clear: both;
+    font-weight: 400;
+    color: #212529;
+    text-align: inherit;
+    text-decoration: none;
+    white-space: nowrap;
+    background-color: transparent;
+    border: 0;
+    cursor: pointer;
+}
+
+.dropdown-archive-item:hover,
+.dropdown-archive-item:focus {
+    color: #16181b;
+    text-decoration: none;
+    background-color: #f8f9fa;
+}
+
+.dropdown-archive-divider {
+    height: 0;
+    margin: 0.5rem 0;
+    overflow: hidden;
+    border-top: 1px solid #e9ecef;
 }

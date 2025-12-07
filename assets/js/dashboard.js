@@ -240,20 +240,18 @@ if (resetDateFilter) {
     resetDateFilter.onclick = (e) => {
         e.preventDefault();
         e.stopPropagation(); // Prevent dropdown from closing
-        selectedStartDate = null;
-        selectedEndDate = null;
-        dateFilterStart.value = '';
-        dateFilterEnd.value = '';
-        startDateDisplay.textContent = '-';
-        endDateDisplay.textContent = '-';
-        currentMonth = new Date();
-        renderCalendar();
 
-        // Update URL without page reload using history API
-        const url = new URL(window.location);
-        url.searchParams.delete('start');
-        url.searchParams.delete('end');
-        window.history.replaceState(null, '', url.toString());
+        // Clear date filter and reload page to reset all dashboard data
+        const baseUrl = window.location.origin + window.location.pathname;
+        const url = new URL(baseUrl);
+
+        // Preserve other parameters if they exist (like period)
+        const currentParams = new URLSearchParams(window.location.search);
+        if (currentParams.has('period')) {
+            url.searchParams.set('period', currentParams.get('period'));
+        }
+
+        window.location.href = url.toString();
     };
 }
 
@@ -410,15 +408,17 @@ function selectModalDate(dateStr) {
     } else if (!modalSelectedEndDate) {
         // Second click
         if (dateStr > modalSelectedStartDate) {
-            // If after start date, set as end date
+            // If after start date, set as end date and instantly apply
             modalSelectedEndDate = dateStr;
             if (modalEndDateDisplay) modalEndDateDisplay.textContent = dateStr;
+            applyModalFilter(); // Auto-apply when both dates are selected
         } else if (dateStr < modalSelectedStartDate) {
-            // If before start date, swap them
+            // If before start date, swap them and apply
             modalSelectedEndDate = modalSelectedStartDate;
             modalSelectedStartDate = dateStr;
             if (modalStartDateDisplay) modalStartDateDisplay.textContent = dateStr;
             if (modalEndDateDisplay) modalEndDateDisplay.textContent = modalSelectedEndDate;
+            applyModalFilter(); // Auto-apply when both dates are selected
         } else {
             // If same date, reset
             modalSelectedStartDate = null;
@@ -437,6 +437,29 @@ function selectModalDate(dateStr) {
     if (modalDateFilterStart) modalDateFilterStart.value = modalSelectedStartDate || '';
     if (modalDateFilterEnd) modalDateFilterEnd.value = modalSelectedEndDate || '';
     renderModalCalendar();
+}
+
+function applyModalFilter() {
+    // Copy modal selections to main calendar and apply filter
+    selectedStartDate = modalSelectedStartDate;
+    selectedEndDate = modalSelectedEndDate;
+    currentMonth = new Date(modalCurrentMonth);
+
+    // Update main displays
+    if (startDateDisplay) startDateDisplay.textContent = selectedStartDate || '-';
+    if (endDateDisplay) endDateDisplay.textContent = selectedEndDate || '-';
+    if (dateFilterStart) dateFilterStart.value = selectedStartDate || '';
+    if (dateFilterEnd) dateFilterEnd.value = selectedEndDate || '';
+
+    // Apply filter if both dates are selected
+    if (selectedStartDate && selectedEndDate) {
+        applyFilter();
+    } else {
+        renderCalendar();
+    }
+
+    // Close modal after auto-applying
+    if (dateFilterModal) dateFilterModal.style.display = 'none';
 }
 
 // Modal month navigation
@@ -468,35 +491,31 @@ if (modalResetDateFilter) {
         if (modalDateFilterEnd) modalDateFilterEnd.value = '';
         modalCurrentMonth = new Date();
         renderModalCalendar();
-    };
-}
 
-// Apply modal filter
-if (applyDateFilter) {
-    applyDateFilter.onclick = (e) => {
-        e.preventDefault();
-        // Copy modal selections to main calendar
-        selectedStartDate = modalSelectedStartDate;
-        selectedEndDate = modalSelectedEndDate;
-        currentMonth = new Date(modalCurrentMonth);
+        // Also reset main calendar and close modal
+        selectedStartDate = null;
+        selectedEndDate = null;
+        if (startDateDisplay) startDateDisplay.textContent = '-';
+        if (endDateDisplay) endDateDisplay.textContent = '-';
+        if (dateFilterStart) dateFilterStart.value = '';
+        if (dateFilterEnd) dateFilterEnd.value = '';
 
-        // Update main displays
-        if (startDateDisplay) startDateDisplay.textContent = selectedStartDate || '-';
-        if (endDateDisplay) endDateDisplay.textContent = selectedEndDate || '-';
-        if (dateFilterStart) dateFilterStart.value = selectedStartDate || '';
-        if (dateFilterEnd) dateFilterEnd.value = selectedEndDate || '';
-
-        // Apply filter if both dates are selected
-        if (selectedStartDate && selectedEndDate) {
-            applyFilter();
-        } else {
-            renderCalendar();
-        }
-
-        // Close modal
+        // Close modal after resetting
         if (dateFilterModal) dateFilterModal.style.display = 'none';
+
+        // Reload page to reset dashboard data
+        const baseUrl = window.location.origin + window.location.pathname;
+        const url = new URL(baseUrl);
+        const currentParams = new URLSearchParams(window.location.search);
+        if (currentParams.has('period')) {
+            url.searchParams.set('period', currentParams.get('period'));
+        }
+        window.location.href = url.toString();
     };
 }
+
+// Modal now auto-applies when both dates are selected
+// The applyDateFilter button is no longer needed
 
 // ===== PERIOD DROPDOWN LABEL UPDATE =====
 function updatePeriodDropdownLabel() {
@@ -705,11 +724,199 @@ appointmentDonutChart = new Chart(document.getElementById("appointmentDonut"), {
 
 // Function to animate charts when data changes
 function animateCharts() {
+    try {
+        if (monthlySalesChart && typeof monthlySalesChart.update === 'function') {
+            // Use default animation mode
+            monthlySalesChart.update();
+        }
+        if (appointmentDonutChart && typeof appointmentDonutChart.update === 'function') {
+            // Use default animation mode
+            appointmentDonutChart.update();
+        }
+    } catch (error) {
+        console.log('Chart animation error:', error);
+        // Fallback: recreate charts if they failed
+        setTimeout(() => {
+            initializeCharts();
+        }, 500);
+    }
+}
+
+// Function to initialize/reinitialize charts
+function initializeCharts() {
+    // Check if charts already exist and destroy them first
     if (monthlySalesChart) {
-        monthlySalesChart.update('active');
+        monthlySalesChart.destroy();
     }
     if (appointmentDonutChart) {
-        appointmentDonutChart.update('active');
+        appointmentDonutChart.destroy();
+    }
+
+    // Recreate the charts
+    try {
+        monthlySalesChart = new Chart(document.getElementById("monthlySales"), {
+            type: "bar",
+            data: {
+                labels: monthlyLabels,
+                datasets: [
+                    {
+                        label: "Sales",
+                        type: "bar",
+                        data: monthlyValues,
+                        backgroundColor: "rgba(205, 159, 254, 0.4)",
+                        borderColor: "rgba(205, 159, 254, 0.8)",
+                        borderWidth: 0,
+                        borderRadius: 8,
+                        borderSkipped: false,
+                        order: 2
+                    },
+                    {
+                        label: "Trend",
+                        type: "line",
+                        data: monthlyValues,
+                        borderColor: "#CD9FFE",
+                        backgroundColor: "transparent",
+                        borderWidth: 3,
+                        fill: false,
+                        tension: 0.4,
+                        pointRadius: 5,
+                        pointBackgroundColor: "#CD9FFE",
+                        pointBorderColor: "#FFF",
+                        pointBorderWidth: 2,
+                        order: 1
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                animation: {
+                    duration: 750,
+                    easing: 'easeInOutQuart',
+                    delay: (context) => {
+                        let delay = 0;
+                        if (context.type === 'data') {
+                            delay = context.dataIndex * 50 + context.datasetIndex * 100;
+                        }
+                        return delay;
+                    }
+                },
+                interaction: {
+                    intersect: false,
+                    mode: 'index'
+                },
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        backgroundColor: 'rgba(0,0,0,0.8)',
+                        padding: 12,
+                        titleFont: { size: 13 },
+                        bodyFont: { size: 12 },
+                        displayColors: false,
+                        callbacks: {
+                            label: function(context) {
+                                if (context.dataset.type === 'line') {
+                                    return '₱' + new Intl.NumberFormat('en-PH').format(context.parsed.y);
+                                }
+                                return '';
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            callback: function(value) {
+                                if (value >= 1000000) {
+                                    return '₱' + (value / 1000000).toFixed(1) + 'M';
+                                } else if (value >= 1000) {
+                                    return '₱' + (value / 1000).toFixed(0) + 'K';
+                                }
+                                return '₱' + value;
+                            },
+                            font: { size: 11, color: '#999' }
+                        },
+                        grid: {
+                            color: 'rgba(0, 0, 0, 0.05)',
+                            drawBorder: false
+                        }
+                    },
+                    x: {
+                        grid: {
+                            display: false,
+                            drawBorder: false
+                        },
+                        ticks: {
+                            font: { size: 11, color: '#999' }
+                        }
+                    }
+                }
+            }
+        });
+
+        appointmentDonutChart = new Chart(document.getElementById("appointmentDonut"), {
+            type: "doughnut",
+            data: {
+                labels: ["Accepted", "Rejected"],
+                datasets: [{
+                    data: [donutAccepted, donutRejected],
+                    backgroundColor: ["#2563EB", "#67E8F9"],
+                    borderColor: "#FFF",
+                    borderWidth: 3
+                }]
+            },
+            options: {
+                cutout: "50%",
+                responsive: true,
+                maintainAspectRatio: true,
+                animation: {
+                    duration: 800,
+                    easing: 'easeInOutQuart'
+                },
+                plugins: {
+                    legend: {
+                        display: true,
+                        position: 'bottom',
+                        labels: {
+                            padding: 20,
+                            font: { size: 12, weight: '500' },
+                            usePointStyle: true,
+                            pointStyle: 'circle',
+                            boxWidth: 8
+                        }
+                    },
+                    tooltip: {
+                        backgroundColor: 'rgba(0,0,0,0.8)',
+                        padding: 12,
+                        titleFont: { size: 13 },
+                        bodyFont: { size: 12 },
+                        displayColors: true,
+                        callbacks: {
+                            label: function(context) {
+                                const value = context.parsed;
+                                const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                const percentage = ((value / total) * 100).toFixed(0);
+                                return percentage + '%';
+                            }
+                        }
+                    },
+                    datalabels: {
+                        color: '#000',
+                        font: { size: 13, weight: 'bold' },
+                        formatter: function(value, context) {
+                            const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                            const percentage = ((value / total) * 100).toFixed(0);
+                            return percentage + '%';
+                        }
+                    }
+                }
+            }
+        });
+
+        console.log('Charts reinitialized successfully');
+    } catch (error) {
+        console.log('Chart initialization error:', error);
     }
 }
 
@@ -737,18 +944,46 @@ style.textContent = `
 document.head.appendChild(style);
 
 // ===== TRIGGER ANIMATIONS ON PAGE LOAD/RELOAD =====
-document.addEventListener('DOMContentLoaded', () => {
+// Prevent multiple animation triggers
+let animationTimeout = null;
+let isAnimating = false;
+
+function triggerChartAnimation() {
+    if (isAnimating) return; // Prevent overlapping animations
+
+    isAnimating = true;
+
+    // Clear any existing timeout
+    if (animationTimeout) {
+        clearTimeout(animationTimeout);
+    }
+
     // Small delay ensures charts are fully rendered before animation starts
-    setTimeout(() => {
+    animationTimeout = setTimeout(() => {
         animateCharts();
+        isAnimating = false;
     }, 300);
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    // Ensure charts are initialized first, then animate
+    setTimeout(() => {
+        // Check if charts exist, if not, initialize them
+        if (!monthlySalesChart || !appointmentDonutChart) {
+            initializeCharts();
+        }
+        // Then trigger animation
+        setTimeout(() => {
+            triggerChartAnimation();
+        }, 100);
+    }, 200);
 });
 
 // Alternative trigger for page visibility (when tab is refocused)
 document.addEventListener('visibilitychange', () => {
     if (!document.hidden) {
         setTimeout(() => {
-            animateCharts();
-        }, 300);
+            triggerChartAnimation();
+        }, 100);
     }
 });

@@ -54,4 +54,22 @@ class User extends Model
         $data['is_active'] = $data['is_active'] ?? 0;
         return $this->create($data);
     }
+
+    public function findByInvitationToken(string $token): ?array
+    {
+        $stmt = $this->db->prepare("SELECT * FROM {$this->table} WHERE invitation_token = :token LIMIT 1");
+        $stmt->execute(['token' => $token]);
+        $r = $stmt->fetch(PDO::FETCH_ASSOC);
+        return $r ?: null;
+    }
+
+    public function completeEmployeeSetup(int $userId, string $password): bool
+    {
+        $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
+        $stmt = $this->db->prepare("UPDATE {$this->table} SET password = :password, is_active = 1, invitation_token = NULL, token_expiry = NULL WHERE user_id = :user_id");
+        return (bool)$stmt->execute([
+            'password' => $hashedPassword,
+            'user_id' => $userId
+        ]);
+    }
 }
