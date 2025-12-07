@@ -1,7 +1,12 @@
-const monthlyLabels = JSON.parse(document.getElementById("monthlyLabels").textContent);
-const monthlyValues = JSON.parse(document.getElementById("monthlyValues").textContent);
-const donutAccepted = parseInt(document.getElementById("donutAccepted").textContent);
-const donutRejected = parseInt(document.getElementById("donutRejected").textContent);
+// Store chart instances for animation updates
+let monthlySalesChart = null;
+let appointmentDonutChart = null;
+
+// Variables to store chart data
+let monthlyLabels = [];
+let monthlyValues = [];
+let donutAccepted = 0;
+let donutRejected = 0;
 
 // ===== DATE FILTER DROPDOWN WITH CALENDAR =====
 // Modal calendar variables
@@ -553,185 +558,274 @@ document.getElementById("openDownloadModal").onclick = () => {
 };
 modal.querySelector(".close-modal").onclick = () => modal.style.display = "none";
 
-// Store chart instances for animation updates
-let monthlySalesChart = null;
-let appointmentDonutChart = null;
+// Function to load chart data from DOM
+function loadChartData() {
+    try {
+        const monthlyLabelsEl = document.getElementById("monthlyLabels");
+        const monthlyValuesEl = document.getElementById("monthlyValues");
+        const donutAcceptedEl = document.getElementById("donutAccepted");
+        const donutRejectedEl = document.getElementById("donutRejected");
+
+        if (monthlyLabelsEl) monthlyLabels = JSON.parse(monthlyLabelsEl.textContent);
+        if (monthlyValuesEl) monthlyValues = JSON.parse(monthlyValuesEl.textContent);
+        if (donutAcceptedEl) donutAccepted = parseInt(donutAcceptedEl.textContent);
+        if (donutRejectedEl) donutRejected = parseInt(donutRejectedEl.textContent);
+    } catch (error) {
+        console.error('Error loading chart data:', error);
+    }
+}
 
 // CHART: MONTHLY SALES (Bar + Line overlay)
-monthlySalesChart = new Chart(document.getElementById("monthlySales"), {
-    type: "bar",
-    data: {
-        labels: monthlyLabels,
-        datasets: [
-            // Bar dataset
-            {
-                label: "Sales",
-                type: "bar",
-                data: monthlyValues,
-                backgroundColor: "rgba(205, 159, 254, 0.4)",
-                borderColor: "rgba(205, 159, 254, 0.8)",
-                borderWidth: 0,
-                borderRadius: 8,
-                borderSkipped: false,
-                order: 2
-            },
-            // Line overlay dataset
-            {
-                label: "Trend",
-                type: "line",
-                data: monthlyValues,
-                borderColor: "#CD9FFE",
-                backgroundColor: "transparent",
-                borderWidth: 3,
-                fill: false,
-                tension: 0.4,
-                pointRadius: 5,
-                pointBackgroundColor: "#CD9FFE",
-                pointBorderColor: "#FFF",
-                pointBorderWidth: 2,
-                order: 1
-            }
-        ]
-    },
-    options: {
-        responsive: true,
-        maintainAspectRatio: true,
-        animation: {
-            duration: 750,
-            easing: 'easeInOutQuart',
-            delay: (context) => {
-                let delay = 0;
-                if (context.type === 'data') {
-                    delay = context.dataIndex * 50 + context.datasetIndex * 100;
+function createMonthlySalesChart() {
+    const canvas = document.getElementById("monthlySales");
+    if (!canvas) return null;
+
+    // Create initial empty data arrays for animation
+    const initialData = monthlyValues.map(() => 0);
+
+    const chart = new Chart(canvas, {
+        type: "bar",
+        data: {
+            labels: monthlyLabels,
+            datasets: [
+                // Bar dataset
+                {
+                    label: "Sales",
+                    type: "bar",
+                    data: initialData,
+                    backgroundColor: "rgba(205, 159, 254, 0.4)",
+                    borderColor: "rgba(205, 159, 254, 0.8)",
+                    borderWidth: 0,
+                    borderRadius: 8,
+                    borderSkipped: false,
+                    order: 2
+                },
+                // Line overlay dataset
+                {
+                    label: "Trend",
+                    type: "line",
+                    data: initialData,
+                    borderColor: "#CD9FFE",
+                    backgroundColor: "transparent",
+                    borderWidth: 3,
+                    fill: false,
+                    tension: 0.4,
+                    pointRadius: 5,
+                    pointBackgroundColor: "#CD9FFE",
+                    pointBorderColor: "#FFF",
+                    pointBorderWidth: 2,
+                    order: 1
                 }
-                return delay;
-            }
+            ]
         },
-        interaction: {
-            intersect: false,
-            mode: 'index'
-        },
-        plugins: {
-            legend: { display: false },
-            tooltip: {
-                backgroundColor: 'rgba(0,0,0,0.8)',
-                padding: 12,
-                titleFont: { size: 13 },
-                bodyFont: { size: 12 },
-                displayColors: false,
-                callbacks: {
-                    label: function(context) {
-                        if (context.dataset.type === 'line') {
-                            return '₱' + new Intl.NumberFormat('en-PH').format(context.parsed.y);
+        options: {
+            responsive: true,
+            maintainAspectRatio: true,
+            animation: {
+                duration: 1500,
+                easing: 'easeOutQuart',
+                onComplete: function() {
+                    // Animation completed
+                },
+                delay: (context) => {
+                    let delay = 0;
+                    if (context.type === 'data') {
+                        // Stagger bars for sequential animation
+                        delay = context.dataIndex * 80;
+                    }
+                    return delay;
+                }
+            },
+            animations: {
+                y: {
+                    from: 0,
+                    duration: 1500,
+                    easing: 'easeOutQuart'
+                },
+                x: {
+                    duration: 0
+                },
+                colors: {
+                    from: 'rgba(205, 159, 254, 0)',
+                    duration: 1500
+                }
+            },
+            interaction: {
+                intersect: false,
+                mode: 'index'
+            },
+            plugins: {
+                legend: { display: false },
+                tooltip: {
+                    backgroundColor: 'rgba(0,0,0,0.8)',
+                    padding: 12,
+                    titleFont: { size: 13 },
+                    bodyFont: { size: 12 },
+                    displayColors: false,
+                    callbacks: {
+                        label: function(context) {
+                            if (context.dataset.type === 'line') {
+                                return '₱' + new Intl.NumberFormat('en-PH').format(context.parsed.y);
+                            }
+                            return '';
                         }
-                        return '';
+                    }
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    min: 0,
+                    ticks: {
+                        callback: function(value) {
+                            if (value >= 1000000) {
+                                return '₱' + (value / 1000000).toFixed(1) + 'M';
+                            } else if (value >= 1000) {
+                                return '₱' + (value / 1000).toFixed(0) + 'K';
+                            }
+                            return '₱' + value;
+                        },
+                        font: { size: 11, color: '#999' }
+                    },
+                    grid: {
+                        color: 'rgba(0, 0, 0, 0.05)',
+                        drawBorder: false
+                    }
+                },
+                x: {
+                    grid: {
+                        display: false,
+                        drawBorder: false
+                    },
+                    ticks: {
+                        font: { size: 11, color: '#999' }
                     }
                 }
             }
-        },
-        scales: {
-            y: {
-                beginAtZero: true,
-                ticks: {
-                    callback: function(value) {
-                        if (value >= 1000000) {
-                            return '₱' + (value / 1000000).toFixed(1) + 'M';
-                        } else if (value >= 1000) {
-                            return '₱' + (value / 1000).toFixed(0) + 'K';
-                        }
-                        return '₱' + value;
-                    },
-                    font: { size: 11, color: '#999' }
-                },
-                grid: {
-                    color: 'rgba(0, 0, 0, 0.05)',
-                    drawBorder: false
-                }
-            },
-            x: {
-                grid: {
-                    display: false,
-                    drawBorder: false
-                },
-                ticks: {
-                    font: { size: 11, color: '#999' }
-                }
-            }
         }
-    }
-});
+    });
 
+    // Animate from zero to actual values - bars will grow from bottom to top
+    setTimeout(() => {
+        chart.data.datasets[0].data = monthlyValues;
+        chart.data.datasets[1].data = monthlyValues;
+        // Use 'active' mode to trigger smooth animation from bottom
+        chart.update('active');
+    }, 200);
+
+    return chart;
+}
 
 // CHART: APPOINTMENT DONUT
-appointmentDonutChart = new Chart(document.getElementById("appointmentDonut"), {
-    type: "doughnut",
-    data: {
-        labels: ["Accepted", "Rejected"],
-        datasets: [{
-            data: [donutAccepted, donutRejected],
-            backgroundColor: ["#2563EB", "#67E8F9"],
-            borderColor: "#FFF",
-            borderWidth: 3
-        }]
-    },
-    options: {
-        cutout: "50%",
-        responsive: true,
-        maintainAspectRatio: true,
-        animation: {
-            duration: 800,
-            easing: 'easeInOutQuart'
+function createAppointmentDonutChart() {
+    const canvas = document.getElementById("appointmentDonut");
+    if (!canvas) return null;
+
+    // Calculate total for initial animation
+    const total = donutAccepted + donutRejected;
+    const initialData = total > 0 ? [0, 0] : [donutAccepted, donutRejected];
+
+    const chart = new Chart(canvas, {
+        type: "doughnut",
+        data: {
+            labels: ["Accepted", "Rejected"],
+            datasets: [{
+                data: initialData,
+                backgroundColor: ["#2563EB", "#67E8F9"],
+                borderColor: "#FFF",
+                borderWidth: 3
+            }]
         },
-        plugins: {
-            legend: {
-                display: true,
-                position: 'bottom',
-                labels: {
-                    padding: 20,
-                    font: { size: 12, weight: '500' },
-                    usePointStyle: true,
-                    pointStyle: 'circle',
-                    boxWidth: 8
+        options: {
+            cutout: "50%",
+            responsive: true,
+            maintainAspectRatio: true,
+            animation: {
+                duration: 2000,
+                easing: 'easeOutCubic',
+                animateRotate: true,
+                animateScale: true,
+                onComplete: function() {
+                    // Animation completed
                 }
             },
-            tooltip: {
-                backgroundColor: 'rgba(0,0,0,0.8)',
-                padding: 12,
-                titleFont: { size: 13 },
-                bodyFont: { size: 12 },
-                displayColors: true,
-                callbacks: {
-                    label: function(context) {
-                        const value = context.parsed;
+            animations: {
+                radius: {
+                    from: 0,
+                    duration: 2000,
+                    easing: 'easeOutCubic'
+                },
+                angle: {
+                    from: 0,
+                    duration: 2000,
+                    easing: 'easeOutCubic'
+                },
+                colors: {
+                    from: 'transparent',
+                    duration: 2000
+                }
+            },
+            plugins: {
+                legend: {
+                    display: true,
+                    position: 'bottom',
+                    labels: {
+                        padding: 20,
+                        font: { size: 12, weight: '500' },
+                        usePointStyle: true,
+                        pointStyle: 'circle',
+                        boxWidth: 8
+                    }
+                },
+                tooltip: {
+                    backgroundColor: 'rgba(0,0,0,0.8)',
+                    padding: 12,
+                    titleFont: { size: 13 },
+                    bodyFont: { size: 12 },
+                    displayColors: true,
+                    callbacks: {
+                        label: function(context) {
+                            const value = context.parsed;
+                            const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                            const percentage = ((value / total) * 100).toFixed(0);
+                            return percentage + '%';
+                        }
+                    }
+                },
+                datalabels: {
+                    color: '#000',
+                    font: { size: 13, weight: 'bold' },
+                    formatter: function(value, context) {
                         const total = context.dataset.data.reduce((a, b) => a + b, 0);
                         const percentage = ((value / total) * 100).toFixed(0);
                         return percentage + '%';
                     }
                 }
-            },
-            datalabels: {
-                color: '#000',
-                font: { size: 13, weight: 'bold' },
-                formatter: function(value, context) {
-                    const total = context.dataset.data.reduce((a, b) => a + b, 0);
-                    const percentage = ((value / total) * 100).toFixed(0);
-                    return percentage + '%';
-                }
             }
         }
+    });
+
+    // Animate from zero to actual values
+    if (total > 0) {
+        setTimeout(() => {
+            chart.data.datasets[0].data = [donutAccepted, donutRejected];
+            chart.update('active');
+        }, 100);
     }
-});
+
+    return chart;
+}
 
 // Function to animate charts when data changes
 function animateCharts() {
     try {
         if (monthlySalesChart && typeof monthlySalesChart.update === 'function') {
-            // Use default animation mode
-            monthlySalesChart.update();
+            // Use 'active' mode to trigger animations
+            monthlySalesChart.update('active');
         }
         if (appointmentDonutChart && typeof appointmentDonutChart.update === 'function') {
-            // Use default animation mode
-            appointmentDonutChart.update();
+            // Use 'active' mode to trigger animations
+            appointmentDonutChart.update('active');
         }
     } catch (error) {
         console.log('Chart animation error:', error);
@@ -744,179 +838,26 @@ function animateCharts() {
 
 // Function to initialize/reinitialize charts
 function initializeCharts() {
+    // Load chart data first
+    loadChartData();
+
     // Check if charts already exist and destroy them first
     if (monthlySalesChart) {
         monthlySalesChart.destroy();
+        monthlySalesChart = null;
     }
     if (appointmentDonutChart) {
         appointmentDonutChart.destroy();
+        appointmentDonutChart = null;
     }
 
     // Recreate the charts
     try {
-        monthlySalesChart = new Chart(document.getElementById("monthlySales"), {
-            type: "bar",
-            data: {
-                labels: monthlyLabels,
-                datasets: [
-                    {
-                        label: "Sales",
-                        type: "bar",
-                        data: monthlyValues,
-                        backgroundColor: "rgba(205, 159, 254, 0.4)",
-                        borderColor: "rgba(205, 159, 254, 0.8)",
-                        borderWidth: 0,
-                        borderRadius: 8,
-                        borderSkipped: false,
-                        order: 2
-                    },
-                    {
-                        label: "Trend",
-                        type: "line",
-                        data: monthlyValues,
-                        borderColor: "#CD9FFE",
-                        backgroundColor: "transparent",
-                        borderWidth: 3,
-                        fill: false,
-                        tension: 0.4,
-                        pointRadius: 5,
-                        pointBackgroundColor: "#CD9FFE",
-                        pointBorderColor: "#FFF",
-                        pointBorderWidth: 2,
-                        order: 1
-                    }
-                ]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: true,
-                animation: {
-                    duration: 750,
-                    easing: 'easeInOutQuart',
-                    delay: (context) => {
-                        let delay = 0;
-                        if (context.type === 'data') {
-                            delay = context.dataIndex * 50 + context.datasetIndex * 100;
-                        }
-                        return delay;
-                    }
-                },
-                interaction: {
-                    intersect: false,
-                    mode: 'index'
-                },
-                plugins: {
-                    legend: { display: false },
-                    tooltip: {
-                        backgroundColor: 'rgba(0,0,0,0.8)',
-                        padding: 12,
-                        titleFont: { size: 13 },
-                        bodyFont: { size: 12 },
-                        displayColors: false,
-                        callbacks: {
-                            label: function(context) {
-                                if (context.dataset.type === 'line') {
-                                    return '₱' + new Intl.NumberFormat('en-PH').format(context.parsed.y);
-                                }
-                                return '';
-                            }
-                        }
-                    }
-                },
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        ticks: {
-                            callback: function(value) {
-                                if (value >= 1000000) {
-                                    return '₱' + (value / 1000000).toFixed(1) + 'M';
-                                } else if (value >= 1000) {
-                                    return '₱' + (value / 1000).toFixed(0) + 'K';
-                                }
-                                return '₱' + value;
-                            },
-                            font: { size: 11, color: '#999' }
-                        },
-                        grid: {
-                            color: 'rgba(0, 0, 0, 0.05)',
-                            drawBorder: false
-                        }
-                    },
-                    x: {
-                        grid: {
-                            display: false,
-                            drawBorder: false
-                        },
-                        ticks: {
-                            font: { size: 11, color: '#999' }
-                        }
-                    }
-                }
-            }
-        });
-
-        appointmentDonutChart = new Chart(document.getElementById("appointmentDonut"), {
-            type: "doughnut",
-            data: {
-                labels: ["Accepted", "Rejected"],
-                datasets: [{
-                    data: [donutAccepted, donutRejected],
-                    backgroundColor: ["#2563EB", "#67E8F9"],
-                    borderColor: "#FFF",
-                    borderWidth: 3
-                }]
-            },
-            options: {
-                cutout: "50%",
-                responsive: true,
-                maintainAspectRatio: true,
-                animation: {
-                    duration: 800,
-                    easing: 'easeInOutQuart'
-                },
-                plugins: {
-                    legend: {
-                        display: true,
-                        position: 'bottom',
-                        labels: {
-                            padding: 20,
-                            font: { size: 12, weight: '500' },
-                            usePointStyle: true,
-                            pointStyle: 'circle',
-                            boxWidth: 8
-                        }
-                    },
-                    tooltip: {
-                        backgroundColor: 'rgba(0,0,0,0.8)',
-                        padding: 12,
-                        titleFont: { size: 13 },
-                        bodyFont: { size: 12 },
-                        displayColors: true,
-                        callbacks: {
-                            label: function(context) {
-                                const value = context.parsed;
-                                const total = context.dataset.data.reduce((a, b) => a + b, 0);
-                                const percentage = ((value / total) * 100).toFixed(0);
-                                return percentage + '%';
-                            }
-                        }
-                    },
-                    datalabels: {
-                        color: '#000',
-                        font: { size: 13, weight: 'bold' },
-                        formatter: function(value, context) {
-                            const total = context.dataset.data.reduce((a, b) => a + b, 0);
-                            const percentage = ((value / total) * 100).toFixed(0);
-                            return percentage + '%';
-                        }
-                    }
-                }
-            }
-        });
-
-        console.log('Charts reinitialized successfully');
+        monthlySalesChart = createMonthlySalesChart();
+        appointmentDonutChart = createAppointmentDonutChart();
+        console.log('Charts initialized successfully');
     } catch (error) {
-        console.log('Chart initialization error:', error);
+        console.error('Chart initialization error:', error);
     }
 }
 
@@ -943,47 +884,59 @@ style.textContent = `
 `;
 document.head.appendChild(style);
 
-// ===== TRIGGER ANIMATIONS ON PAGE LOAD/RELOAD =====
-// Prevent multiple animation triggers
-let animationTimeout = null;
-let isAnimating = false;
-
-function triggerChartAnimation() {
-    if (isAnimating) return; // Prevent overlapping animations
-
-    isAnimating = true;
-
-    // Clear any existing timeout
-    if (animationTimeout) {
-        clearTimeout(animationTimeout);
+// ===== INITIALIZE CHARTS ON PAGE LOAD =====
+function initCharts() {
+    // Wait for Chart.js to be available
+    if (typeof Chart === 'undefined') {
+        console.warn('Chart.js not loaded yet, retrying...');
+        setTimeout(initCharts, 100);
+        return;
     }
 
-    // Small delay ensures charts are fully rendered before animation starts
-    animationTimeout = setTimeout(() => {
-        animateCharts();
-        isAnimating = false;
-    }, 300);
+    // Configure Chart.js defaults to ensure animations are enabled
+    Chart.defaults.animation = Chart.defaults.animation || {};
+    Chart.defaults.animation.duration = 2000;
+    Chart.defaults.animation.easing = 'easeOutCubic';
+
+    // Load chart data and initialize charts
+    loadChartData();
+    
+    // Check if canvas elements exist
+    const monthlySalesCanvas = document.getElementById("monthlySales");
+    const appointmentDonutCanvas = document.getElementById("appointmentDonut");
+    
+    if (!monthlySalesCanvas || !appointmentDonutCanvas) {
+        console.warn('Chart canvas elements not found, retrying...');
+        setTimeout(initCharts, 100);
+        return;
+    }
+    
+    // Initialize charts - they will animate automatically on creation
+    try {
+        // Destroy existing charts if they exist
+        if (monthlySalesChart) {
+            monthlySalesChart.destroy();
+        }
+        if (appointmentDonutChart) {
+            appointmentDonutChart.destroy();
+        }
+        
+        // Create new charts with animations
+        monthlySalesChart = createMonthlySalesChart();
+        appointmentDonutChart = createAppointmentDonutChart();
+        
+        console.log('Charts initialized successfully with animations');
+        console.log('Monthly Sales Chart:', monthlySalesChart);
+        console.log('Appointment Donut Chart:', appointmentDonutChart);
+    } catch (error) {
+        console.error('Error initializing charts:', error);
+    }
 }
 
-document.addEventListener('DOMContentLoaded', () => {
-    // Ensure charts are initialized first, then animate
-    setTimeout(() => {
-        // Check if charts exist, if not, initialize them
-        if (!monthlySalesChart || !appointmentDonutChart) {
-            initializeCharts();
-        }
-        // Then trigger animation
-        setTimeout(() => {
-            triggerChartAnimation();
-        }, 100);
-    }, 200);
-});
-
-// Alternative trigger for page visibility (when tab is refocused)
-document.addEventListener('visibilitychange', () => {
-    if (!document.hidden) {
-        setTimeout(() => {
-            triggerChartAnimation();
-        }, 100);
-    }
-});
+// Initialize when DOM is ready
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initCharts);
+} else {
+    // DOM is already ready
+    initCharts();
+}
