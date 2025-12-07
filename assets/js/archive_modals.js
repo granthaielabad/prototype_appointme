@@ -3,6 +3,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const serviceModal = document.getElementById("archiveServiceViewModal");
     const appointmentModal = document.getElementById("archiveAppointmentViewModal");
     const inquiryModal = document.getElementById("archiveInquiryViewModal");
+    const employeeModal = document.getElementById("archiveEmployeeViewModal");
     const closeBtns = document.querySelectorAll(".close-modal");
 
     /* -------------------------------------------
@@ -23,6 +24,7 @@ document.addEventListener("DOMContentLoaded", () => {
         serviceModal.style.display = "none";
         appointmentModal.style.display = "none";
         inquiryModal.style.display = "none";
+        employeeModal.style.display = "none";
     };
 
     /* -------------------------------------------
@@ -200,6 +202,33 @@ document.addEventListener("DOMContentLoaded", () => {
 
                 closeAllModals();
                 inquiryModal.style.display = "flex";
+
+            } else if (itemType === 'employee') {
+                // Populate Employee Modal
+                document.getElementById("archive_employee_name").textContent = details.full_name || "Unknown Employee";
+                document.getElementById("archive_employee_email").textContent = details.email || "N/A";
+                document.getElementById("archive_employee_contact").textContent = details.contact_number || "N/A";
+                document.getElementById("archive_employee_position").textContent = details.position || "N/A";
+                
+                // Format hire date
+                const hireDateFormatted = formatFullDate(details.hire_date);
+                document.getElementById("archive_employee_hire_date").textContent = hireDateFormatted;
+                
+                document.getElementById("archive_employee_address").textContent = details.address || "N/A";
+
+                // Status badge - always show as "Deactivated" for archived employees
+                const statusBadge = document.getElementById("archive_employee_status_badge");
+                statusBadge.textContent = "Status: Deactivated";
+                statusBadge.className = "badge badge-inactive";
+                statusBadge.style.backgroundColor = "#dc3545";
+                statusBadge.style.color = "#fff";
+
+                // Format archived date
+                const archivedDateFormatted = formatFullDate(details.archived_at);
+                document.getElementById("archive_employee_archived_date").textContent = archivedDateFormatted;
+
+                closeAllModals();
+                employeeModal.style.display = "flex";
             }
         });
     });
@@ -214,7 +243,7 @@ document.addEventListener("DOMContentLoaded", () => {
     /* -------------------------------------------
        CLICK OUTSIDE TO CLOSE
     ------------------------------------------- */
-    [serviceModal, appointmentModal, inquiryModal].forEach(modal => {
+    [serviceModal, appointmentModal, inquiryModal, employeeModal].forEach(modal => {
         modal.addEventListener("click", (e) => {
             if (e.target === modal) closeAllModals();
         });

@@ -49,7 +49,7 @@ class ArchiveController extends AdminController
                     ? json_decode($archive['item_data'], true) 
                     : [];
 
-                // Extract the item_id from snapshot (service_id, appointment_id, or inquiry_id)
+                // Extract the item_id from snapshot (service_id, appointment_id, inquiry_id, or employee id)
                 $itemId = null;
                 $itemType = $archive['item_type'] ?? 'unknown';
                 if ($itemType === 'service' && isset($itemData['service_id'])) {
@@ -58,6 +58,8 @@ class ArchiveController extends AdminController
                     $itemId = $itemData['appointment_id'];
                 } elseif ($itemType === 'inquiry' && isset($itemData['inquiry_id'])) {
                     $itemId = $itemData['inquiry_id'];
+                } elseif ($itemType === 'employee' && isset($itemData['id'])) {
+                    $itemId = $itemData['id'];
                 }
 
                 // Build the item for display
@@ -112,6 +114,18 @@ class ArchiveController extends AdminController
                     $item['details']['message'] = $item['details']['message'] ?? '';
                     $item['details']['created_at'] = $item['details']['created_at'] ?? $item['archived_at'];
                     $item['details']['archived_at'] = $item['archived_at'];
+                } elseif ($item['item_type'] === 'employee') {
+                    $item['details']['full_name'] = $item['details']['full_name'] ?? $item['item_name'] ?? 'Unknown Employee';
+                    $item['details']['email'] = $item['details']['email'] ?? 'N/A';
+                    $item['details']['contact_number'] = $item['details']['contact_number'] ?? 'N/A';
+                    $item['details']['employee_number'] = $item['details']['employee_number'] ?? 'N/A';
+                    $item['details']['position'] = $item['details']['position'] ?? 'N/A';
+                    $item['details']['hire_date'] = $item['details']['hire_date'] ?? 'N/A';
+                    $item['details']['address'] = $item['details']['address'] ?? 'N/A';
+                    $item['details']['work_schedule'] = $item['details']['work_schedule'] ?? 'N/A';
+                    $item['details']['remarks'] = $item['details']['remarks'] ?? '';
+                    $item['details']['is_active'] = $item['details']['is_active'] ?? 1;
+                    $item['details']['archived_at'] = $item['archived_at'];
                 }
 
                 $items[] = $item;
@@ -153,6 +167,25 @@ class ArchiveController extends AdminController
 
             case 'inquiry':
                 $ok = (new Inquiry())->restore($id);
+                break;
+
+            case 'employee':
+                // For employees, we need to restore from tbl_employees
+                $db = (new \App\Models\Service())->getDb();
+
+                // Check if employee exists and is deleted
+                $stmt = $db->prepare("SELECT * FROM tbl_employees WHERE id = ? AND is_deleted = 1");
+                $stmt->execute([$id]);
+                $employee = $stmt->fetch(PDO::FETCH_ASSOC);
+
+                if (!$employee) {
+                    $ok = false;
+                    break;
+                }
+
+                // Restore in main table (mark as not deleted)
+                $stmt = $db->prepare("UPDATE tbl_employees SET is_deleted = 0, deleted_at = NULL, deleted_by = NULL WHERE id = ?");
+                $ok = $stmt->execute([$id]);
                 break;
 
             default:
