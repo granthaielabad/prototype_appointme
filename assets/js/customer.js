@@ -78,7 +78,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
 
-
+// profile - changed password
   const changePassForm = document.querySelector('#changePasswordModal form');
   if (changePassForm) {
     changePassForm.addEventListener('submit', (e) => {
@@ -90,5 +90,27 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     });
   }
+
+// profile - changed profile
+
+  const photoTrigger = document.getElementById('profilePhotoTrigger');
+  const photoInput = document.getElementById('profilePhotoInput');
+  const photoImg = document.getElementById('profilePhoto');
+  const photoForm = document.getElementById('profilePhotoForm');
+
+  if (photoTrigger && photoInput) {
+    photoTrigger.addEventListener('click', () => photoInput.click());
+    photoInput.addEventListener('change', (e) => {
+      const file = e.target.files?.[0];
+      if (file) {
+        const url = URL.createObjectURL(file);
+        if (photoImg) photoImg.src = url;
+        photoForm?.submit();
+      }
+    });
+  }
+
+
+
 
 });

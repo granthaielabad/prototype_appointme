@@ -83,6 +83,8 @@ class UserController extends Controller
             "emergency_phone"    => trim($_POST["emergency_phone"] ?? "")
         ];
 
+
+
         $m = new User();
         $m->update($userId, $updates);
 
@@ -211,6 +213,46 @@ class UserController extends Controller
         Auth::logout();
         Session::flash('success', 'Your account has been deactivated.', 'success');
         header('Location: /login');
+        exit();
+    }
+
+    // update photo
+    public function updatePhoto(): void
+    {
+        Auth::requireRole(3);
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') { header('Location: /profile'); exit(); }
+
+        $token = $_POST['_csrf'] ?? '';
+        if (!CSRF::verify($token)) { Session::flash('error','Invalid form submission.','danger'); header('Location: /profile'); exit(); }
+
+        $sessionUser = Auth::user();
+        $userId = (int)($sessionUser['user_id'] ?? 0);
+        if ($userId <= 0) { Session::flash('error','User not found.','danger'); header('Location: /login'); exit(); }
+
+        if (empty($_FILES['profile_photo']['name']) || $_FILES['profile_photo']['error'] !== UPLOAD_ERR_OK) {
+            Session::flash('error','Upload failed. Please try again.','danger'); header('Location: /profile'); exit();
+        }
+
+        $file = $_FILES['profile_photo'];
+        $allowed = ['image/jpeg' => 'jpg', 'image/png' => 'png', 'image/webp' => 'webp'];
+        $mime = mime_content_type($file['tmp_name']);
+        if (!isset($allowed[$mime])) { Session::flash('error','Invalid image type. Use JPG, PNG, or WEBP.','danger'); header('Location: /profile'); exit(); }
+
+        $ext = $allowed[$mime];
+        $dir = __DIR__ . '/../../uploads/profile_photos'; // <-- underscore folder
+        if (!is_dir($dir)) { mkdir($dir, 0755, true); }
+        $filename = 'user_' . $userId . '_' . time() . '.' . $ext;
+        $dest = $dir . '/' . $filename;
+        if (!move_uploaded_file($file['tmp_name'], $dest)) {
+            Session::flash('error','Upload failed. Please try again.','danger'); header('Location: /profile'); exit();
+        }
+
+        (new User())->update($userId, ['profile_photo' => '/uploads/profile_photos/' . $filename]); // <-- underscore URL
+        $freshUser = (new User())->find($userId);
+        if ($freshUser) { Session::set('user', $freshUser); }
+
+        Session::flash('success','Profile photo updated.','success');
+        header('Location: /profile');
         exit();
     }
 

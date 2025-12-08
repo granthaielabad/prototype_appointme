@@ -58,6 +58,8 @@ $router->post("/book", "BookingController@store");
 $router->get("/api/appointments/taken", "BookingController@takenSlots");
 $router->get("/appointment/cancel", "BookingController@cancelFromHistory");
 
+$router->post("/profile/update-photo", "UserController@updatePhoto");
+
 
 
 $router->get("/invoices", "InvoiceController@customerList");

@@ -83,8 +83,19 @@ $emgPhone = $user['emergency_phone'] ?? '';
         <div class="container-inside1-body2">
             <h5><?= htmlspecialchars($fullName ?: 'Your Name') ?></h5>
             <p><?= $created ? 'Created since ' . htmlspecialchars($created) : '' ?></p>
-            <img src="<?= htmlspecialchars($photo) ?>" height="300" width="300" alt="Profile photo">
-        </div>
+              <!--photo form   --> 
+           <form id="profilePhotoForm" method="POST" action="/profile/update-photo" enctype="multipart/form-data" class="d-inline-block">
+            <input type="hidden" name="_csrf" value="<?= \App\Core\CSRF::getToken() ?>">
+            <div class="profile-photo-wrapper">
+              <img id="profilePhoto" src="<?= htmlspecialchars($photo) ?>" class="profile-photo" alt="Profile photo">
+              <button type="button" id="profilePhotoTrigger" class="photo-edit-btn" aria-label="Change profile photo">
+                <i class="bi bi-pencil-fill"></i>
+              </button>
+              <input type="file" id="profilePhotoInput" name="profile_photo" accept="image/jpeg,image/png,image/webp" class="d-none">
+            </div>
+          </form>
+
+          </div>
 
 
 
