@@ -3,6 +3,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const serviceModal = document.getElementById("archiveServiceViewModal");
     const appointmentModal = document.getElementById("archiveAppointmentViewModal");
     const inquiryModal = document.getElementById("archiveInquiryViewModal");
+    const employeeModal = document.getElementById("archiveEmployeeViewModal");
     const closeBtns = document.querySelectorAll(".close-modal");
 
     /* -------------------------------------------
@@ -23,6 +24,7 @@ document.addEventListener("DOMContentLoaded", () => {
         serviceModal.style.display = "none";
         appointmentModal.style.display = "none";
         inquiryModal.style.display = "none";
+        employeeModal.style.display = "none";
     };
 
     /* -------------------------------------------
@@ -122,19 +124,31 @@ document.addEventListener("DOMContentLoaded", () => {
                 }`;
                 document.getElementById("archive_appointment_date_time").textContent = appointmentDateTime;
 
-                // Populate Services List as badges
+                // Populate Services List as badges with categories
                 const servicesContainer = document.getElementById("archive_appointment_services");
                 servicesContainer.innerHTML = "";
                 if (details.services && Array.isArray(details.services)) {
                     const servicesList = details.services.map(s => {
-                        const serviceName = typeof s === 'string' ? s : (s.service_name || s);
-                        return `<span class="badge rounded-pill" style="background-color: #6c757d; padding: 0.5rem 1rem; font-size: 0.85rem;">
-                            <i class="bi bi-scissors me-1"></i>${htmlEscape(serviceName)}
-                        </span>`;
+                        if (typeof s === 'string') {
+                            // Legacy format - just service name
+                            return `<span class="badge rounded-pill me-2" style="background-color: #6c757d; padding: 0.5rem 1rem; font-size: 0.85rem;">
+                                <i class="bi bi-scissors me-1"></i>${htmlEscape(s)}
+                            </span>`;
+                        } else if (s && typeof s === 'object' && s.name) {
+                            // New format with name and category
+                            const serviceBadge = `<span class="badge rounded-pill me-2" style="background-color: #6c757d; padding: 0.5rem 1rem; font-size: 0.85rem;">
+                                <i class="bi bi-scissors me-1"></i>${htmlEscape(s.name)}
+                            </span>`;
+                            const categoryBadge = `<span class="badge rounded-pill" style="background-color: #6c757d; padding: 0.5rem 1rem; font-size: 0.85rem;">
+                                <i class="bi bi-brush me-1"></i>${htmlEscape(s.category || 'Service')}
+                            </span>`;
+                            return serviceBadge + categoryBadge;
+                        }
+                        return '';
                     }).join("");
                     servicesContainer.innerHTML = servicesList;
                 } else if (typeof details.services === 'string') {
-                    servicesContainer.innerHTML = `<span class="badge rounded-pill" style="background-color: #6c757d; padding: 0.5rem 1rem; font-size: 0.85rem;">
+                    servicesContainer.innerHTML = `<span class="badge rounded-pill me-2" style="background-color: #6c757d; padding: 0.5rem 1rem; font-size: 0.85rem;">
                         <i class="bi bi-scissors me-1"></i>${htmlEscape(details.services)}
                     </span>`;
                 } else {
@@ -152,16 +166,69 @@ document.addEventListener("DOMContentLoaded", () => {
                 document.getElementById("archive_inq_name").textContent = details.full_name || "Unknown";
                 document.getElementById("archive_inq_phone").textContent = details.phone || "N/A";
                 document.getElementById("archive_inq_email").textContent = details.email || "N/A";
-                
+
+                // Set status badge
+                const statusElement = document.getElementById("archive_inq_status");
+                const status = details.status || 'pending'; // Use stored status or default to pending
+                let statusBadge = '';
+
+                switch (status) {
+                    case 'pending':
+                        statusBadge = '<span class="badge bg-warning text-dark">Pending</span>';
+                        break;
+                    case 'read':
+                        statusBadge = '<span class="badge bg-info text-white">Read</span>';
+                        break;
+                    case 'replied':
+                        statusBadge = '<span class="badge bg-success">Replied</span>';
+                        break;
+                    case 'deleted':
+                        statusBadge = '<span class="badge bg-danger">Deleted</span>';
+                        break;
+                    default:
+                        statusBadge = '<span class="badge bg-secondary">Unknown</span>';
+                }
+                statusElement.innerHTML = statusBadge;
+
+                // Populate message content
+                document.getElementById("archive_inq_message").textContent = details.message || "No message provided";
+
                 // Format inquiry date as "Full Month Name, Day, Year"
                 const inquiryDateFormatted = formatFullDate(details.created_at || details.inquiry_date);
                 document.getElementById("archive_inq_date").textContent = inquiryDateFormatted;
-                
+
                 const archivedDateFormatted = formatFullDate(details.archived_at);
                 document.getElementById("archive_inq_archived_date").textContent = archivedDateFormatted;
 
                 closeAllModals();
                 inquiryModal.style.display = "flex";
+
+            } else if (itemType === 'employee') {
+                // Populate Employee Modal
+                document.getElementById("archive_employee_name").textContent = details.full_name || "Unknown Employee";
+                document.getElementById("archive_employee_email").textContent = details.email || "N/A";
+                document.getElementById("archive_employee_contact").textContent = details.contact_number || "N/A";
+                document.getElementById("archive_employee_position").textContent = details.position || "N/A";
+                
+                // Format hire date
+                const hireDateFormatted = formatFullDate(details.hire_date);
+                document.getElementById("archive_employee_hire_date").textContent = hireDateFormatted;
+                
+                document.getElementById("archive_employee_address").textContent = details.address || "N/A";
+
+                // Status badge - always show as "Deactivated" for archived employees
+                const statusBadge = document.getElementById("archive_employee_status_badge");
+                statusBadge.textContent = "Status: Deactivated";
+                statusBadge.className = "badge badge-inactive";
+                statusBadge.style.backgroundColor = "#dc3545";
+                statusBadge.style.color = "#fff";
+
+                // Format archived date
+                const archivedDateFormatted = formatFullDate(details.archived_at);
+                document.getElementById("archive_employee_archived_date").textContent = archivedDateFormatted;
+
+                closeAllModals();
+                employeeModal.style.display = "flex";
             }
         });
     });
@@ -176,7 +243,7 @@ document.addEventListener("DOMContentLoaded", () => {
     /* -------------------------------------------
        CLICK OUTSIDE TO CLOSE
     ------------------------------------------- */
-    [serviceModal, appointmentModal, inquiryModal].forEach(modal => {
+    [serviceModal, appointmentModal, inquiryModal, employeeModal].forEach(modal => {
         modal.addEventListener("click", (e) => {
             if (e.target === modal) closeAllModals();
         });

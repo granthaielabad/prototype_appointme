@@ -186,14 +186,17 @@ if (apptResetDateFilter) {
     apptResetDateFilter.onclick = (e) => {
         e.preventDefault();
         e.stopPropagation(); // Prevent dropdown from closing
-        apptSelectedDate = null;
-        apptDateFilter.value = '';
-        apptCurrentMonth = new Date();
-        apptRenderCalendar();
 
-        // Update URL without page reload using history API
-        const url = new URL(window.location);
-        url.searchParams.delete('date');
-        window.history.replaceState(null, '', url.toString());
+        // Clear date filter and reload page to reset all appointment data
+        const baseUrl = window.location.origin + window.location.pathname;
+        const url = new URL(baseUrl);
+
+        // Preserve other parameters if they exist (like filter status)
+        const currentParams = new URLSearchParams(window.location.search);
+        if (currentParams.has('filter')) {
+            url.searchParams.set('filter', currentParams.get('filter'));
+        }
+
+        window.location.href = url.toString();
     };
 }

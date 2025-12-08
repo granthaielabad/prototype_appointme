@@ -214,7 +214,7 @@ class ReportController extends AdminController
                 $query = "
                     SELECT u.user_id, u.first_name, u.last_name, u.contact_number, u.email, u.date_created, u.is_active
                     FROM tbl_users u
-                    WHERE u.role_id = 3
+                    WHERE u.role_id = 2
                     ORDER BY u.date_created DESC
                 ";
                 $filename = "customer_list" . ($start ? "_{$start}_to_{$end}" : "_all");
@@ -350,7 +350,7 @@ class ReportController extends AdminController
                 $query = "
                     SELECT u.user_id, u.first_name, u.last_name, u.contact_number, u.email, u.date_created, u.is_active
                     FROM tbl_users u
-                    WHERE u.role_id = 3
+                    WHERE u.role_id = 2
                     ORDER BY u.date_created DESC
                 ";
                 $title = "Customer List";

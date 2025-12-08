@@ -10,7 +10,7 @@ class NotificationController extends Controller
 {
     public function list(): void
     {
-        Auth::requireRole(3);
+        Auth::requireRole(2);
         $user = Auth::user();
         $n = new Notification();
         $rows = $n->findByUser($user["user_id"]);
@@ -21,7 +21,7 @@ class NotificationController extends Controller
 
     public function markAllRead(): void
     {
-        Auth::requireRole(3);
+        Auth::requireRole(2);
         $user = Auth::user();
         (new Notification())->markAllRead($user["user_id"]);
         Session::flash("success", "All notifications marked read", "success");

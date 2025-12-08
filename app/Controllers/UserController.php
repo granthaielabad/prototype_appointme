@@ -31,7 +31,7 @@ class UserController extends Controller
 
     public function profile(): void
     {
-        Auth::requireRole(3);
+        Auth::requireRole(2); // customers only
 
         // Always fetch a fresh user row (session can be stale)
         $sessionUser = Auth::user();
@@ -50,7 +50,7 @@ class UserController extends Controller
 
     public function updateProfile(): void
     {
-        Auth::requireRole(3);
+        Auth::requireRole(2);
 
         if ($_SERVER["REQUEST_METHOD"] !== "POST") {
             header("Location: /profile");
