@@ -12,6 +12,9 @@ use Dotenv\Dotenv;
 
 require_once __DIR__ . "/vendor/autoload.php";
 
+// Load Auth 
+require_once __DIR__ . "/app/core/auth.php";
+
 // Initialize debugging
 Debug::init(__DIR__ . '/logs');
 Debug::logRequest();
@@ -52,6 +55,10 @@ $router->get("/reset-password", "AuthController@resetPasswordForm");
 $router->post("/reset-password", "AuthController@resetPassword");
 
 $router->get("/logout", "AuthController@logout");
+
+/* EMPLOYEE INVITATION */
+$router->get("/employee/accept-invitation", "EmployeeInvitationController@acceptInvitation");
+$router->post("/employee/complete-setup", "EmployeeInvitationController@completeSetup");
 
 /* CUSTOMER */
 $router->get("/book", "BookingController@index");
@@ -109,6 +116,16 @@ $router->post("/admin/services/store", "Admin\\ServiceController@store");
 $router->get("/admin/services/edit", "Admin\\ServiceController@edit");
 $router->post("/admin/services/update", "Admin\\ServiceController@update");
 $router->get("/admin/services/delete", "Admin\\ServiceController@delete");
+
+$router->get("/admin/employees", "Admin\\EmployeeController@index");
+$router->get("/admin/employees/create", "Admin\\EmployeeController@create");
+$router->post("/admin/employees/store", "Admin\\EmployeeController@store");
+$router->get("/admin/employees/edit", "Admin\\EmployeeController@edit");
+$router->post("/admin/employees/update", "Admin\\EmployeeController@update");
+$router->post("/admin/employees/toggle-status", "Admin\\EmployeeController@toggleStatus");
+$router->get("/admin/employees/archive", "Admin\\EmployeeController@archive");
+$router->get("/admin/employees/delete", "Admin\\EmployeeController@delete");
+$router->get("/admin/employees/activate", "Admin\\EmployeeController@activate");
 
 $router->get("/admin/inquiries", "Admin\\InquiryController@index");
 $router->get("/admin/inquiries/show", "Admin\\InquiryController@show");

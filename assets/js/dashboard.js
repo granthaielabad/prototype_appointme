@@ -1,7 +1,12 @@
-const monthlyLabels = JSON.parse(document.getElementById("monthlyLabels").textContent);
-const monthlyValues = JSON.parse(document.getElementById("monthlyValues").textContent);
-const donutAccepted = parseInt(document.getElementById("donutAccepted").textContent);
-const donutRejected = parseInt(document.getElementById("donutRejected").textContent);
+// Store chart instances for animation updates
+let monthlySalesChart = null;
+let appointmentDonutChart = null;
+
+// Variables to store chart data
+let monthlyLabels = [];
+let monthlyValues = [];
+let donutAccepted = 0;
+let donutRejected = 0;
 
 // ===== DATE FILTER DROPDOWN WITH CALENDAR =====
 // Modal calendar variables
@@ -240,20 +245,18 @@ if (resetDateFilter) {
     resetDateFilter.onclick = (e) => {
         e.preventDefault();
         e.stopPropagation(); // Prevent dropdown from closing
-        selectedStartDate = null;
-        selectedEndDate = null;
-        dateFilterStart.value = '';
-        dateFilterEnd.value = '';
-        startDateDisplay.textContent = '-';
-        endDateDisplay.textContent = '-';
-        currentMonth = new Date();
-        renderCalendar();
 
-        // Update URL without page reload using history API
-        const url = new URL(window.location);
-        url.searchParams.delete('start');
-        url.searchParams.delete('end');
-        window.history.replaceState(null, '', url.toString());
+        // Clear date filter and reload page to reset all dashboard data
+        const baseUrl = window.location.origin + window.location.pathname;
+        const url = new URL(baseUrl);
+
+        // Preserve other parameters if they exist (like period)
+        const currentParams = new URLSearchParams(window.location.search);
+        if (currentParams.has('period')) {
+            url.searchParams.set('period', currentParams.get('period'));
+        }
+
+        window.location.href = url.toString();
     };
 }
 
@@ -410,15 +413,17 @@ function selectModalDate(dateStr) {
     } else if (!modalSelectedEndDate) {
         // Second click
         if (dateStr > modalSelectedStartDate) {
-            // If after start date, set as end date
+            // If after start date, set as end date and instantly apply
             modalSelectedEndDate = dateStr;
             if (modalEndDateDisplay) modalEndDateDisplay.textContent = dateStr;
+            applyModalFilter(); // Auto-apply when both dates are selected
         } else if (dateStr < modalSelectedStartDate) {
-            // If before start date, swap them
+            // If before start date, swap them and apply
             modalSelectedEndDate = modalSelectedStartDate;
             modalSelectedStartDate = dateStr;
             if (modalStartDateDisplay) modalStartDateDisplay.textContent = dateStr;
             if (modalEndDateDisplay) modalEndDateDisplay.textContent = modalSelectedEndDate;
+            applyModalFilter(); // Auto-apply when both dates are selected
         } else {
             // If same date, reset
             modalSelectedStartDate = null;
@@ -437,6 +442,29 @@ function selectModalDate(dateStr) {
     if (modalDateFilterStart) modalDateFilterStart.value = modalSelectedStartDate || '';
     if (modalDateFilterEnd) modalDateFilterEnd.value = modalSelectedEndDate || '';
     renderModalCalendar();
+}
+
+function applyModalFilter() {
+    // Copy modal selections to main calendar and apply filter
+    selectedStartDate = modalSelectedStartDate;
+    selectedEndDate = modalSelectedEndDate;
+    currentMonth = new Date(modalCurrentMonth);
+
+    // Update main displays
+    if (startDateDisplay) startDateDisplay.textContent = selectedStartDate || '-';
+    if (endDateDisplay) endDateDisplay.textContent = selectedEndDate || '-';
+    if (dateFilterStart) dateFilterStart.value = selectedStartDate || '';
+    if (dateFilterEnd) dateFilterEnd.value = selectedEndDate || '';
+
+    // Apply filter if both dates are selected
+    if (selectedStartDate && selectedEndDate) {
+        applyFilter();
+    } else {
+        renderCalendar();
+    }
+
+    // Close modal after auto-applying
+    if (dateFilterModal) dateFilterModal.style.display = 'none';
 }
 
 // Modal month navigation
@@ -468,35 +496,31 @@ if (modalResetDateFilter) {
         if (modalDateFilterEnd) modalDateFilterEnd.value = '';
         modalCurrentMonth = new Date();
         renderModalCalendar();
-    };
-}
 
-// Apply modal filter
-if (applyDateFilter) {
-    applyDateFilter.onclick = (e) => {
-        e.preventDefault();
-        // Copy modal selections to main calendar
-        selectedStartDate = modalSelectedStartDate;
-        selectedEndDate = modalSelectedEndDate;
-        currentMonth = new Date(modalCurrentMonth);
+        // Also reset main calendar and close modal
+        selectedStartDate = null;
+        selectedEndDate = null;
+        if (startDateDisplay) startDateDisplay.textContent = '-';
+        if (endDateDisplay) endDateDisplay.textContent = '-';
+        if (dateFilterStart) dateFilterStart.value = '';
+        if (dateFilterEnd) dateFilterEnd.value = '';
 
-        // Update main displays
-        if (startDateDisplay) startDateDisplay.textContent = selectedStartDate || '-';
-        if (endDateDisplay) endDateDisplay.textContent = selectedEndDate || '-';
-        if (dateFilterStart) dateFilterStart.value = selectedStartDate || '';
-        if (dateFilterEnd) dateFilterEnd.value = selectedEndDate || '';
-
-        // Apply filter if both dates are selected
-        if (selectedStartDate && selectedEndDate) {
-            applyFilter();
-        } else {
-            renderCalendar();
-        }
-
-        // Close modal
+        // Close modal after resetting
         if (dateFilterModal) dateFilterModal.style.display = 'none';
+
+        // Reload page to reset dashboard data
+        const baseUrl = window.location.origin + window.location.pathname;
+        const url = new URL(baseUrl);
+        const currentParams = new URLSearchParams(window.location.search);
+        if (currentParams.has('period')) {
+            url.searchParams.set('period', currentParams.get('period'));
+        }
+        window.location.href = url.toString();
     };
 }
+
+// Modal now auto-applies when both dates are selected
+// The applyDateFilter button is no longer needed
 
 // ===== PERIOD DROPDOWN LABEL UPDATE =====
 function updatePeriodDropdownLabel() {
@@ -534,12 +558,32 @@ document.getElementById("openDownloadModal").onclick = () => {
 };
 modal.querySelector(".close-modal").onclick = () => modal.style.display = "none";
 
-// Store chart instances for animation updates
-let monthlySalesChart = null;
-let appointmentDonutChart = null;
+// Function to load chart data from DOM
+function loadChartData() {
+    try {
+        const monthlyLabelsEl = document.getElementById("monthlyLabels");
+        const monthlyValuesEl = document.getElementById("monthlyValues");
+        const donutAcceptedEl = document.getElementById("donutAccepted");
+        const donutRejectedEl = document.getElementById("donutRejected");
+
+        if (monthlyLabelsEl) monthlyLabels = JSON.parse(monthlyLabelsEl.textContent);
+        if (monthlyValuesEl) monthlyValues = JSON.parse(monthlyValuesEl.textContent);
+        if (donutAcceptedEl) donutAccepted = parseInt(donutAcceptedEl.textContent);
+        if (donutRejectedEl) donutRejected = parseInt(donutRejectedEl.textContent);
+    } catch (error) {
+        console.error('Error loading chart data:', error);
+    }
+}
 
 // CHART: MONTHLY SALES (Bar + Line overlay)
-monthlySalesChart = new Chart(document.getElementById("monthlySales"), {
+function createMonthlySalesChart() {
+    const canvas = document.getElementById("monthlySales");
+    if (!canvas) return null;
+
+    // Create initial empty data arrays for animation
+    const initialData = monthlyValues.map(() => 0);
+
+    const chart = new Chart(canvas, {
     type: "bar",
     data: {
         labels: monthlyLabels,
@@ -548,7 +592,7 @@ monthlySalesChart = new Chart(document.getElementById("monthlySales"), {
             {
                 label: "Sales",
                 type: "bar",
-                data: monthlyValues,
+                    data: initialData,
                 backgroundColor: "rgba(205, 159, 254, 0.4)",
                 borderColor: "rgba(205, 159, 254, 0.8)",
                 borderWidth: 0,
@@ -560,7 +604,7 @@ monthlySalesChart = new Chart(document.getElementById("monthlySales"), {
             {
                 label: "Trend",
                 type: "line",
-                data: monthlyValues,
+                    data: initialData,
                 borderColor: "#CD9FFE",
                 backgroundColor: "transparent",
                 borderWidth: 3,
@@ -578,16 +622,34 @@ monthlySalesChart = new Chart(document.getElementById("monthlySales"), {
         responsive: true,
         maintainAspectRatio: true,
         animation: {
-            duration: 750,
-            easing: 'easeInOutQuart',
+                duration: 1500,
+                easing: 'easeOutQuart',
+                onComplete: function() {
+                    // Animation completed
+                },
             delay: (context) => {
                 let delay = 0;
                 if (context.type === 'data') {
-                    delay = context.dataIndex * 50 + context.datasetIndex * 100;
+                        // Stagger bars for sequential animation
+                        delay = context.dataIndex * 80;
                 }
                 return delay;
             }
         },
+            animations: {
+                y: {
+                    from: 0,
+                    duration: 1500,
+                    easing: 'easeOutQuart'
+                },
+                x: {
+                    duration: 0
+                },
+                colors: {
+                    from: 'rgba(205, 159, 254, 0)',
+                    duration: 1500
+                }
+            },
         interaction: {
             intersect: false,
             mode: 'index'
@@ -613,6 +675,7 @@ monthlySalesChart = new Chart(document.getElementById("monthlySales"), {
         scales: {
             y: {
                 beginAtZero: true,
+                    min: 0,
                 ticks: {
                     callback: function(value) {
                         if (value >= 1000000) {
@@ -642,14 +705,32 @@ monthlySalesChart = new Chart(document.getElementById("monthlySales"), {
     }
 });
 
+    // Animate from zero to actual values - bars will grow from bottom to top
+    setTimeout(() => {
+        chart.data.datasets[0].data = monthlyValues;
+        chart.data.datasets[1].data = monthlyValues;
+        // Use 'active' mode to trigger smooth animation from bottom
+        chart.update('active');
+    }, 200);
+
+    return chart;
+}
 
 // CHART: APPOINTMENT DONUT
-appointmentDonutChart = new Chart(document.getElementById("appointmentDonut"), {
+function createAppointmentDonutChart() {
+    const canvas = document.getElementById("appointmentDonut");
+    if (!canvas) return null;
+
+    // Calculate total for initial animation
+    const total = donutAccepted + donutRejected;
+    const initialData = total > 0 ? [0, 0] : [donutAccepted, donutRejected];
+
+    const chart = new Chart(canvas, {
     type: "doughnut",
     data: {
         labels: ["Accepted", "Rejected"],
         datasets: [{
-            data: [donutAccepted, donutRejected],
+                data: initialData,
             backgroundColor: ["#2563EB", "#67E8F9"],
             borderColor: "#FFF",
             borderWidth: 3
@@ -660,8 +741,29 @@ appointmentDonutChart = new Chart(document.getElementById("appointmentDonut"), {
         responsive: true,
         maintainAspectRatio: true,
         animation: {
-            duration: 800,
-            easing: 'easeInOutQuart'
+                duration: 2000,
+                easing: 'easeOutCubic',
+                animateRotate: true,
+                animateScale: true,
+                onComplete: function() {
+                    // Animation completed
+                }
+            },
+            animations: {
+                radius: {
+                    from: 0,
+                    duration: 2000,
+                    easing: 'easeOutCubic'
+                },
+                angle: {
+                    from: 0,
+                    duration: 2000,
+                    easing: 'easeOutCubic'
+                },
+                colors: {
+                    from: 'transparent',
+                    duration: 2000
+                }
         },
         plugins: {
             legend: {
@@ -703,13 +805,59 @@ appointmentDonutChart = new Chart(document.getElementById("appointmentDonut"), {
     }
 });
 
+    // Animate from zero to actual values
+    if (total > 0) {
+        setTimeout(() => {
+            chart.data.datasets[0].data = [donutAccepted, donutRejected];
+            chart.update('active');
+        }, 100);
+    }
+
+    return chart;
+}
+
 // Function to animate charts when data changes
 function animateCharts() {
+    try {
+        if (monthlySalesChart && typeof monthlySalesChart.update === 'function') {
+            // Use 'active' mode to trigger animations
+            monthlySalesChart.update('active');
+        }
+        if (appointmentDonutChart && typeof appointmentDonutChart.update === 'function') {
+            // Use 'active' mode to trigger animations
+            appointmentDonutChart.update('active');
+        }
+    } catch (error) {
+        console.log('Chart animation error:', error);
+        // Fallback: recreate charts if they failed
+        setTimeout(() => {
+            initializeCharts();
+        }, 500);
+    }
+}
+
+// Function to initialize/reinitialize charts
+function initializeCharts() {
+    // Load chart data first
+    loadChartData();
+
+    // Check if charts already exist and destroy them first
     if (monthlySalesChart) {
-        monthlySalesChart.update('active');
+        monthlySalesChart.destroy();
+        monthlySalesChart = null;
     }
     if (appointmentDonutChart) {
-        appointmentDonutChart.update('active');
+        appointmentDonutChart.destroy();
+        appointmentDonutChart = null;
+    }
+
+    // Recreate the charts
+    try {
+        monthlySalesChart = createMonthlySalesChart();
+        appointmentDonutChart = createAppointmentDonutChart();
+        console.log('Charts initialized successfully');
+    } catch (error) {
+        console.error('Chart initialization error:', error);
     }
 }
 
@@ -736,19 +884,59 @@ style.textContent = `
 `;
 document.head.appendChild(style);
 
-// ===== TRIGGER ANIMATIONS ON PAGE LOAD/RELOAD =====
-document.addEventListener('DOMContentLoaded', () => {
-    // Small delay ensures charts are fully rendered before animation starts
-    setTimeout(() => {
-        animateCharts();
-    }, 300);
-});
-
-// Alternative trigger for page visibility (when tab is refocused)
-document.addEventListener('visibilitychange', () => {
-    if (!document.hidden) {
-        setTimeout(() => {
-            animateCharts();
-        }, 300);
+// ===== INITIALIZE CHARTS ON PAGE LOAD =====
+function initCharts() {
+    // Wait for Chart.js to be available
+    if (typeof Chart === 'undefined') {
+        console.warn('Chart.js not loaded yet, retrying...');
+        setTimeout(initCharts, 100);
+        return;
     }
-});
+
+    // Configure Chart.js defaults to ensure animations are enabled
+    Chart.defaults.animation = Chart.defaults.animation || {};
+    Chart.defaults.animation.duration = 2000;
+    Chart.defaults.animation.easing = 'easeOutCubic';
+
+    // Load chart data and initialize charts
+    loadChartData();
+    
+    // Check if canvas elements exist
+    const monthlySalesCanvas = document.getElementById("monthlySales");
+    const appointmentDonutCanvas = document.getElementById("appointmentDonut");
+    
+    if (!monthlySalesCanvas || !appointmentDonutCanvas) {
+        console.warn('Chart canvas elements not found, retrying...');
+        setTimeout(initCharts, 100);
+        return;
+    }
+    
+    // Initialize charts - they will animate automatically on creation
+    try {
+        // Destroy existing charts if they exist
+        if (monthlySalesChart) {
+            monthlySalesChart.destroy();
+        }
+        if (appointmentDonutChart) {
+            appointmentDonutChart.destroy();
+        }
+        
+        // Create new charts with animations
+        monthlySalesChart = createMonthlySalesChart();
+        appointmentDonutChart = createAppointmentDonutChart();
+        
+        console.log('Charts initialized successfully with animations');
+        console.log('Monthly Sales Chart:', monthlySalesChart);
+        console.log('Appointment Donut Chart:', appointmentDonutChart);
+    } catch (error) {
+        console.error('Error initializing charts:', error);
+    }
+}
+
+// Initialize when DOM is ready
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initCharts);
+} else {
+    // DOM is already ready
+    initCharts();
+}
