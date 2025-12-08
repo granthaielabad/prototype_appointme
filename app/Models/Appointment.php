@@ -111,19 +111,28 @@ public function findByUser(int $userId, ?int $limit = null): array
     /*
      * Check if a specific time slot is already booked
      */
-    public function isSlotTaken(string $date, string $time): bool
-    {
-        $stmt = $this->db->prepare("
-            SELECT COUNT(*) 
-            FROM {$this->table} 
-            WHERE appointment_date = :date 
-            AND appointment_time = :time 
-            AND status NOT IN ('cancelled', 'completed')
-            AND is_deleted = 0
-        ");
-        $stmt->execute(['date' => $date, 'time' => $time]);
-        return $stmt->fetchColumn() > 0;
+    public function isSlotTaken(string $date, string $time, ?int $excludeAppointmentId = null): bool
+{
+    $sql = "
+        SELECT COUNT(*) 
+        FROM {$this->table} 
+        WHERE appointment_date = :date 
+          AND appointment_time = :time 
+          AND status NOT IN ('cancelled', 'completed')
+          AND is_deleted = 0
+    ";
+    $params = ['date' => $date, 'time' => $time];
+
+    if ($excludeAppointmentId !== null) {
+        $sql .= " AND {$this->primaryKey} <> :exclude_id";
+        $params['exclude_id'] = $excludeAppointmentId;
     }
+
+    $stmt = $this->db->prepare($sql);
+    $stmt->execute($params);
+    return $stmt->fetchColumn() > 0;
+}
+
         
     /**
      * Limit per user per day to prevent spammy bookings

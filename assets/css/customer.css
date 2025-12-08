@@ -566,3 +566,83 @@
   background: #f3e8ff;
 }
 
+
+.resched-btn {
+    background: #f4f0ff;
+    color: #5a3dbe;
+    border: 1px solid #d9cef9;
+    border-radius: 6px;
+    padding: 6px 12px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+.resched-btn:hover { background: #e9e1ff; }
+
+.resched-used {
+    color: #888;
+    font-size: 13px;
+    font-style: italic;
+    margin-right: 8px;
+}
+
+/* Modal */
+.resched-modal {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.45);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+}
+.resched-modal.is-open { display: flex; }
+.resched-modal__dialog {
+    background: #fff;
+    padding: 20px 22px;
+    border-radius: 12px;
+    width: min(440px, 92vw);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+}
+.resched-modal__dialog h4 { margin: 0 0 8px; }
+.resched-note { margin: 0 0 14px; color: #444; }
+
+.resched-field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-bottom: 12px;
+    font-size: 14px;
+}
+.resched-field input[type="date"],
+.resched-field input[type="time"] {
+    padding: 8px 10px;
+    border: 1px solid #d9d9d9;
+    border-radius: 6px;
+    font-size: 14px;
+}
+
+.resched-modal__actions {
+    display: flex;
+    gap: 10px;
+    justify-content: flex-end;
+}
+.resched-cancel {
+    background: #f1f1f1;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    padding: 8px 12px;
+    cursor: pointer;
+}
+.resched-confirm {
+    background: #5a3dbe;
+    color: #fff;
+    border: 1px solid #4a2fa3;
+    border-radius: 6px;
+    padding: 8px 12px;
+    cursor: pointer;
+}
+.resched-confirm:hover { background: #4a2fa3; }
+    
+
+
+

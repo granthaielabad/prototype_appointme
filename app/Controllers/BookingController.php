@@ -382,6 +382,75 @@ class BookingController extends Controller
         }
 
 
+        public function reschedule(): void
+{
+    Auth::requireRole(2);
+    header('Content-Type: application/json');
+
+    if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+        http_response_code(405);
+        echo json_encode(['error' => 'Method not allowed']);
+        return;
+    }
+
+    $user   = Auth::user();
+    $apptId = (int) ($_POST['appointment_id'] ?? 0);
+    $date   = trim($_POST['date'] ?? '');
+    $time   = trim($_POST['time'] ?? '');
+
+    if ($apptId <= 0 || empty($date) || empty($time)) {
+        http_response_code(422);
+        echo json_encode(['error' => 'Date and time are required.']);
+        return;
+    }
+
+    $apptModel   = new Appointment();
+    $appointment = $apptModel->find($apptId);
+
+    if (!$appointment || (int) $appointment['user_id'] !== (int) $user['user_id']) {
+        http_response_code(403);
+        echo json_encode(['error' => 'Unauthorized action.']);
+        return;
+    }
+
+    if (in_array(strtolower($appointment['status']), ['cancelled', 'completed'], true)) {
+        http_response_code(422);
+        echo json_encode(['error' => 'Cannot reschedule this appointment.']);
+        return;
+    }
+
+    $rescheduleCount = (int) ($appointment['reschedule_count'] ?? 0);
+    if ($rescheduleCount >= 1) {
+        http_response_code(422);
+        echo json_encode(['error' => 'You can only reschedule once.']);
+        return;
+    }
+
+    // If the slot is unchanged, allow without updating
+    if ($appointment['appointment_date'] === $date && $appointment['appointment_time'] === $time) {
+        echo json_encode(['success' => true]);
+        return;
+    }
+
+    // Exclude current appointment from the slot check
+    if ($apptModel->isSlotTaken($date, $time, $apptId)) {
+        http_response_code(422);
+        echo json_encode(['error' => 'That slot is already taken. Please choose another.']);
+        return;
+    }
+
+    $apptModel->update($apptId, [
+        'appointment_date'  => $date,
+        'appointment_time'  => $time,
+        'status'            => 'pending',
+        'reschedule_count'  => $rescheduleCount + 1,
+        'updated_at'        => date('Y-m-d H:i:s'),
+    ]);
+
+    echo json_encode(['success' => true]);
+}
+
+
 
 
 
