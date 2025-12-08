@@ -1,9 +1,5 @@
 <?php
-// views/pages/payment_qr.php
-
-
 $checkoutUrl = $checkoutUrl ?? '';
-
 $escapedUrl = htmlspecialchars($checkoutUrl, ENT_QUOTES, 'UTF-8');
 $qrData     = urlencode($checkoutUrl);
 ?>
@@ -39,9 +35,14 @@ $qrData     = urlencode($checkoutUrl);
                     </a>
                 </p>
 
-                <a href="/my-appointments" class="btn btn-outline-secondary btn-sm">
+                <a href="/my-appointments" class="btn btn-outline-secondary btn-sm" id="back-to-appointments">
                     Back to My Appointments
                 </a>
+
+                <script>
+                  window.PAYMENT_QR_CONFIG = { cancelUrl: '/payment/cancel-session' };
+                </script>
+                <script src="/assets/js/payment_qr.js"></script>
             </div>
         </div>
     <?php else: ?>

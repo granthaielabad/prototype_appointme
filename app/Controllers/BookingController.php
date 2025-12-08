@@ -12,6 +12,16 @@ use App\Models\Payment;
 
 class BookingController extends Controller
 {
+
+
+    private function clearPaymentSession(): void
+    {
+        unset($_SESSION['checkout_url'], $_SESSION['payment_session']);
+    }
+
+
+
+
     public function index(): void
     {
         // only customers
@@ -40,6 +50,7 @@ class BookingController extends Controller
     }
 
 
+    
    
     public function store(): void
     {
@@ -77,7 +88,7 @@ class BookingController extends Controller
             exit();
         }
 
-        // combine
+        // create appointment
         $apptModel = new Appointment();
         $appointmentId = $apptModel->createAppointment([
             "user_id"          => $user["user_id"],
@@ -89,6 +100,8 @@ class BookingController extends Controller
             "created_at"       => date("Y-m-d H:i:s"),
         ]);
 
+
+
          if (!$appointmentId) {
             Session::flash("error", "Failed to create appointment.", "danger");
             header("Location: /book");
@@ -99,12 +112,13 @@ class BookingController extends Controller
           $referenceNumber = 'APT-' . $appointmentId . '-' . time();
 
           $paymentModel = new Payment();
-            $paymentModel->create([
+            $paymentId = $paymentModel->create([
                 'appointment_id' =>$appointmentId,
                 'amount' => $service['price'],
                 'status' => 'pending',
 
             ]);
+            
 
               // billing part
         $billing = [
@@ -158,6 +172,7 @@ class BookingController extends Controller
         }
 
         $result = json_decode($response, true);
+        
 
         if (empty($result['success']) || empty($result['checkout_url'])) {
             Session::flash('error', 'Payment session failed to initialize.', 'danger');
@@ -165,7 +180,12 @@ class BookingController extends Controller
             exit();
         }
 
-      
+        $_SESSION['payment_session'] = [
+            'appointment_id' => $appointmentId,
+            'payment_id'     => $paymentId,
+        ];
+
+          
         $_SESSION['checkout_url'] = $result['checkout_url'];
 
         Session::flash(
@@ -179,25 +199,60 @@ class BookingController extends Controller
     }
 
 
+   
+    public function cancelPaymentSession(): void
+    {
+        Auth::requireRole(3);
+        header('Content-Type: application/json');
 
-    public function paymentQr(): void
+        $session = $_SESSION['payment_session'] ?? null;
+        if (!$session) {
+            http_response_code(204);
+            echo json_encode(['ok' => true]);
+            return;
+        }
+
+        $apptId = (int)($session['appointment_id'] ?? 0);
+        $payId  = (int)($session['payment_id'] ?? 0);
+
+        $apptModel = new Appointment();
+        $payModel  = new Payment();
+
+        if ($apptId > 0) {
+            $apptModel->update($apptId, [
+                'status'     => 'cancelled',
+                'updated_at' => date('Y-m-d H:i:s'),
+            ]);
+        }
+
+        if ($payId > 0) {
+            $payModel->update($payId, [
+                'status' => 'failed',
+            ]);
+        }
+
+        $this->clearPaymentSession();
+        echo json_encode(['ok' => true]);
+    }
+
+
+   public function paymentQr(): void
     {
         Auth::requireRole(3);
 
-        if (empty($_SESSION['checkout_url'])) {
-            Session::flash('error', 'No active paymentsession found. Please try booking again.', 'danger' );
-            header('Location: /my-appointments' );
-            exit;
+        if (empty($_SESSION['checkout_url']) || empty($_SESSION['payment_session']['appointment_id'])) {
+            $this->clearPaymentSession();
+            Session::flash('error', 'No active payment session found. Please try booking again.', 'danger');
+            header('Location: /my-appointments');
+            exit();
         }
 
         $checkoutUrl = $_SESSION['checkout_url'];
-        
 
-         $this->renderCustomer('payment_qr', [
-             'pageTitle' => 'Payment QR',
-             'checkoutUrl' => $checkoutUrl,
-    ]);
-
+        $this->renderCustomer('payment_qr', [
+            'pageTitle'   => 'Payment QR',
+            'checkoutUrl' => $checkoutUrl,
+        ]);
     }
 
     // GREY OUT THE TAKEN SLOTS 

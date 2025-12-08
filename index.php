@@ -2,6 +2,7 @@
 declare(strict_types=1);
 date_default_timezone_set("Asia/Manila");
 
+use App\Controllers\BookingController;
 use App\Controllers\UserController;
 use App\Core\Session;
 use App\Core\Router;
@@ -69,6 +70,7 @@ $router->post("/profile/change-password", "UserController@changePassword");
 /* added testing carl */
 $router->get("/my-appointments", "BookingController@myAppointments");
 $router->get("/cancel-appointment", "BookingController@cancel");
+$router->post("/payment/cancel-session", "BookingController@cancelPaymentSession");
 $router->get("/payment-qr", "BookingController@paymentQr"); 
 $router->post("/webhook/paymongo", "PaymentWebhookController@handle");
 
