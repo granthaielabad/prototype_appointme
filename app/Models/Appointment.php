@@ -331,4 +331,32 @@ public function findByUser(int $userId, ?int $limit = null): array
     }
 
 
+
+    // NOIFICATIONS
+    public function findPendingDueInNext24h(): array
+        {
+            $sql = "
+                SELECT 
+                    a.appointment_id,
+                    a.user_id,
+                    a.appointment_date,
+                    a.appointment_time,
+                    s.service_name,
+                    DATE_FORMAT(a.appointment_time, '%h:%i %p') AS formatted_time
+                FROM {$this->table} a
+                JOIN tbl_services s ON a.service_id = s.service_id
+                WHERE a.is_deleted = 0
+                AND a.status = 'pending'
+                AND IFNULL(a.reminder_sent, 0) = 0
+                AND CONCAT(a.appointment_date, ' ', a.appointment_time)
+                    BETWEEN NOW() AND DATE_ADD(NOW(), INTERVAL 24 HOUR)
+            ";
+            $stmt = $this->db->prepare($sql);
+            $stmt->execute();
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        }
+
+
+
+
 }

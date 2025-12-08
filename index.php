@@ -74,12 +74,16 @@ $router->post("/payment/cancel-session", "BookingController@cancelPaymentSession
 $router->get("/payment-qr", "BookingController@paymentQr"); 
 $router->post("/webhook/paymongo", "PaymentWebhookController@handle");
 
+// success page
+$router->get("/payment/success", "BookingController@paymentSuccess");
+
 
 $router->post("/profile/delete-account", "UserController@deleteAccount");
 $router->get("/profile", "UserController@profile");
 $router->post("/profile/update", "UserController@updateProfile");
 
-$router->get("/notifications/get", "NotificationController@getAll");
+$router->get("/notifications/get", "NotificationController@list");  // navbar dropdown
+$router->get("/notifications/list", "NotificationController@list"); // customer modal
 
 /* OTP */
 $router->post("/otp/send", "OTPController@send");

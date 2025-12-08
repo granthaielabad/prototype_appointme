@@ -144,7 +144,9 @@ class BookingController extends Controller
         'billing'          => $billing,
         'line_items'       => $lineItems,
         'reference_number' => $referenceNumber,
-    ]);
+        'success_url'      => rtrim($_ENV['APP_URL'] ?? 'http://localhost:8000/', '/') . '/payment/success',
+        'cancel_url'       => rtrim($_ENV['APP_URL'] ?? 'http://localhost:8000/', '/') . '/my-appointments',
+]);
 
         //temporary lipat sa env
         $token   = "super-secret-string";
@@ -353,6 +355,19 @@ class BookingController extends Controller
             header("Location: /my-appointments");
         }
 
+
+        // paymentSuccess page
+        public function paymentSuccess(): void
+        {
+            Auth::requireRole(3);
+
+            // If there was a payment session, you can optionally mark it as cleared.
+            unset($_SESSION['payment_session'], $_SESSION['checkout_url']);
+
+            Session::flash('success', 'Payment successful! Redirecting to your appointments...', 'success');
+            $this->renderCustomer('payment_success', ['pageTitle' => 'Payment Successful']);
+            return;
+        }
 
 
 
