@@ -190,11 +190,7 @@ class BookingController extends Controller
           
         $_SESSION['checkout_url'] = $result['checkout_url'];
 
-        Session::flash(
-            'success',
-            'Appointment booked successfully! Please proceed to the payment.',
-            'success'
-        );
+      
 
         header("Location: /payment-qr");
         exit();
