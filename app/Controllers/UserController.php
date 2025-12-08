@@ -40,7 +40,7 @@ class UserController extends Controller
      */
     public function profile(): void
     {
-        Auth::requireRole(3); // customers only
+        Auth::requireRole(2); // customers only
 
         $user = Auth::user();
 
@@ -55,7 +55,7 @@ class UserController extends Controller
      */
     public function updateProfile(): void
     {
-        Auth::requireRole(3);
+        Auth::requireRole(2);
 
         if ($_SERVER["REQUEST_METHOD"] !== "POST") {
             header("Location: /profile");

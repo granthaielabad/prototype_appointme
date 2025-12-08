@@ -48,7 +48,7 @@ class User extends Model
         return (bool)$stmt->execute(['uid' => $userId]);
     }
 
-    public function createWithRole(array $data, int $roleId = 3): int
+    public function createWithRole(array $data, int $roleId = 2): int
     {
         $data['role_id'] = $roleId;
         $data['is_active'] = $data['is_active'] ?? 0;

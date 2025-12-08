@@ -10,6 +10,9 @@ use Dotenv\Dotenv;
 
 require_once __DIR__ . "/vendor/autoload.php";
 
+// Load Auth 
+require_once __DIR__ . "/app/core/auth.php";
+
 // Initialize debugging
 Debug::init(__DIR__ . '/logs');
 Debug::logRequest();

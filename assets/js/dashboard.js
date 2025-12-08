@@ -584,58 +584,58 @@ function createMonthlySalesChart() {
     const initialData = monthlyValues.map(() => 0);
 
     const chart = new Chart(canvas, {
-        type: "bar",
-        data: {
-            labels: monthlyLabels,
-            datasets: [
-                // Bar dataset
-                {
-                    label: "Sales",
-                    type: "bar",
+    type: "bar",
+    data: {
+        labels: monthlyLabels,
+        datasets: [
+            // Bar dataset
+            {
+                label: "Sales",
+                type: "bar",
                     data: initialData,
-                    backgroundColor: "rgba(205, 159, 254, 0.4)",
-                    borderColor: "rgba(205, 159, 254, 0.8)",
-                    borderWidth: 0,
-                    borderRadius: 8,
-                    borderSkipped: false,
-                    order: 2
-                },
-                // Line overlay dataset
-                {
-                    label: "Trend",
-                    type: "line",
+                backgroundColor: "rgba(205, 159, 254, 0.4)",
+                borderColor: "rgba(205, 159, 254, 0.8)",
+                borderWidth: 0,
+                borderRadius: 8,
+                borderSkipped: false,
+                order: 2
+            },
+            // Line overlay dataset
+            {
+                label: "Trend",
+                type: "line",
                     data: initialData,
-                    borderColor: "#CD9FFE",
-                    backgroundColor: "transparent",
-                    borderWidth: 3,
-                    fill: false,
-                    tension: 0.4,
-                    pointRadius: 5,
-                    pointBackgroundColor: "#CD9FFE",
-                    pointBorderColor: "#FFF",
-                    pointBorderWidth: 2,
-                    order: 1
-                }
-            ]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: true,
-            animation: {
+                borderColor: "#CD9FFE",
+                backgroundColor: "transparent",
+                borderWidth: 3,
+                fill: false,
+                tension: 0.4,
+                pointRadius: 5,
+                pointBackgroundColor: "#CD9FFE",
+                pointBorderColor: "#FFF",
+                pointBorderWidth: 2,
+                order: 1
+            }
+        ]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: true,
+        animation: {
                 duration: 1500,
                 easing: 'easeOutQuart',
                 onComplete: function() {
                     // Animation completed
                 },
-                delay: (context) => {
-                    let delay = 0;
-                    if (context.type === 'data') {
+            delay: (context) => {
+                let delay = 0;
+                if (context.type === 'data') {
                         // Stagger bars for sequential animation
                         delay = context.dataIndex * 80;
-                    }
-                    return delay;
                 }
-            },
+                return delay;
+            }
+        },
             animations: {
                 y: {
                     from: 0,
@@ -650,60 +650,60 @@ function createMonthlySalesChart() {
                     duration: 1500
                 }
             },
-            interaction: {
-                intersect: false,
-                mode: 'index'
-            },
-            plugins: {
-                legend: { display: false },
-                tooltip: {
-                    backgroundColor: 'rgba(0,0,0,0.8)',
-                    padding: 12,
-                    titleFont: { size: 13 },
-                    bodyFont: { size: 12 },
-                    displayColors: false,
-                    callbacks: {
-                        label: function(context) {
-                            if (context.dataset.type === 'line') {
-                                return '₱' + new Intl.NumberFormat('en-PH').format(context.parsed.y);
-                            }
-                            return '';
+        interaction: {
+            intersect: false,
+            mode: 'index'
+        },
+        plugins: {
+            legend: { display: false },
+            tooltip: {
+                backgroundColor: 'rgba(0,0,0,0.8)',
+                padding: 12,
+                titleFont: { size: 13 },
+                bodyFont: { size: 12 },
+                displayColors: false,
+                callbacks: {
+                    label: function(context) {
+                        if (context.dataset.type === 'line') {
+                            return '₱' + new Intl.NumberFormat('en-PH').format(context.parsed.y);
                         }
-                    }
-                }
-            },
-            scales: {
-                y: {
-                    beginAtZero: true,
-                    min: 0,
-                    ticks: {
-                        callback: function(value) {
-                            if (value >= 1000000) {
-                                return '₱' + (value / 1000000).toFixed(1) + 'M';
-                            } else if (value >= 1000) {
-                                return '₱' + (value / 1000).toFixed(0) + 'K';
-                            }
-                            return '₱' + value;
-                        },
-                        font: { size: 11, color: '#999' }
-                    },
-                    grid: {
-                        color: 'rgba(0, 0, 0, 0.05)',
-                        drawBorder: false
-                    }
-                },
-                x: {
-                    grid: {
-                        display: false,
-                        drawBorder: false
-                    },
-                    ticks: {
-                        font: { size: 11, color: '#999' }
+                        return '';
                     }
                 }
             }
+        },
+        scales: {
+            y: {
+                beginAtZero: true,
+                    min: 0,
+                ticks: {
+                    callback: function(value) {
+                        if (value >= 1000000) {
+                            return '₱' + (value / 1000000).toFixed(1) + 'M';
+                        } else if (value >= 1000) {
+                            return '₱' + (value / 1000).toFixed(0) + 'K';
+                        }
+                        return '₱' + value;
+                    },
+                    font: { size: 11, color: '#999' }
+                },
+                grid: {
+                    color: 'rgba(0, 0, 0, 0.05)',
+                    drawBorder: false
+                }
+            },
+            x: {
+                grid: {
+                    display: false,
+                    drawBorder: false
+                },
+                ticks: {
+                    font: { size: 11, color: '#999' }
+                }
+            }
         }
-    });
+    }
+});
 
     // Animate from zero to actual values - bars will grow from bottom to top
     setTimeout(() => {
@@ -726,21 +726,21 @@ function createAppointmentDonutChart() {
     const initialData = total > 0 ? [0, 0] : [donutAccepted, donutRejected];
 
     const chart = new Chart(canvas, {
-        type: "doughnut",
-        data: {
-            labels: ["Accepted", "Rejected"],
-            datasets: [{
+    type: "doughnut",
+    data: {
+        labels: ["Accepted", "Rejected"],
+        datasets: [{
                 data: initialData,
-                backgroundColor: ["#2563EB", "#67E8F9"],
-                borderColor: "#FFF",
-                borderWidth: 3
-            }]
-        },
-        options: {
-            cutout: "50%",
-            responsive: true,
-            maintainAspectRatio: true,
-            animation: {
+            backgroundColor: ["#2563EB", "#67E8F9"],
+            borderColor: "#FFF",
+            borderWidth: 3
+        }]
+    },
+    options: {
+        cutout: "50%",
+        responsive: true,
+        maintainAspectRatio: true,
+        animation: {
                 duration: 2000,
                 easing: 'easeOutCubic',
                 animateRotate: true,
@@ -764,46 +764,46 @@ function createAppointmentDonutChart() {
                     from: 'transparent',
                     duration: 2000
                 }
+        },
+        plugins: {
+            legend: {
+                display: true,
+                position: 'bottom',
+                labels: {
+                    padding: 20,
+                    font: { size: 12, weight: '500' },
+                    usePointStyle: true,
+                    pointStyle: 'circle',
+                    boxWidth: 8
+                }
             },
-            plugins: {
-                legend: {
-                    display: true,
-                    position: 'bottom',
-                    labels: {
-                        padding: 20,
-                        font: { size: 12, weight: '500' },
-                        usePointStyle: true,
-                        pointStyle: 'circle',
-                        boxWidth: 8
-                    }
-                },
-                tooltip: {
-                    backgroundColor: 'rgba(0,0,0,0.8)',
-                    padding: 12,
-                    titleFont: { size: 13 },
-                    bodyFont: { size: 12 },
-                    displayColors: true,
-                    callbacks: {
-                        label: function(context) {
-                            const value = context.parsed;
-                            const total = context.dataset.data.reduce((a, b) => a + b, 0);
-                            const percentage = ((value / total) * 100).toFixed(0);
-                            return percentage + '%';
-                        }
-                    }
-                },
-                datalabels: {
-                    color: '#000',
-                    font: { size: 13, weight: 'bold' },
-                    formatter: function(value, context) {
+            tooltip: {
+                backgroundColor: 'rgba(0,0,0,0.8)',
+                padding: 12,
+                titleFont: { size: 13 },
+                bodyFont: { size: 12 },
+                displayColors: true,
+                callbacks: {
+                    label: function(context) {
+                        const value = context.parsed;
                         const total = context.dataset.data.reduce((a, b) => a + b, 0);
                         const percentage = ((value / total) * 100).toFixed(0);
                         return percentage + '%';
                     }
                 }
+            },
+            datalabels: {
+                color: '#000',
+                font: { size: 13, weight: 'bold' },
+                formatter: function(value, context) {
+                    const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                    const percentage = ((value / total) * 100).toFixed(0);
+                    return percentage + '%';
+                }
             }
         }
-    });
+    }
+});
 
     // Animate from zero to actual values
     if (total > 0) {
