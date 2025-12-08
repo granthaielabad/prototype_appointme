@@ -197,62 +197,77 @@ class BookingController extends Controller
         exit();
     }
 
+    public function cancelPaymentSession(): void
+{
+    Auth::requireRole(2);
+    header('Content-Type: application/json');
+
+    if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+        http_response_code(405);
+        echo json_encode(['error' => 'Method not allowed']);
+        return;
+    }
+
+    $session = $_SESSION['payment_session'] ?? null;
+    if (!$session) {
+        $this->clearPaymentSession();
+        http_response_code(204);
+        echo json_encode(['ok' => true]);
+        return;
+    }
+
+    $apptId = (int) ($session['appointment_id'] ?? 0);
+    $payId  = (int) ($session['payment_id'] ?? 0);
+
+    $apptModel = new Appointment();
+    $payModel  = new Payment();
+
+    if ($apptId > 0) {
+        $apptModel->update($apptId, [
+            'status'     => 'cancelled',
+            'updated_at' => date('Y-m-d H:i:s'),
+        ]);
+    }
+
+    if ($payId > 0) {
+        $payModel->update($payId, [
+            'status'     => 'failed',
+            'updated_at' => date('Y-m-d H:i:s'),
+        ]);
+    }
+
+    $this->clearPaymentSession();
+    echo json_encode(['ok' => true]);
+}
 
    
-    public function cancelPaymentSession(): void
-    {
-        Auth::requireRole(3);
-        header('Content-Type: application/json');
-
-        $session = $_SESSION['payment_session'] ?? null;
-        if (!$session) {
-            http_response_code(204);
-            echo json_encode(['ok' => true]);
-            return;
-        }
-
-        $apptId = (int)($session['appointment_id'] ?? 0);
-        $payId  = (int)($session['payment_id'] ?? 0);
-
-        $apptModel = new Appointment();
-        $payModel  = new Payment();
-
-        if ($apptId > 0) {
-            $apptModel->update($apptId, [
-                'status'     => 'cancelled',
-                'updated_at' => date('Y-m-d H:i:s'),
-            ]);
-        }
-
-        if ($payId > 0) {
-            $payModel->update($payId, [
-                'status' => 'failed',
-            ]);
-        }
-
-        $this->clearPaymentSession();
-        echo json_encode(['ok' => true]);
-    }
+    
 
 
    public function paymentQr(): void
-    {
-        Auth::requireRole(2);
+{
+    Auth::requireRole(2);
 
-        if (empty($_SESSION['checkout_url']) || empty($_SESSION['payment_session']['appointment_id'])) {
-            $this->clearPaymentSession();
-            Session::flash('error', 'No active payment session found. Please try booking again.', 'danger');
-            header('Location: /my-appointments');
-            exit();
-        }
+    // prevent cached QR from showing after cancellation/back
+    header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
+    header('Pragma: no-cache');
+    header('Expires: 0');
 
-        $checkoutUrl = $_SESSION['checkout_url'];
-
-        $this->renderCustomer('payment_qr', [
-            'pageTitle'   => 'Payment QR',
-            'checkoutUrl' => $checkoutUrl,
-        ]);
+    if (empty($_SESSION['checkout_url']) || empty($_SESSION['payment_session']['appointment_id'])) {
+        $this->clearPaymentSession();
+        Session::flash('error', 'No active payment session found. Please try booking again.', 'danger');
+        header('Location: /my-appointments');
+        exit();
     }
+
+    $checkoutUrl = $_SESSION['checkout_url'];
+
+    $this->renderCustomer('payment_qr', [
+        'pageTitle'   => 'Payment QR',
+        'checkoutUrl' => $checkoutUrl,
+    ]);
+}
+
 
     // GREY OUT THE TAKEN SLOTS 
     public function takenSlots(): void
@@ -356,7 +371,7 @@ class BookingController extends Controller
         // paymentSuccess page
         public function paymentSuccess(): void
         {
-            Auth::requireRole(3);
+            Auth::requireRole(2);
 
             // If there was a payment session, you can optionally mark it as cleared.
             unset($_SESSION['payment_session'], $_SESSION['checkout_url']);

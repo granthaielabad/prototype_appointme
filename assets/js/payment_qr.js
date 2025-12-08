@@ -1,11 +1,11 @@
 (() => {
   const cfg = window.PAYMENT_QR_CONFIG || {};
   const cancelUrl = cfg.cancelUrl || '/payment/cancel-session';
-  let cancelled = false;
+  let cancelling = false;
 
   const sendCancel = () => {
-    if (cancelled) return;
-    cancelled = true;
+    if (cancelling) return;
+    cancelling = true;
 
     const payload = new Blob([JSON.stringify({})], { type: 'application/json' });
 
@@ -20,7 +20,7 @@
       });
     }
 
-    const payBtn = document.querySelector('a.btn.btn-primary');
+    const payBtn = document.querySelector('.pay-btn');
     if (payBtn) {
       payBtn.removeAttribute('href');
       payBtn.classList.add('disabled');
@@ -28,10 +28,23 @@
     }
   };
 
-  // Cancel on navigation 
+  // Cancel on navigation away
   window.addEventListener('pagehide', sendCancel);
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'hidden') sendCancel();
+  });
 
-  // Cancel on "Back to My Appointments" 
+  // If the page is restored from the back/forward cache, cancel and redirect away
+  window.addEventListener('pageshow', (event) => {
+    const navEntry = performance.getEntriesByType('navigation')[0];
+    const cameFromHistory = event.persisted || navEntry?.type === 'back_forward';
+    if (cameFromHistory) {
+      sendCancel();
+      window.location.replace('/my-appointments');
+    }
+  });
+
+  // Cancel on "Back to My Appointments"
   const backBtn = document.getElementById('back-to-appointments');
   if (backBtn) backBtn.addEventListener('click', sendCancel, { once: true });
 })();
