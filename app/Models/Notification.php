@@ -6,18 +6,38 @@ use PDO;
 
 class Notification extends Model
 {
-    protected string $table = 'tbl_notifications';
+    protected string $table = 'tbl_notifications'; // keep if other code references it
     protected string $primaryKey = 'notification_id';
 
     public function findByUser(int $userId, int $limit = 20): array
     {
         $sql = "
-            SELECT notification_id, user_id, title, message, type, appointment_id, is_read, created_at
-            FROM {$this->table}
-            WHERE user_id = :user_id
+            SELECT
+                a.appointment_id AS notification_id,
+                a.user_id,
+                a.appointment_id,
+                'Appointment Reminder' AS title,
+                CONCAT(
+                    'You have an upcoming ',
+                    COALESCE(s.service_name, 'service'),
+                    ' appointment on ',
+                    a.appointment_date,
+                    ' at ',
+                    DATE_FORMAT(a.appointment_time, '%h:%i %p')
+                ) AS message,
+                'appointment_reminder' AS type,
+                0 AS is_read,
+                CONCAT(a.appointment_date, ' ', a.appointment_time) AS created_at
+            FROM tbl_appointments a
+            LEFT JOIN tbl_services s ON s.service_id = a.service_id
+            WHERE a.user_id = :user_id
+              AND a.status = 'Pending'
+              AND TIMESTAMP(a.appointment_date, a.appointment_time)
+                    BETWEEN NOW() AND DATE_ADD(NOW(), INTERVAL 24 HOUR)
             ORDER BY created_at DESC
             LIMIT :limit
         ";
+
         $stmt = $this->db->prepare($sql);
         $stmt->bindValue(':user_id', $userId, PDO::PARAM_INT);
         $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
@@ -27,20 +47,9 @@ class Notification extends Model
 
     public function markAllRead(int $userId): bool
     {
-        $stmt = $this->db->prepare("UPDATE {$this->table} SET is_read = 1 WHERE user_id = :user_id");
-        return $stmt->execute(['user_id' => $userId]);
+        // no-op: notifications are computed dynamically, not stored
+        return true;
     }
 
-    public function createReminder(int $userId, int $appointmentId, string $serviceName, string $date, string $time): int
-    {
-        return $this->create([
-            'user_id'        => $userId,
-            'appointment_id' => $appointmentId,
-            'title'          => 'Appointment Reminder',
-            'message'        => "You have an upcoming {$serviceName} appointment on {$date} at {$time}.",
-            'type'           => 'appointment_reminder',
-            'is_read'        => 0,
-            'created_at'     => date('Y-m-d H:i:s'),
-        ]);
-    }
+    // leave createReminder/remove other methods if still used elsewhere
 }
