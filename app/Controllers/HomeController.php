@@ -16,11 +16,8 @@ class HomeController extends Controller
             if ((int) $user["role_id"] === 1) {
                 header("Location: /admin/dashboard");
                 exit();
-            } elseif ((int) $user["role_id"] === 2) {
-                header("Location: /staff/dashboard");
-                exit();
             } else {
-                header("Location: /my-appointments");
+                header("Location: /book");
                 exit();
             }
         }

@@ -10,7 +10,7 @@ class AppointmentController extends Controller
 {
     public function index(): void
     {
-        Auth::requireRole(3);
+        Auth::requireRole(2);
         $appointments = (new Appointment())->findByUser(Auth::user()["user_id"]);
         $this->renderPublic("pages/appointments", [
             "appointments" => $appointments,
@@ -20,7 +20,7 @@ class AppointmentController extends Controller
 
     public function show(): void
     {
-        Auth::requireRole(3);
+        Auth::requireRole(2);
         $id = $_GET["id"] ?? 0;
         $appointment = (new Appointment())->find($id);
         if (!$appointment) {

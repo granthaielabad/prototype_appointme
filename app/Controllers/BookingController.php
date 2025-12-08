@@ -15,8 +15,9 @@ class BookingController extends Controller
     public function index(): void
     {
         // only customers
-        Auth::requireRole(3);
-
+        
+        Auth::requireRole(2);
+        
         $serviceModel = new Service();
         $services = $serviceModel->findAll();
 
@@ -43,7 +44,7 @@ class BookingController extends Controller
    
     public function store(): void
     {
-        Auth::requireRole(3);
+        Auth::requireRole(2);
 
         if ($_SERVER["REQUEST_METHOD"] !== "POST") {
             header("Location: /book");
@@ -182,7 +183,7 @@ class BookingController extends Controller
 
     public function paymentQr(): void
     {
-        Auth::requireRole(3);
+        Auth::requireRole(2);
 
         if (empty($_SESSION['checkout_url'])) {
             Session::flash('error', 'No active paymentsession found. Please try booking again.', 'danger' );
@@ -203,7 +204,7 @@ class BookingController extends Controller
     // GREY OUT THE TAKEN SLOTS 
     public function takenSlots(): void
 {
-    Auth::requireRole(3);
+    Auth::requireRole(2);
 
     $date = $_GET['date'] ?? null;
     if (!$date) {
@@ -224,7 +225,7 @@ class BookingController extends Controller
 
     public function myAppointments(): void
     {
-        Auth::requireRole(3);
+        Auth::requireRole(2);
 
         $user = Auth::user();
         $apptModel = new Appointment();
@@ -240,7 +241,7 @@ class BookingController extends Controller
     // nagagamit po ba ito? 
     public function cancel(): void
     {
-        Auth::requireRole(3);
+        Auth::requireRole(2);
 
         $id = (int) ($_GET["id"] ?? 0);
         if ($id <= 0) {
@@ -259,7 +260,7 @@ class BookingController extends Controller
     
    public function cancelFromHistory(): void
                 {
-            Auth::requireRole(3);
+            Auth::requireRole(2);
 
             $id = (int) ($_GET["id"] ?? 0);
             if ($id <= 0) {
