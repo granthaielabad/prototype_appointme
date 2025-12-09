@@ -331,6 +331,7 @@ public function findByUser(int $userId, ?int $limit = null): array
             AND a.appointment_date = :date
             AND a.is_deleted = 0
             AND a.status NOT IN ('cancelled', 'failed')
+            AND CONCAT(a.appointment_date, ' ' , a.appointment_time) >= DATE_SUB(NOW(), INTERVAL 1 HOUR)
             ORDER BY a.appointment_time ASC
             LIMIT 1
         ");
