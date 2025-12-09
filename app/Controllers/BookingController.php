@@ -8,10 +8,21 @@ use App\Models\Service;
 use App\Models\Appointment;
 use App\Models\User;
 use App\Models\Payment;
+use App\Models\AdminNotification;
+
 
 
 class BookingController extends Controller
 {
+    
+    private function notifyAdminAppointment(int $appointmentId, int $userId, string $type, array $context = []): void
+            {
+                try {
+                    (new AdminNotification())->createForEvent($appointmentId, $userId, $type, $context);
+                } catch (\Throwable $e) {
+                   
+                }
+            }
 
 
     private function clearPaymentSession(): void
@@ -109,6 +120,19 @@ class BookingController extends Controller
             exit();
 
          }
+
+             $this->notifyAdminAppointment(
+            $appointmentId,
+            (int) $user['user_id'],
+            'booked',
+            [
+                'customer_name' => trim($user['first_name'] . ' ' . $user['last_name']),
+                'service_name'  => $service['service_name'] ?? 'Service',
+                'date'          => $date,
+                'time'          => $time,
+            ]
+        );
+
 
           $referenceNumber = 'APT-' . $appointmentId . '-' . time();
 
@@ -363,6 +387,19 @@ class BookingController extends Controller
                 "updated_at" => date("Y-m-d H:i:s"),
             ]);
 
+                        $this->notifyAdminAppointment(
+                $id,
+                (int) $appointment['user_id'],
+                'cancelled',
+                [
+                    'customer_name' => trim(Auth::user()['first_name'] . ' ' . Auth::user()['last_name']),
+                    'service_name'  => $appointment['service_name'] ?? 'Service',
+                    'date'          => $appointment['appointment_date'] ?? '',
+                    'time'          => $appointment['appointment_time'] ?? '',
+                ]
+            );
+
+
             Session::flash("success", "Appointment cancelled successfully.");
             header("Location: /my-appointments");
         }
@@ -446,6 +483,19 @@ class BookingController extends Controller
         'reschedule_count'  => $rescheduleCount + 1,
         'updated_at'        => date('Y-m-d H:i:s'),
     ]);
+
+        $this->notifyAdminAppointment(
+        $apptId,
+        (int) $user['user_id'],
+        'rescheduled',
+        [
+            'customer_name' => trim($user['first_name'] . ' ' . $user['last_name']),
+            'service_name'  => $appointment['service_name'] ?? 'Service',
+            'date'          => $date,
+            'time'          => $time,
+        ]
+    );
+
 
     echo json_encode(['success' => true]);
 }

@@ -143,6 +143,12 @@ $router->get("/admin/reports/export-csv", "Admin\\ReportController@exportCsv");
 $router->get("/admin/reports/export-pdf", "Admin\\ReportController@exportPdf");
 $router->get("/admin/reports/summary", "Admin\\ReportController@summary");
 
+//notifications
+$router->get("/admin/notifications", "Admin\\NotificationController@index");
+$router->get("/admin/notifications/mark-all", "Admin\\NotificationController@markAll");
+$router->get("/admin/notifications/mark-one", "Admin\\NotificationController@markOne");
+
+
 /* RESOURCE-LIKE (misc) */
 $router->get("/services", "ServiceController@index");
 $router->get("/services/show", "ServiceController@show");
