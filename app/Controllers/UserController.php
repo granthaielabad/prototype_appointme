@@ -102,7 +102,7 @@ class UserController extends Controller
 
         public function changePassword(): void
     {
-        Auth::requireRole(3);
+        Auth::requireRole(2);
 
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
             header('Location: /profile');
@@ -180,7 +180,7 @@ class UserController extends Controller
 
         public function deleteAccount(): void
     {
-        Auth::requireRole(3);
+        Auth::requireRole(2);
 
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
             header('Location: /profile');
@@ -219,7 +219,7 @@ class UserController extends Controller
     // update photo
     public function updatePhoto(): void
     {
-        Auth::requireRole(3);
+        Auth::requireRole(2);
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') { header('Location: /profile'); exit(); }
 
         $token = $_POST['_csrf'] ?? '';
