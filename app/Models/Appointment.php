@@ -156,6 +156,21 @@ public function findByUser(int $userId, ?int $limit = null): array
      */
    public function createAppointment(array $data): int
         {
+
+            // Normalize time to 24h format for TIME column
+            $rawTime = trim($data['appointment_time'] ?? '');
+            $timeObj = \DateTime::createFromFormat('g:i A', $rawTime)
+                ?: \DateTime::createFromFormat('h:i A', $rawTime)
+                ?: \DateTime::createFromFormat('H:i', $rawTime)
+                ?: \DateTime::createFromFormat('H:i:s', $rawTime);
+
+            if (!$timeObj) {
+                throw new Exception("Invalid time format. Please choose a valid time slot.");
+            }
+
+            $data['appointment_time'] = $timeObj->format('H:i:s');
+
+
             // Prevent double booking of same slot
             if ($this->isSlotTaken($data['appointment_date'], $data['appointment_time'])) {
                 throw new Exception("This time slot is already booked. Please choose another.");
