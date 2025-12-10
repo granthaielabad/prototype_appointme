@@ -1,177 +1,204 @@
 <?php
-$first = $user['first_name'] ?? '';
-$last  = $user['last_name'] ?? '';
-$fullName = trim("$first $last");
-$created = !empty($user['date_created']) ? date('F Y', strtotime($user['date_created'])) : '';
-$phone = $user['contact_number'] ?? '';
-$email = $user['email'] ?? '';
-$bio = $user['bio'] ?? '';
-$todayAppt = $todayAppointment ?? null;
-// additional db 
-$photo = $user['profile_photo'] ?? '/assets/img/apple-touch-icon.png';
-$address = $user['address'] ?? '';
-$emgName = $user['emergency_name'] ?? '';
-$emgRel  = $user['emergency_relation'] ?? '';
-$emgPhone = $user['emergency_phone'] ?? '';
 
+$userFullName = trim(($user['first_name'] ?? '') . ' ' . ($user['last_name'] ?? ''));
+$createdAt = !empty($user['created_at']) ? date('F Y', strtotime($user['created_at'])) : 'mm yyyy';
+$avatar = $user['avatar'] ?? '/assets/img/apple-touch-icon.png';
 
-
-
-
+$phone   = htmlspecialchars($user['contact_number'] ?? '');
+$email   = htmlspecialchars($user['email'] ?? '');
+$address = htmlspecialchars($user['address'] ?? '123 Luzon, Quezon City');
+$bio     = htmlspecialchars($user['bio'] ?? 'Salon Customer');
 ?>
-<div class="body-body">
-    <div class="body-body-1">
-        <div class="container-inside1-body1">
-            <h3>Hello, <?= htmlspecialchars($first ?: 'User') ?>!</h3>
-            <p>This is your space. Review your details and make sure everything looks good</p>
 
-            <div class="appointment-container">
-    <div class="appt-card">
-        <div class="appt-card-header">
-            <h5>Appointment Status</h5>
-        </div>
-        <?php if ($todayAppt): ?>
-            <div class="appt-card-body">
-                <div class="appt-id">#<?= htmlspecialchars($todayAppt['appointment_id']) ?></div>
-                <div class="appt-meta">
-                    <div class="appt-status <?= htmlspecialchars(strtolower($todayAppt['status'])) ?>">
-                        <?= htmlspecialchars(ucwords($todayAppt['status'])) ?>
+<div class="profile-root container-fluid py-4">
+
+    <section class="profile-header mb-4">
+        <h1 class="page-title"><?= htmlspecialchars($pageTitle ?? 'My Profile') ?></h1>
+        <p class="page-sub">
+            Hello, <strong><?= htmlspecialchars($user['first_name'] ?? 'Guest') ?>!</strong>
+            <span class="d-block">This is your space — review your details and make sure everything looks good.</span>
+        </p>
+    </section>
+
+    <section class="d-flex gap-4 align-items-start mb-4 flex-wrap">
+        <div class="appt-status-box flex-grow-1">
+            <div class="status-head">
+                <h6>Appointment Status</h6>
+            </div>
+
+            <div class="status-body d-flex justify-content-between align-items-center">
+                <!-- Left -->
+                <div class="status-left">
+                    <div class="appt-number">
+                        #<?= htmlspecialchars($user['current_appointment_no'] ?? '00000') ?>
                     </div>
-                    <div class="appt-date"><?= date('F j, Y', strtotime($todayAppt['appointment_date'])) ?></div>
-                    <div class="appt-time"><?= date('g:i A', strtotime($todayAppt['appointment_time'])) ?></div>
+                </div>
+
+                <!-- Center -->
+                <div class="status-center text-center">
+                    <div class="appt-state text-success">
+                        <?= htmlspecialchars($user['current_appointment_status'] ?? 'On Going') ?>
+                    </div>
+                    <div class="appt-date">
+                        <?= htmlspecialchars($user['current_appointment_date'] ?? date('F j, Y')) ?>
+                    </div>
+                    <div class="appt-time">
+                        <?= htmlspecialchars($user['current_appointment_time'] ?? '3:00 P.M.') ?>
+                    </div>
+                </div>
+
+                <!-- Clock -->
+                <div class="status-clock text-center">
+                    <div class="clock-visual">
+                        <div class="hand hour" id="hourHand"></div>
+                        <div class="hand minute" id="minuteHand"></div>
+                        <div class="hand second" id="secondHand"></div>
+                        <div class="center-dot"></div>
+                    </div>
+                    <div class="digital-time" id="digTime">--:--:--</div>
                 </div>
             </div>
-        <?php else: ?>
-            <div class="appt-card-body empty">No appointment today.</div>
-        <?php endif; ?>
-    </div>
-</div>
         </div>
+    </section>
 
+    <!-- MAIN PROFILE ROW -->
+    <section class="profile-main row g-4">
 
-        <div class="container-inside2-body1">
-            <div class="clock">
-                <div class="hand hour" id="hourHand"></div>
-                <div class="hand minute" id="minuteHand"></div>
-                <div class="hand second" id="secondHand"></div>
-                <div class="numbers">
-                    <span style="--i:1">1</span>
-                    <span style="--i:2">2</span>
-                    <span style="--i:3">3</span>
-                    <span style="--i:4">4</span>
-                    <span style="--i:5">5</span>
-                    <span style="--i:6">6</span>
-                    <span style="--i:7">7</span>
-                    <span style="--i:8">8</span>
-                    <span style="--i:9">9</span>
-                    <span style="--i:10">10</span>
-                    <span style="--i:11">11</span>
-                    <span style="--i:12">12</span>
+        <!-- LEFT: AVATAR CARD -->
+        <div class="col-lg-4">
+            <div class="card profile-avatar-card">
+                <div class="card-body text-center">
+
+                    <h4 class="mb-1"><?= htmlspecialchars($userFullName ?: 'Firstname Lastname') ?></h4>
+                    <p class="text-muted mb-3">Created Since <?= $createdAt ?></p>
+
+                    <div class="avatar-wrap mx-auto mb-3">
+                        <img src="<?= htmlspecialchars($avatar) ?>" alt="Avatar" class="avatar-img">
+                    </div>
+
+                    <div class="d-grid gap-2">
+                        <a href="/profile/edit" class="btn btn-purple">Edit Profile</a>
+
+                        <form action="/profile/delete" method="post"
+                              onsubmit="return confirm('Delete your profile? This cannot be undone.')">
+                            <input type="hidden" name="_csrf" value="<?= \App\Core\CSRF::getToken() ?>">
+                            <button type="submit" class="btn btn-danger-outline">
+                                Delete Profile
+                            </button>
+                        </form>
+                    </div>
+
                 </div>
-                <div class="center"></div>
-            </div>
-            <div class="digital">
-                <div id="digTime">--:--:--</div>
-                <div class="label">Philippine Time (UTC +8)</div>
             </div>
         </div>
-    </div>
 
-       
+        <!-- RIGHT: DETAILS CARD -->
+        <div class="col-lg-8">
+            <div class="card profile-details-card">
+                <div class="card-body d-flex flex-wrap gap-4">
 
-    <div class="body-body-2">
-        <div class="container-inside1-body2">
-            <h5><?= htmlspecialchars($fullName ?: 'Your Name') ?></h5>
-            <p><?= $created ? 'Created since ' . htmlspecialchars($created) : '' ?></p>
-              <!--photo form   --> 
-           <form id="profilePhotoForm" method="POST" action="/profile/update-photo" enctype="multipart/form-data" class="d-inline-block">
-            <input type="hidden" name="_csrf" value="<?= \App\Core\CSRF::getToken() ?>">
-            <div class="profile-photo-wrapper">
-              <img id="profilePhoto" src="<?= htmlspecialchars($photo) ?>" class="profile-photo" alt="Profile photo">
-              <button type="button" id="profilePhotoTrigger" class="photo-edit-btn" aria-label="Change profile photo">
-                <i class="bi bi-pencil-fill"></i>
-              </button>
-              <input type="file" id="profilePhotoInput" name="profile_photo" accept="image/jpeg,image/png,image/webp" class="d-none">
+                    <!-- Personal Info -->
+                    <div class="flex-grow-1">
+                        <h5>Personal Information</h5>
+
+                        <div class="info-row">
+                            <label>Full name</label>
+                            <div class="info-value"><?= htmlspecialchars($userFullName ?: 'User') ?></div>
+                        </div>
+
+                        <div class="info-row">
+                            <label>Email</label>
+                            <div class="info-value"><?= $email ?></div>
+                        </div>
+
+                        <div class="info-row">
+                            <label>Phone</label>
+                            <div class="info-value"><?= $phone ?></div>
+                        </div>
+
+                        <div class="info-row">
+                            <label>Bio</label>
+                            <div class="info-value"><?= $bio ?></div>
+                        </div>
+                    </div>
+
+                    <!-- Contact & Security -->
+                    <div class="contact-col" style="max-width:360px;">
+
+                        <div class="d-flex justify-content-between align-items-start mb-3">
+                            <h5 class="me-3">Contact & Security</h5>
+
+                            <div class="d-flex gap-2">
+
+                                <!-- Edit Profile -->
+                                <a href="/profile/edit" class="btn btn-sm btn-icon btn-edit" title="Edit Profile">
+                                    <img src="/assets/img/EditIcon.svg" alt="Edit" />
+                                </a>
+
+                                <!-- Delete Profile -->
+                                <form action="/profile/delete" method="post"
+                                      onsubmit="return confirm('Delete your profile? This cannot be undone.')">
+                                    <input type="hidden" name="_csrf" value="<?= \App\Core\CSRF::getToken() ?>">
+                                    <button class="btn btn-sm btn-icon btn-delete" title="Delete Profile">
+                                        <img src="/assets/img/DeleteIcon.svg" alt="Delete" />
+                                    </button>
+                                </form>
+
+                            </div>
+                        </div>
+
+                        <div class="info-row">
+                            <label>Address</label>
+                            <div class="info-value"><?= $address ?></div>
+                        </div>
+
+                        <div class="info-row">
+                            <label>Emergency Contact</label>
+                            <div class="info-value"><?= htmlspecialchars($user['emergency_contact_name'] ?? '-') ?></div>
+                            <div class="info-value small"><?= htmlspecialchars($user['emergency_contact_phone'] ?? '') ?></div>
+                        </div>
+
+                        <div class="mt-4">
+                            <button class="btn btn-outline-settings" data-bs-toggle="modal" data-bs-target="#changePasswordModal">
+                                <img src="/assets/img/SettingsIcon.svg" class="icon" alt="Settings" />
+                                Change Password
+                            </button>
+                        </div>
+
+                    </div>
+
+                </div>
             </div>
-          </form>
+        </div>
 
-          </div>
-
-
-
-         <!--TRANFSFER DETAILS TO A FORM 
-        --> 
-        <form id="profileEditForm" class="profile-inline-form" method="POST" action="/profile/update" enctype="multipart/form-data">
-  <input type="hidden" name="_csrf" value="<?= \App\Core\CSRF::getToken() ?>">
-
-  <div class="container-inside2-body2">
-    <div class="container-inside2-body2-1">
-      <h4>Personal Information</h4>
-
-      <h6>Full Name</h6>
-      <div class="view-mode"><?= htmlspecialchars($fullName) ?></div>
-      <div class="edit-mode d-none">
-        <input class="form-control mb-2" name="first_name" value="<?= htmlspecialchars($first) ?>" placeholder="First name">
-        <input class="form-control" name="last_name" value="<?= htmlspecialchars($last) ?>" placeholder="Last name">
-      </div>
-
-      <h6>Email</h6>
-      <div class="view-mode"><?= htmlspecialchars($email) ?></div>
-      <div class="edit-mode d-none">
-        <input class="form-control" name="email" value="<?= htmlspecialchars($email) ?>" disabled>
-        <small class="text-muted">Email not editable here</small>
-      </div>
-
-      <h6>Phone</h6>
-      <div class="view-mode"><?= htmlspecialchars($phone) ?></div>
-      <div class="edit-mode d-none">
-        <input class="form-control" name="contact_number" value="<?= htmlspecialchars($phone) ?>">
-      </div>
-
-      <h6>Bio</h6>
-      <div class="view-mode"><?= htmlspecialchars($bio) ?></div>
-      <div class="edit-mode d-none">
-        <textarea class="form-control" name="bio" rows="2"><?= htmlspecialchars($bio) ?></textarea>
-      </div>
-    </div>
-
-    <div class="container-inside2-body2-2">
-      <div class="d-flex justify-content-end gap-2 mb-2">
-        <button type="button" id="editProfileBtn" class="editprofile">Edit Profile</button>
-<button type="button" class="deleteprofile" data-bs-toggle="modal" data-bs-target="#deleteAccountModal" aria-label="Delete account">🗑</button>
-      </div>
-
-      <h4>Contact &amp; Security</h4>
-
-      <h6>Address</h6>
-      <div class="view-mode"><?= htmlspecialchars($address ?? '') ?></div>
-      <div class="edit-mode d-none">
-        <input class="form-control" name="address" value="<?= htmlspecialchars($address ?? '') ?>">
-      </div>
-
-      <h6>Emergency Contact</h6>
-      <div class="view-mode">
-        <?= htmlspecialchars($emgName ?? '') ?><?= !empty($emgRel) ? " (" . htmlspecialchars($emgRel) . ")" : "" ?><br>
-        <?= htmlspecialchars($emgPhone ?? '') ?>
-      </div>
-      <div class="edit-mode d-none">
-        <input class="form-control mb-2" name="emergency_name" value="<?= htmlspecialchars($emgName ?? '') ?>" placeholder="Name">
-        <input class="form-control mb-2" name="emergency_relation" value="<?= htmlspecialchars($emgRel ?? '') ?>" placeholder="Relation">
-        <input class="form-control" name="emergency_phone" value="<?= htmlspecialchars($emgPhone ?? '') ?>" placeholder="Phone">
-      </div>
-
-      <div class="mt-3 view-mode">
-        <button class="changepass" type="button" data-bs-toggle="modal" data-bs-target="#changePasswordModal">
-          <img src="/assets/img/settings.png" class="icon" alt=""> Change password
-        </button>
-      </div>
-
-      <div class="edit-mode d-none mt-3 d-flex gap-2">
-        <button type="submit" class="btn btn-primary">Save</button>
-        <button type="button" id="cancelEditBtn" class="btn btn-outline-secondary">Cancel</button>
-      </div>
-    </div>
-  </div>
-</form>
-
+    </section>
 </div>
+
+<!-- ===================== CLOCK SCRIPT ======================= -->
+<script>
+(function(){
+  function updateClock() {
+    const now = new Date();
+    const ph = new Date(now.toLocaleString("en-US", { timeZone: "Asia/Manila" }));
+
+    const sec = ph.getSeconds();
+    const min = ph.getMinutes();
+    const hr  = ph.getHours();
+
+    document.getElementById('secondHand').style.transform =
+        `translate(-50%, -100%) rotate(${sec * 6}deg)`;
+
+    document.getElementById('minuteHand').style.transform =
+        `translate(-50%, -100%) rotate(${min * 6 + sec * 0.1}deg)`;
+
+    document.getElementById('hourHand').style.transform =
+        `translate(-50%, -100%) rotate(${hr * 30 + min * 0.5}deg)`;
+
+    document.getElementById('digTime').textContent =
+        ph.toLocaleTimeString('en-US', { hour12: false });
+  }
+
+  updateClock();
+  setInterval(updateClock, 1000);
+})();
+</script>

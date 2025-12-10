@@ -15,10 +15,6 @@
 
     <nav class="sidebar-links">
 
-        <a href="/profile">
-            <i class="bi bi-receipt"></i> Profile
-        </a>
-
         <a href="/invoices">
             <i class="bi bi-receipt"></i> Invoice History
         </a>

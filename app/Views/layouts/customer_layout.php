@@ -24,45 +24,48 @@
     <div class="customer-wrapper d-flex">
 
         <main class="flex-grow-1 min-vh-100">
-            <header class="d-flex justify-content-between align-items-center p-3 border-bottom bg-white">
-                <div class="d-flex align-items-center gap-3">
-                    <a class="me-3" href="#home"><img src="/assets/img/apple-touch-icon.png" height="70" alt=""></a>
-                    <h5 class="m-0"><?= htmlspecialchars($pageTitle ?? "") ?></h5>
-                </div>
+<header class="customer-header">
 
-                
+    <!-- LEFT (Logo + Page Title) -->
+    <div class="header-left">
+        <a href="/customer/dashboard">
+            <img src="/assets/img/logo.svg" class="header-logo">
+        </a>
+        <h5 class="header-title"><?= htmlspecialchars($pageTitle ?? "") ?></h5>
+    </div>
 
-                <div class="d-flex align-items-center gap-3">
-                    <button id="notifBtn" class="btn btn-ghost position-relative" data-bs-toggle="modal"
-                        data-bs-target="#notificationsModal">
-                        <i class="bi bi-bell fs-4"></i>
-                        <span id="notifCount"
-                            class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"
-                            style="font-size:10px;display:none">0</span>
-                    </button>
+    <!-- RIGHT (Notification + Profile Dropdown) -->
+    <div class="header-right">
 
-                    <div class="dropdown">
-                        <a class="btn" href="/profile" id="profileDropdown" data-bs-toggle="dropdown"
-                            aria-expanded="false">
-                            <img src="/assets/img/ProfileIcon.svg" class="rounded-circle" width="36" height="36"
-                                alt="Profile">
-                        </a>
-                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="profileDropdown">
-                            <li><a class="dropdown-item" href="/profile">Profile</a></li>
-                            <li><a class="dropdown-item" href="#" data-bs-toggle="modal"
-                                    data-bs-target="#changePasswordModal">Change password</a></li>
-                            <li>
-                                <hr class="dropdown-divider">
-                            </li>
-                            <li><a class="dropdown-item text-danger" href="/logout">Logout</a></li>
-                        </ul>
-                    </div>
-                </div>
-            </header>
-                
-          <div class="container-fluid p-4">
-                <?php include __DIR__ . "/alerts.php"; ?>
-                <?= $content ?>
+        <!-- NOTIFICATION -->
+        <button id="notifBtn" class="header-icon-btn" data-bs-toggle="modal" data-bs-target="#notificationsModal">
+            <img src="/assets/img/NotificationIcon.svg" class="header-icon">
+            <span id="notifCount" class="notif-badge" style="display:none;">0</span>
+        </button>
+
+        <!-- PROFILE DROPDOWN -->
+        <div class="dropdown">
+            <a href="#" class="profile-btn" id="profileDropdown" data-bs-toggle="dropdown">
+                <img src="/assets/img/ProfileIcon.svg" class="profile-avatar">
+            </a>
+
+            <ul class="dropdown-menu dropdown-menu-end">
+                <li><a class="dropdown-item" href="/profile">My Profile</a></li>
+                <li><a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#changePasswordModal">Change Password</a></li>
+                <li><hr class="dropdown-divider"></li>
+                <li><a class="dropdown-item text-danger" href="/logout">Logout</a></li>
+            </ul>
+        </div>
+
+    </div>
+
+</header>
+
+
+            <div class="container-fluid p-4">
+                <?php // $content is injected by Controller::renderWithLayout
+
+echo $content; ?>
             </div>
 
         </main>
@@ -77,16 +80,8 @@
   }
   if (file_exists(__DIR__ . "/../Customer/components/change_password_modal.php")) {
       include __DIR__ . "/../Customer/components/change_password_modal.php";
-  } if (file_exists(__DIR__ . "/../Customer/components/delete_account_modal.php")) {
-      include __DIR__ . "/../Customer/components/delete_account_modal.php";
   }
-
-
-
   ?>
-
-
-  
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
