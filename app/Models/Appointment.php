@@ -91,7 +91,7 @@ public function findByUser(int $userId, ?int $limit = null): array
         
         // Add status filter if provided and not 'all'
         if (!empty($status) && $status !== 'all') {
-            $query .= " AND a.status = :status";
+            $query .= " WHERE a.status = :status";
         }
         
         $query .= " ORDER BY a.appointment_date DESC, a.appointment_time DESC";
@@ -111,28 +111,19 @@ public function findByUser(int $userId, ?int $limit = null): array
     /*
      * Check if a specific time slot is already booked
      */
-    public function isSlotTaken(string $date, string $time, ?int $excludeAppointmentId = null): bool
-{
-    $sql = "
-        SELECT COUNT(*) 
-        FROM {$this->table} 
-        WHERE appointment_date = :date 
-          AND appointment_time = :time 
-          AND status NOT IN ('cancelled', 'completed')
-          AND is_deleted = 0
-    ";
-    $params = ['date' => $date, 'time' => $time];
-
-    if ($excludeAppointmentId !== null) {
-        $sql .= " AND {$this->primaryKey} <> :exclude_id";
-        $params['exclude_id'] = $excludeAppointmentId;
+    public function isSlotTaken(string $date, string $time): bool
+    {
+        $stmt = $this->db->prepare("
+            SELECT COUNT(*) 
+            FROM {$this->table} 
+            WHERE appointment_date = :date 
+            AND appointment_time = :time 
+            AND status NOT IN ('cancelled', 'completed')
+            AND is_deleted = 0
+        ");
+        $stmt->execute(['date' => $date, 'time' => $time]);
+        return $stmt->fetchColumn() > 0;
     }
-
-    $stmt = $this->db->prepare($sql);
-    $stmt->execute($params);
-    return $stmt->fetchColumn() > 0;
-}
-
         
     /**
      * Limit per user per day to prevent spammy bookings
@@ -156,21 +147,6 @@ public function findByUser(int $userId, ?int $limit = null): array
      */
    public function createAppointment(array $data): int
         {
-
-            // Normalize time to 24h format for TIME column
-            $rawTime = trim($data['appointment_time'] ?? '');
-            $timeObj = \DateTime::createFromFormat('g:i A', $rawTime)
-                ?: \DateTime::createFromFormat('h:i A', $rawTime)
-                ?: \DateTime::createFromFormat('H:i', $rawTime)
-                ?: \DateTime::createFromFormat('H:i:s', $rawTime);
-
-            if (!$timeObj) {
-                throw new Exception("Invalid time format. Please choose a valid time slot.");
-            }
-
-            $data['appointment_time'] = $timeObj->format('H:i:s');
-
-
             // Prevent double booking of same slot
             if ($this->isSlotTaken($data['appointment_date'], $data['appointment_time'])) {
                 throw new Exception("This time slot is already booked. Please choose another.");
@@ -333,55 +309,5 @@ public function findByUser(int $userId, ?int $limit = null): array
     {
         return $this->delete($id);
     }
-
-    // For Appointment in Profile: Fetching Today appointment.
-
-  public function findForUserOnDate(int $userId, string $date): ?array
-    {
-        $stmt = $this->db->prepare("
-            SELECT a.*, s.service_name
-            FROM {$this->table} a
-            JOIN tbl_services s ON a.service_id = s.service_id
-            WHERE a.user_id = :user_id
-            AND a.appointment_date = :date
-            AND a.is_deleted = 0
-            AND a.status NOT IN ('cancelled', 'failed')
-            AND CONCAT(a.appointment_date, ' ' , a.appointment_time) >= DATE_SUB(NOW(), INTERVAL 1 HOUR)
-            ORDER BY a.appointment_time ASC
-            LIMIT 1
-        ");
-        $stmt->execute(['user_id' => $userId, 'date' => $date]);
-        $row = $stmt->fetch(PDO::FETCH_ASSOC);
-        return $row ?: null;
-    }
-
-
-
-    // NOIFICATIONS
-    public function findPendingDueInNext24h(): array
-        {
-            $sql = "
-                SELECT 
-                    a.appointment_id,
-                    a.user_id,
-                    a.appointment_date,
-                    a.appointment_time,
-                    s.service_name,
-                    DATE_FORMAT(a.appointment_time, '%h:%i %p') AS formatted_time
-                FROM {$this->table} a
-                JOIN tbl_services s ON a.service_id = s.service_id
-                WHERE a.is_deleted = 0
-                AND a.status = 'pending'
-                AND IFNULL(a.reminder_sent, 0) = 0
-                AND CONCAT(a.appointment_date, ' ', a.appointment_time)
-                    BETWEEN NOW() AND DATE_ADD(NOW(), INTERVAL 24 HOUR)
-            ";
-            $stmt = $this->db->prepare($sql);
-            $stmt->execute();
-            return $stmt->fetchAll(PDO::FETCH_ASSOC);
-        }
-
-
-
 
 }

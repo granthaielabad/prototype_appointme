@@ -76,43 +76,36 @@ if (typeof navbarInitialized === 'undefined') {
     });
 
     // ====== NOTIFICATION DROPDOWN ======
-const notifBtn = document.getElementById("notifToggle");
-const notifDropdown = document.getElementById("notifDropdown");
+    const notifBtn = document.getElementById("notifToggle");
+    const notifDropdown = document.getElementById("notifDropdown");
 
-if (notifBtn) {
-    notifBtn.addEventListener("click", (e) => {
-        e.stopPropagation();
-        notifDropdown.classList.toggle("show");
+    if (notifBtn) {
+        notifBtn.addEventListener("click", (e) => {
+            e.stopPropagation();
+            notifDropdown.classList.toggle("show");
 
-        fetch('/notifications/get')
-            .then(res => res.json())
-            .then(data => {
-                const esc = (s) => String(s ?? '').replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]));
-                let html = '';
-                if (!data.length) {
-                    html = '<p class="text-muted small">No new notifications.</p>';
-                } else {
-                    data.forEach(n => {
-                        const ts = n.created_at
-                            ? new Date(n.created_at.replace(' ', 'T')).toLocaleString()
-                            : '';
-                        html += `
-                            <div class="notif-item">
-                                <strong>${esc(n.title)}</strong>
-                                <p>${esc(n.message)}</p>
-                                <small>${esc(ts)}</small>
-                            </div>
-                        `;
-                    });
-                }
-                document.getElementById("notifList").innerHTML = html;
-            })
-            .catch(() => {
-                document.getElementById("notifList").innerHTML = '<p class="text-muted small">Could not load notifications.</p>';
-            });
-    });
-}
-
+            // Optional AJAX loader:
+            fetch('/notifications/get')
+                .then(res => res.json())
+                .then(data => {
+                    let html = '';
+                    if (data.length === 0) {
+                        html = '<p class="text-muted small">No new notifications.</p>';
+                    } else {
+                        data.forEach(n => {
+                            html += `
+                                <div class="notif-item">
+                                    <strong>${n.title}</strong>
+                                    <p>${n.message}</p>
+                                    <small>${n.date}</small>
+                                </div>
+                            `;
+                        });
+                    }
+                    document.getElementById("notifList").innerHTML = html;
+                });
+        });
+    }
 
     // ===== PROFILE DROPDOWN TOGGLE =====
     const profileToggle = document.getElementById("profileToggle");

@@ -74,8 +74,10 @@ document.addEventListener("DOMContentLoaded", () => {
     ------------------------------------------- */
     document.querySelectorAll(".openDeleteModal").forEach(btn => {
         btn.addEventListener("click", () => {
+            const name = btn.dataset.name;
             const id = btn.dataset.id;
 
+            document.getElementById("deleteServiceName").textContent = name;
             document.getElementById("confirmDeleteBtn").setAttribute(
                 "href",
                 `/admin/services/delete?id=${id}`

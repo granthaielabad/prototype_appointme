@@ -1,56 +1,55 @@
 <?php
+// views/pages/payment_qr.php
+
+
 $checkoutUrl = $checkoutUrl ?? '';
-$escapedUrl  = htmlspecialchars($checkoutUrl, ENT_QUOTES, 'UTF-8');
-$qrData      = urlencode($checkoutUrl);
+
+$escapedUrl = htmlspecialchars($checkoutUrl, ENT_QUOTES, 'UTF-8');
+$qrData     = urlencode($checkoutUrl);
 ?>
-<link rel="stylesheet" href="/assets/css/payment_qr.css">
 
-<div class="payment-qr-page">
-    <div class="payment-card">
-        <?php if (!empty($checkoutUrl)): ?>
-            <div>
-                <div class="subheading">Pay with E-Wallet</div>
+<div class="container my-5">
+    <h2 class="mb-4 text-center">Scan to Pay</h2>
 
-                <div class="qr-wrapper">
-                    <img
-                        src="https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=<?= $qrData ?>"
-                        alt="Payment QR Code"
-                    >
-                </div>
+    <?php if (!empty($checkoutUrl)): ?>
+        <div class="row justify-content-center">
+            <div class="col-md-6 text-center">
+                <p class="mb-3">
+                    Please scan this QR code using your mobile banking or e-wallet app.
+                </p>
 
-                <div class="merchant">8th Avenue Salon</div>
-                <div class="details">Mobile No: +639999999999</div>
-                <div class="details">User Id: 00000000000</div>
+                <img
+                    src="https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=<?= $qrData ?>"
+                    alt="Payment QR Code"
+                    class="img-fluid mb-3"
+                >
 
-                <div class="actions">
+                <p class="mb-3">
+                    Or click this button if you’re on mobile or desktop:
+                </p>
+
+                <p class="mb-3">
                     <a
                         href="<?= $escapedUrl ?>"
                         target="_blank"
                         rel="noopener noreferrer"
-                        class="pay-btn"
+                        class="btn btn-primary"
                     >
-                        Pay
+                        Open Payment Page
                     </a>
+                </p>
 
-                    <a href="/my-appointments" class="back-link" id="back-to-appointments">
-                        Back to My Appointments
-                    </a>
-                </div>
-            </div>
-
-            <script>
-              window.PAYMENT_QR_CONFIG = { cancelUrl: '/payment/cancel-session' };
-            </script>
-            <script src="/assets/js/payment_qr.js"></script>
-        <?php else: ?>
-            <div class="error-card">
-                <div class="payment-title">Payment Session Missing</div>
-                <div class="payment-meta">No active payment session found.</div>
-                <div class="payment-meta">Please try booking again.</div>
-                <a href="/my-appointments" class="back-link" id="back-to-appointments">
+                <a href="/my-appointments" class="btn btn-outline-secondary btn-sm">
                     Back to My Appointments
                 </a>
             </div>
-        <?php endif; ?>
-    </div>
+        </div>
+    <?php else: ?>
+        <div class="alert alert-danger">
+            No active payment session found. Please try booking again.
+        </div>
+        <a href="/my-appointments" class="btn btn-outline-secondary btn-sm">
+            Back to My Appointments
+        </a>
+    <?php endif; ?>
 </div>

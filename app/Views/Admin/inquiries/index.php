@@ -1,26 +1,6 @@
 <?php
 $pageTitle = "Inquiry";
 $activePage = "inquiry";
-
-/**
- * Get status badge for inquiry
- */
-function getInquiryStatusBadge($status, $isRead) {
-    $status = $status ?? 'pending';
-
-    switch ($status) {
-        case 'pending':
-            return '<span class="badge bg-warning text-dark">Pending</span>';
-        case 'read':
-            return '<span class="badge bg-info text-white">Read</span>';
-        case 'replied':
-            return '<span class="badge bg-success">Replied</span>';
-        case 'deleted':
-            return '<span class="badge bg-danger">Deleted</span>';
-        default:
-            return '<span class="badge bg-secondary">Unknown</span>';
-    }
-}
 ?>
 
 <div class="admin-section">
@@ -64,7 +44,6 @@ function getInquiryStatusBadge($status, $isRead) {
                         <th>S.No</th>
                         <th>Name</th>
                         <th>Email</th>
-                        <th>Status</th>
                         <th>Enquiry Date</th>
                         <th style="width: 90px;">Action</th>
                     </tr>
@@ -73,7 +52,7 @@ function getInquiryStatusBadge($status, $isRead) {
 
                     <?php if (empty($inquiries)): ?>
                         <tr data-empty-state="true">
-                            <td colspan="6" class="text-center text-muted py-4">No inquiries found.</td>
+                            <td colspan="5" class="text-center text-muted py-4">No inquiries found.</td>
                         </tr>
                     <?php else: ?>
                         <?php foreach ($inquiries as $i => $inq): ?>
@@ -81,18 +60,17 @@ function getInquiryStatusBadge($status, $isRead) {
                                 <td><?= $i + 1 ?></td>
                                 <td><?= htmlspecialchars($inq['full_name']) ?><?= !$inq['is_read'] ? ' <span class="badge bg-warning text-dark ms-2">NEW</span>' : '' ?></td>
                                 <td><?= htmlspecialchars($inq['email']) ?></td>
-                                <td><?= getInquiryStatusBadge($inq['status'], $inq['is_read']) ?></td>
-                                <td><?= date("F d, Y", strtotime($inq['created_at'])) ?></td>
+                                <td><?= date("M d, Y", strtotime($inq['created_at'])) ?></td>
                                 <td>
                                     <button class="text-purple me-2 openInquiryModal" style="border:0;background:none;">
                                         <i class="bi bi-eye"></i>
                                     </button>
 
-                                    <button class="text-purple openInquiryArchiveWarningModal" style="border:0;background:none;"
-                                            data-id="<?= $inq['inquiry_id'] ?>"
-                                            data-name="<?= htmlspecialchars($inq['full_name']) ?>">
+                                    <a href="/admin/inquiries/delete?id=<?= $inq['inquiry_id'] ?>" 
+                                       class="text-purple"
+                                       onclick="return confirm('Delete this inquiry?')">
                                         <i class="bi bi-trash"></i>
-                                    </button>
+                                    </a>
                                 </td>
                             </tr>
                         <?php endforeach; ?>
@@ -120,47 +98,14 @@ function getInquiryStatusBadge($status, $isRead) {
             <p><strong>Name:</strong> <span id="inq_name"></span></p>
             <p><strong>Mobile Number:</strong> <span id="inq_phone"></span></p>
             <p><strong>Email Address:</strong> <span id="inq_email"></span></p>
-            <p><strong>Status:</strong> <span id="inq_status"></span></p>
             <p><strong>Inquiry Date:</strong> <span id="inq_date"></span></p>
 
             <p class="mt-3"><strong>Message:</strong></p>
             <p id="inq_message" class="p-2 bg-light rounded"></p>
 
         </div>
-
-        <div class="modal-footer">
-            <button class="btn btn-primary w-100" id="replyInquiryBtn">
-                <i class="bi bi-reply me-1"></i>Reply
-            </button>
-        </div>
-    </div>
-</div>
-
-<!-- Archive Warning Modal -->
-<div class="custom-modal" id="inquiryArchiveWarningModal" style="display: none;">
-    <div class="custom-modal-content" style="max-width: 400px; text-align: center;">
-        <!-- Warning Icon -->
-        <div style="margin-bottom: 20px;">
-            <i class="bi bi-exclamation-triangle" style="font-size: 60px; color: #8b0000;"></i>
-        </div>
-
-        <!-- Warning Text -->
-        <p style="font-size: 16px; margin-bottom: 20px;">
-            Are you sure you want to <span style="color: #8b0000; font-weight: bold;">archive</span> this inquiry?
-        </p>
-
-        <!-- Action Buttons -->
-        <div style="display: flex; gap: 12px; margin-top: 20px;">
-            <button class="btn btn-outline-danger w-50" id="confirmInquiryArchiveBtn" style="border: 1px solid #ccc;">
-                <strong>Delete Service</strong>
-            </button>
-            <button class="btn btn-outline-secondary w-50" id="cancelInquiryArchiveBtn" style="border: 1px solid #ccc;">
-                <strong>No</strong>
-            </button>
-        </div>
     </div>
 </div>
 
 <script src="/assets/js/inquiry_modals.js"></script>
 <script src="/assets/js/inquiry_realtime.js"></script>
-<script src="/assets/js/archive_warning_modal.js"></script>

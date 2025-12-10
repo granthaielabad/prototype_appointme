@@ -7,34 +7,31 @@ class CSRF
     {
         Session::start();
         $token = bin2hex(random_bytes(24));
-        $_SESSION['_csrf_token'] = $token;
-        $_SESSION['_csrf_token_time'] = time();
+        $_SESSION['_csrf_token'] = $token;        // overwrite always
+        $_SESSION['_csrf_token_time'] = time();   // overwrite always
         return $token;
     }
+
 
     public static function getToken(): ?string
     {
         Session::start();
-        
-        // If no token exists, generate one automatically
-        if (empty($_SESSION['_csrf_token'])) {
-            return self::generate();
-        }
-        
-        return $_SESSION['_csrf_token'];
+        return $_SESSION['_csrf_token'] ?? null;
     }
 
     public static function verify(string $token, int $maxAgeSeconds = 3600): bool
     {
         Session::start();
 
-        // No token in session or no token provided?
+        // No token?
         if (empty($_SESSION['_csrf_token']) || empty($token)) {
+            self::clear();
             return false;
         }
 
         // Token mismatch?
         if (!hash_equals($_SESSION['_csrf_token'], $token)) {
+            self::clear();
             return false;
         }
 
@@ -45,8 +42,8 @@ class CSRF
             return false;
         }
 
-        // Valid → regenerate token for next request (token rotation)
-        self::generate();
+        // Valid → rotate token
+        self::clear();
         return true;
     }
 
@@ -54,4 +51,5 @@ class CSRF
     {
         unset($_SESSION['_csrf_token'], $_SESSION['_csrf_token_time']);
     }
+
 }

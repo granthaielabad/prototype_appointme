@@ -14,19 +14,6 @@ class AuthController extends Controller
     /** ---------------- LOGIN ---------------- **/
     public function loginForm(): void
     {
-        // ✅ If already logged in, redirect to appropriate page
-        if (Auth::check()) {
-            $user = Auth::user();
-            Session::preventCache();
-            
-            if ($user && (int)$user['role_id'] === 1) {
-                header('Location: /admin/dashboard');
-            } else {
-                header('Location: /book');
-            }
-            exit();
-        }
-        
         $this->renderAuth("Auth/login");
     }
 
@@ -73,9 +60,6 @@ class AuthController extends Controller
 
         Auth::login($user);
 
-        // ✅ Prevent browser caching after successful login
-        Session::preventCache();
-
         if ((int) $user["role_id"] === 1) {
             header("Location: /admin/dashboard");
             exit();
@@ -87,19 +71,6 @@ class AuthController extends Controller
     /** ---------------- REGISTER ---------------- **/
     public function registerForm(): void
     {
-        // ✅ If already logged in, redirect to appropriate page
-        if (Auth::check()) {
-            $user = Auth::user();
-            Session::preventCache();
-            
-            if ($user && (int)$user['role_id'] === 1) {
-                header('Location: /admin/dashboard');
-            } else {
-                header('Location: /book');
-            }
-            exit();
-        }
-        
         $this->renderAuth("Auth/register");
     }
 
@@ -168,7 +139,7 @@ class AuthController extends Controller
                 "date_created" => date("Y-m-d H:i:s"),
                 "is_active" => 0,
             ],
-            2,
+            3,
         );
 
         // generate OTP
@@ -197,19 +168,6 @@ class AuthController extends Controller
     /** ---------------- OTP ---------------- **/
     public function verifyOtpForm(): void
     {
-        // ✅ If already logged in and verified, redirect
-        if (Auth::check()) {
-            $user = Auth::user();
-            Session::preventCache();
-            
-            if ($user && (int)$user['role_id'] === 1) {
-                header('Location: /admin/dashboard');
-            } else {
-                header('Location: /book');
-            }
-            exit();
-        }
-        
         $this->renderAuth("Auth/verify_otp");
     }
 
@@ -269,19 +227,6 @@ class AuthController extends Controller
     /** ---------------- FORGOT PASSWORD ---------------- **/
     public function forgotPasswordForm(): void
     {
-        // ✅ If already logged in, redirect to appropriate page
-        if (Auth::check()) {
-            $user = Auth::user();
-            Session::preventCache();
-            
-            if ($user && (int)$user['role_id'] === 1) {
-                header('Location: /admin/dashboard');
-            } else {
-                header('Location: /book');
-            }
-            exit();
-        }
-        
         $this->renderAuth("Auth/forgot_password");
     }
 
@@ -348,22 +293,6 @@ class AuthController extends Controller
 
     public function resetPasswordForm(): void
     {
-        // ✅ If already logged in, redirect to appropriate page
-        if (Auth::check()) {
-            $user = Auth::user();
-            Session::preventCache();
-            
-            if ($user && (int)$user['role_id'] === 1) {
-                header('Location: /admin/dashboard');
-            } elseif ($user && (int)$user['role_id'] === 2) {
-                header('Location: /book');
-            } else {
-                // Fallback for any other role or if user data is missing
-                header('Location: /');
-            }
-            exit();
-        }
-        
         $token = $_GET["token"] ?? "";
         $this->renderAuth("Auth/reset_password", ["token" => $token]);
     }
@@ -427,10 +356,6 @@ class AuthController extends Controller
     public function logout(): void
     {
         Auth::logout();
-        
-        // ✅ Prevent browser caching after logout
-        Session::preventCache();
-        
         header("Location: /");
         exit();
     }

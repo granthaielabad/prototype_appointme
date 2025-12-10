@@ -144,21 +144,20 @@ $categories = [
 
 <!-- DELETE SERVICE MODAL -->
 <div class="custom-modal" id="deleteServiceModal">
-    <div class="custom-modal-content" style="max-width: 400px; text-align: center;">
+    <div class="custom-modal-content small-modal">
 
-        <!-- Warning Icon -->
-        <div style="margin-bottom: 20px;">
-            <i class="bi bi-exclamation-triangle" style="font-size: 60px; color: #8b0000;"></i>
+        <div class="modal-header">
+            <h5>Delete Service</h5>
+            <button class="close-modal">&times;</button>
         </div>
 
-        <!-- Warning Text -->
-        <p style="font-size: 16px; margin-bottom: 20px;">
-            Are you sure you want to <span style="color: #8b0000; font-weight: bold;">archive</span> this service?
+        <p class="text-muted">
+            Are you sure you want to delete "<span id="deleteServiceName"></span>"?
         </p>
 
         <div class="d-flex gap-2 mt-3">
-            <a id="confirmDeleteBtn" class="btn btn-outline-danger w-50" style="border: 1px solid #ccc; font-size: 16px; font-weight: 500;"><strong>Delete Service</strong></a>
-            <button class="btn btn-outline-secondary w-50 close-modal" style="border: 1px solid #ccc; font-size: 16px; font-weight: 500;"><strong>No</strong></button>
+            <a id="confirmDeleteBtn" class="btn btn-danger w-50" style="background:#CD9FFE;border:none;">Yes</a>
+            <button class="btn btn-outline-secondary w-50 close-modal">No</button>
         </div>
     </div>
 </div>

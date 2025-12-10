@@ -7,7 +7,6 @@ use PDO;
 
 // Sql changes to mark-as-read and filtering by read status to work
 // ALTER TABLE tbl_inquiries ADD COLUMN is_read TINYINT(1) DEFAULT 0;
-// ALTER TABLE tbl_inquiries ADD COLUMN status ENUM('pending', 'read', 'replied', 'deleted') DEFAULT 'pending';
 
 class Inquiry extends Model
 {
@@ -21,7 +20,6 @@ class Inquiry extends Model
         'email',
         'phone',
         'message',
-        'status',
         'created_at'
     ];
 
@@ -31,23 +29,22 @@ class Inquiry extends Model
     public function getAll(): array
     {
         $sql = "
-            SELECT
+            SELECT 
                 {$this->primaryKey},
                 user_id,
                 first_name,
                 last_name,
                 CONCAT(
-                    COALESCE(first_name, ''),
-                    CASE
-                        WHEN first_name IS NOT NULL AND last_name IS NOT NULL THEN ' '
-                        ELSE ''
-                    END,
+                    COALESCE(first_name, ''), 
+                    CASE 
+                        WHEN first_name IS NOT NULL AND last_name IS NOT NULL THEN ' ' 
+                        ELSE '' 
+                    END, 
                     COALESCE(last_name, '')
                 ) AS full_name,
                 email,
                 phone,
                 message,
-                status,
                 is_read,
                 created_at
             FROM {$this->table}
@@ -64,23 +61,22 @@ class Inquiry extends Model
     public function getByReadStatus(?string $readStatus = null): array
     {
         $sql = "
-            SELECT
+            SELECT 
                 {$this->primaryKey},
                 user_id,
                 first_name,
                 last_name,
                 CONCAT(
-                    COALESCE(first_name, ''),
-                    CASE
-                        WHEN first_name IS NOT NULL AND last_name IS NOT NULL THEN ' '
-                        ELSE ''
-                    END,
+                    COALESCE(first_name, ''), 
+                    CASE 
+                        WHEN first_name IS NOT NULL AND last_name IS NOT NULL THEN ' ' 
+                        ELSE '' 
+                    END, 
                     COALESCE(last_name, '')
                 ) AS full_name,
                 email,
                 phone,
                 message,
-                status,
                 is_read,
                 created_at
             FROM {$this->table}
@@ -88,9 +84,9 @@ class Inquiry extends Model
         ";
         
         if ($readStatus === 'read') {
-            $sql .= " AND status = 'read'";
+            $sql .= " AND is_read = 1";
         } elseif ($readStatus === 'unread') {
-            $sql .= " AND status = 'pending'";
+            $sql .= " AND is_read = 0";
         }
         
         $sql .= " ORDER BY is_read ASC, created_at DESC";
@@ -100,6 +96,15 @@ class Inquiry extends Model
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
+    /**
+     * Mark inquiry as read
+     */
+    public function markAsRead(int|string $id): bool
+    {
+        $sql = "UPDATE {$this->table} SET is_read = 1 WHERE {$this->primaryKey} = :id";
+        $stmt = $this->getDb()->prepare($sql);
+        return $stmt->execute(['id' => $id]);
+    }
 
     /**
      * Find a single inquiry by its ID.
@@ -107,23 +112,22 @@ class Inquiry extends Model
     public function find(int|string $id): ?array
     {
         $sql = "
-            SELECT
+            SELECT 
                 {$this->primaryKey},
                 user_id,
                 first_name,
                 last_name,
                 CONCAT(
-                    COALESCE(first_name, ''),
-                    CASE
-                        WHEN first_name IS NOT NULL AND last_name IS NOT NULL THEN ' '
-                        ELSE ''
-                    END,
+                    COALESCE(first_name, ''), 
+                    CASE 
+                        WHEN first_name IS NOT NULL AND last_name IS NOT NULL THEN ' ' 
+                        ELSE '' 
+                    END, 
                     COALESCE(last_name, '')
                 ) AS full_name,
                 email,
                 phone,
                 message,
-                status,
                 is_read,
                 created_at
             FROM {$this->table}
@@ -143,23 +147,22 @@ class Inquiry extends Model
     public function getByUser(int|string $userId): array
     {
         $sql = "
-            SELECT
+            SELECT 
                 {$this->primaryKey},
                 user_id,
                 first_name,
                 last_name,
                 CONCAT(
-                    COALESCE(first_name, ''),
-                    CASE
-                        WHEN first_name IS NOT NULL AND last_name IS NOT NULL THEN ' '
-                        ELSE ''
-                    END,
+                    COALESCE(first_name, ''), 
+                    CASE 
+                        WHEN first_name IS NOT NULL AND last_name IS NOT NULL THEN ' ' 
+                        ELSE '' 
+                    END, 
                     COALESCE(last_name, '')
                 ) AS full_name,
                 email,
                 phone,
                 message,
-                status,
                 is_read,
                 created_at
             FROM {$this->table}
@@ -183,45 +186,18 @@ class Inquiry extends Model
     }
 
     /**
-     * Mark an inquiry as read and update status
-     */
-    public function markAsRead(int|string $id): bool
-    {
-        try {
-            $sql = "UPDATE {$this->table}
-                    SET is_read = 1, status = 'read'
-                    WHERE {$this->primaryKey} = :id
-                      AND is_deleted = 0";
-            $stmt = $this->getDb()->prepare($sql);
-            $success = $stmt->execute(['id' => $id]);
-
-            if ($success && $stmt->rowCount() > 0) {
-                error_log("Inquiry::markAsRead - success id={$id}");
-                return true;
-            }
-
-            error_log("Inquiry::markAsRead - failed or no rows affected id={$id}");
-            return false;
-        } catch (\Throwable $e) {
-            error_log('Error marking inquiry as read: ' . $e->getMessage());
-            return false;
-        }
-    }
-
-    /**
      * Archive an inquiry (soft delete + snapshot to tbl_archives)
      */
-    public function archive(int|string $id, ?int $adminId = null, string $status = 'deleted'): bool
+    public function archive(int|string $id, ?int $adminId = null): bool
     {
         try {
+            error_log("Inquiry::archive start - id={$id} admin={$adminId}");
             // Get the inquiry data
             $inquiry = $this->find($id);
             if (!$inquiry) {
+                error_log("Inquiry::archive - inquiry not found id={$id}");
                 return false;
             }
-
-            // Update the status in the data before archiving
-            $inquiry['status'] = $status;
 
             // 1) Snapshot to tbl_archives
             $archive = new Archive();
@@ -238,12 +214,12 @@ class Inquiry extends Model
                 return false;
             }
 
-            // 2) Update status and soft delete from main table
+            // 2) Soft delete from main table
             $sql = "UPDATE {$this->table}
-                    SET status = :status, is_deleted = 1, deleted_at = NOW(), deleted_by = :admin_id
+                    SET is_deleted = 1, deleted_at = NOW(), deleted_by = :admin_id
                     WHERE {$this->primaryKey} = :id";
             $stmt = $this->getDb()->prepare($sql);
-            $ok = $stmt->execute(['id' => $id, 'admin_id' => $adminId, 'status' => $status]);
+            $ok = $stmt->execute(['id' => $id, 'admin_id' => $adminId]);
             if (!$ok) {
                 error_log('Inquiry::archive - soft delete failed: ' . json_encode($stmt->errorInfo()));
             } else {

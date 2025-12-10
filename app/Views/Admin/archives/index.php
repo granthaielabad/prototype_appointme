@@ -22,10 +22,9 @@ $activePage = "archives";
                         'all' => 'All Archive',
                         'service' => 'Service',
                         'appointment' => 'Appointment',
-                        'inquiry' => 'Inquiry',
-                        'employee' => 'Employee'
+                        'inquiry' => 'Inquiry'
                     ];
-                    echo $filterLabels[$currentFilter] ?? 'All Archive';
+                    echo $filterLabels[$currentFilter] ?? 'All Inquiry';
                 ?>
             </button>
             <ul class="dropdown-menu">
@@ -33,7 +32,6 @@ $activePage = "archives";
                 <li><a class="dropdown-item" href="?filter=service">Service</a></li>
                 <li><a class="dropdown-item" href="?filter=appointment">Appointment</a></li>
                 <li><a class="dropdown-item" href="?filter=inquiry">Inquiry</a></li>
-                <li><a class="dropdown-item" href="?filter=employee">Employee</a></li>
             </ul>
         </div>
     </div>
@@ -47,7 +45,7 @@ $activePage = "archives";
             </div>
         <?php else: ?>
             <?php foreach ($items as $item): ?>
-                <div class="card archive-item-card mb-2 p-3 border-0 shadow-sm"
+                <div class="card archive-item-card mb-1 p-4 border-0 shadow-sm"
                      data-archive='<?= json_encode($item, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT) ?>'>
                     <div class="d-flex justify-content-between align-items-start">
                         <!-- LEFT SIDE: Item Info -->
@@ -77,14 +75,12 @@ $activePage = "archives";
                                 </a>
 
                                 <!-- Restore -->
-                                <button class="text-purple btn btn-link p-0 openRestoreWarningModal"
-                                   data-type="<?= $item['item_type'] ?>"
-                                   data-id="<?= $item['item_id'] ?>"
-                                   data-name="<?= htmlspecialchars($item['item_name']) ?>"
-                                   data-filter="<?= htmlspecialchars($currentFilter) ?>"
-                                   title="Restore Item">
+                                <a href="/admin/archives/restore?type=<?= $item['item_type'] ?>&id=<?= $item['item_id'] ?>" 
+                                   class="text-purple"
+                                   title="Restore Item"
+                                   onclick="return confirm('Restore this item?')">
                                     <i class="bi bi-arrow-counterclockwise"></i>
-                                </button>
+                                </a>
                             </div>
                         </div>
                     </div>
@@ -191,7 +187,6 @@ $activePage = "archives";
             <p><strong>Name:</strong> <span id="archive_inq_name"></span></p>
             <p><strong>Mobile Number:</strong> <span id="archive_inq_phone"></span></p>
             <p><strong>Email Address:</strong> <span id="archive_inq_email"></span></p>
-            <p><strong>Status:</strong> <span id="archive_inq_status"></span></p>
             <p><strong>Inquiry Date:</strong> <span id="archive_inq_date"></span></p>
             <p class="mt-3"><strong>Message:</strong></p>
             <p id="archive_inq_message" class="p-2 bg-light rounded"></p>
@@ -200,82 +195,4 @@ $activePage = "archives";
     </div>
 </div>
 
-<!-- ============================================ -->
-<!-- EMPLOYEE VIEW MODAL -->
-<!-- ============================================ -->
-<div class="custom-modal" id="archiveEmployeeViewModal">
-    <div class="custom-modal-content" style="max-width: 500px;">
-        <!-- Close Button -->
-        <button class="close-modal" style="position: absolute; top: 15px; right: 15px; font-size: 24px; border: none; background: none; cursor: pointer;">&times;</button>
-
-        <!-- Status Badge -->
-        <div class="mb-3">
-            <span class="badge badge-inactive" id="archive_employee_status_badge" style="font-size: 0.9rem; padding: 0.5rem 1rem;">Status: Deactivated</span>
-        </div>
-
-        <!-- Employee Name -->
-        <h4 style="font-weight: 600; margin-bottom: 1rem; margin-top: 0; margin-left: 3px;" id="archive_employee_name">Employee Name</h4>
-
-        <!-- Employee Details -->
-        <div class="mb-3">
-            <p style="font-size: 0.9rem; color: #666; margin-bottom: 0.5rem;"><strong>Email:</strong></p>
-            <p style="font-size: 0.95rem; margin-bottom: 1rem;" id="archive_employee_email">N/A</p>
-        </div>
-
-        <div class="mb-3">
-            <p style="font-size: 0.9rem; color: #666; margin-bottom: 0.5rem;"><strong>Contact Number:</strong></p>
-            <p style="font-size: 0.95rem; margin-bottom: 1rem;" id="archive_employee_contact">N/A</p>
-        </div>
-
-        <div class="mb-3">
-            <p style="font-size: 0.9rem; color: #666; margin-bottom: 0.5rem;"><strong>Position:</strong></p>
-            <p style="font-size: 0.95rem; margin-bottom: 1rem;" id="archive_employee_position">N/A</p>
-        </div>
-
-        <div class="mb-3">
-            <p style="font-size: 0.9rem; color: #666; margin-bottom: 0.5rem;"><strong>Hire Date:</strong></p>
-            <p style="font-size: 0.95rem; margin-bottom: 1rem;" id="archive_employee_hire_date">N/A</p>
-        </div>
-
-        <div class="mb-3">
-            <p style="font-size: 0.9rem; color: #666; margin-bottom: 0.5rem;"><strong>Address:</strong></p>
-            <p style="font-size: 0.95rem; margin-bottom: 1rem;" id="archive_employee_address">N/A</p>
-        </div>
-
-        <!-- Divider -->
-        <hr style="margin: 0.5rem 0; border: none; border-top: 1px solid #e0e0e0;">
-
-        <!-- Archived Date -->
-        <div style="padding-top: 1rem;">
-            <small style="color: #999;"><strong>Archived Date:</strong> <span id="archive_employee_archived_date"></span></small>
-        </div>
-    </div>
-</div>
-
-<!-- Restore Warning Modal -->
-<div class="custom-modal" id="restoreWarningModal" style="display: none;">
-    <div class="custom-modal-content" style="max-width: 400px; text-align: center;">
-        <!-- Restore Icon -->
-        <div style="margin-bottom: 20px;">
-            <i class="bi bi-arrow-counterclockwise" style="font-size: 60px; color: #28a745;"></i>
-        </div>
-
-        <!-- Warning Text -->
-        <p style="font-size: 16px; margin-bottom: 20px;">
-            Are you sure you want to <span style="color: #28a745; font-weight: bold;">restore</span> <span id="restoreItemName">*Name*</span> from the system?
-        </p>
-
-        <!-- Action Buttons -->
-        <div style="display: flex; gap: 12px; margin-top: 20px;">
-            <button class="btn btn-outline-success w-50" id="confirmRestoreBtn" style="border: 1px solid #ccc">
-                <strong>Restore</strong>
-            </button>
-            <button class="btn btn-outline-secondary  w-50" id="cancelRestoreBtn" style="border: 1px solid #ccc;">
-                <strong>No</strong>
-            </button>
-        </div>
-    </div>
-</div>
-
 <script src="/assets/js/archive_modals.js"></script>
-<script src="/assets/js/restore_warning_modal.js"></script>

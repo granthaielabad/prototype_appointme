@@ -36,22 +36,12 @@
                 </a>
             </li>
 
-
             <!-- Inquiries -->
             <?php $isActive = str_starts_with($_SERVER['REQUEST_URI'], '/admin/inquiries'); ?>
             <li>
                 <a class="nav-link <?= $isActive ? 'active-nav' : '' ?>" href="/admin/inquiries">
                     <img src="/assets/img/admin/<?= $isActive ? 'active_InquiryIcon.svg' : 'InquiryIcon.svg' ?>">
                     Inquiries
-                </a>
-            </li>
-
-                        <!-- Employees -->
-            <?php $isActive = str_starts_with($_SERVER['REQUEST_URI'], '/admin/employees'); ?>
-            <li>
-                <a class="nav-link <?= $isActive ? 'active-nav' : '' ?>" href="/admin/employees">
-                    <img src="/assets/img/admin/<?= $isActive ? 'active_UserListIcon.svg' : 'UserListIcon.svg' ?>">
-                    Employees
                 </a>
             </li>
 

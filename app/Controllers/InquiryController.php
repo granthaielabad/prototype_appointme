@@ -59,7 +59,6 @@ class InquiryController extends Controller
             "email" => $data["email"],
             "phone" => $data["phone"],
             "message" => $data["message"],
-            "status" => "pending",
             "user_id" => null,
         ]);
 

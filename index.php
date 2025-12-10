@@ -2,8 +2,6 @@
 declare(strict_types=1);
 date_default_timezone_set("Asia/Manila");
 
-use App\Controllers\BookingController;
-use App\Controllers\UserController;
 use App\Core\Session;
 use App\Core\Router;
 use App\Core\CSRF;
@@ -11,9 +9,6 @@ use App\Core\Debug;
 use Dotenv\Dotenv;
 
 require_once __DIR__ . "/vendor/autoload.php";
-
-// Load Auth 
-require_once __DIR__ . "/app/core/auth.php";
 
 // Initialize debugging
 Debug::init(__DIR__ . '/logs');
@@ -56,41 +51,29 @@ $router->post("/reset-password", "AuthController@resetPassword");
 
 $router->get("/logout", "AuthController@logout");
 
-/* EMPLOYEE INVITATION */
-$router->get("/employee/accept-invitation", "EmployeeInvitationController@acceptInvitation");
-$router->post("/employee/complete-setup", "EmployeeInvitationController@completeSetup");
-
 /* CUSTOMER */
 $router->get("/book", "BookingController@index");
 $router->post("/book", "BookingController@store");
 $router->get("/api/appointments/taken", "BookingController@takenSlots");
 $router->get("/appointment/cancel", "BookingController@cancelFromHistory");
-$router->post("/appointment/reschedule", "BookingController@reschedule"); 
-$router->post("/profile/update-photo", "UserController@updatePhoto");
 
 
 
 $router->get("/invoices", "InvoiceController@customerList");
-$router->post("/profile/change-password", "UserController@changePassword");
 
 
 /* added testing carl */
 $router->get("/my-appointments", "BookingController@myAppointments");
 $router->get("/cancel-appointment", "BookingController@cancel");
-$router->post("/payment/cancel-session", "BookingController@cancelPaymentSession");
 $router->get("/payment-qr", "BookingController@paymentQr"); 
 $router->post("/webhook/paymongo", "PaymentWebhookController@handle");
 
-// success page
-$router->get("/payment/success", "BookingController@paymentSuccess");
 
 
-$router->post("/profile/delete-account", "UserController@deleteAccount");
 $router->get("/profile", "UserController@profile");
 $router->post("/profile/update", "UserController@updateProfile");
 
-$router->get("/notifications/get", "NotificationController@list");  // navbar dropdown
-$router->get("/notifications/list", "NotificationController@list"); // customer modal
+$router->get("/notifications/get", "NotificationController@getAll");
 
 /* OTP */
 $router->post("/otp/send", "OTPController@send");
@@ -117,16 +100,6 @@ $router->get("/admin/services/edit", "Admin\\ServiceController@edit");
 $router->post("/admin/services/update", "Admin\\ServiceController@update");
 $router->get("/admin/services/delete", "Admin\\ServiceController@delete");
 
-$router->get("/admin/employees", "Admin\\EmployeeController@index");
-$router->get("/admin/employees/create", "Admin\\EmployeeController@create");
-$router->post("/admin/employees/store", "Admin\\EmployeeController@store");
-$router->get("/admin/employees/edit", "Admin\\EmployeeController@edit");
-$router->post("/admin/employees/update", "Admin\\EmployeeController@update");
-$router->post("/admin/employees/toggle-status", "Admin\\EmployeeController@toggleStatus");
-$router->get("/admin/employees/archive", "Admin\\EmployeeController@archive");
-$router->get("/admin/employees/delete", "Admin\\EmployeeController@delete");
-$router->get("/admin/employees/activate", "Admin\\EmployeeController@activate");
-
 $router->get("/admin/inquiries", "Admin\\InquiryController@index");
 $router->get("/admin/inquiries/show", "Admin\\InquiryController@show");
 $router->post("/admin/inquiries/mark-as-read", "Admin\\InquiryController@markAsRead");
@@ -136,18 +109,6 @@ $router->get("/admin/inquiries/delete", "Admin\\InquiryController@archive");;
 $router->get("/admin/archives", "Admin\\ArchiveController@index");
 $router->get("/admin/archives/restore", "Admin\\ArchiveController@restore");
 $router->get("/admin/archives/delete", "Admin\\ArchiveController@delete");
-
-$router->get("/admin/reports", "Admin\\ReportController@index");
-$router->post("/admin/reports/export", "Admin\\ReportController@export");
-$router->get("/admin/reports/export-csv", "Admin\\ReportController@exportCsv");
-$router->get("/admin/reports/export-pdf", "Admin\\ReportController@exportPdf");
-$router->get("/admin/reports/summary", "Admin\\ReportController@summary");
-
-//notifications
-$router->get("/admin/notifications", "Admin\\NotificationController@index");
-$router->get("/admin/notifications/mark-all", "Admin\\NotificationController@markAll");
-$router->get("/admin/notifications/mark-one", "Admin\\NotificationController@markOne");
-
 
 /* RESOURCE-LIKE (misc) */
 $router->get("/services", "ServiceController@index");

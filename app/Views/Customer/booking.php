@@ -1,5 +1,3 @@
-
-
 <div class="booking-page-root">
 
     <!-- LEFT: BOOKING FORM -->

@@ -25,9 +25,6 @@ abstract class Controller
      */
     protected function renderAuth(string $view, array $data = []): void
     {
-        if (!str_starts_with($view, "Auth/")) {
-            $view = "Auth/" . $view;
-        }
         $this->renderWithLayout($view, "auth", $data);
     }
 

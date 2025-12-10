@@ -12,7 +12,7 @@ class InvoiceController extends Controller
 
     public function index(): void
     {
-        Auth::requireRole(2);
+        Auth::requireRole(3);
         $user = Auth::user();
         if ($user && (int) $user["role_id"] === 1) {
             header("Location: /admin/dashboard");
@@ -27,7 +27,7 @@ class InvoiceController extends Controller
     // invoice shower 
     public function customerList(): void
 {
-    Auth::requireRole(2); // customers only
+    Auth::requireRole(3); // customers only
     $user = Auth::user();
 
     $invoices = (new Invoice())->findByUserWithDetails((int)$user['user_id']); // add this method in the Invoice model if not present

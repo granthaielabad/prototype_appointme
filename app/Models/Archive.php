@@ -15,7 +15,6 @@ class Archive extends Model
 
     /**
      * Create an archive snapshot of another item.
-     * If an archive already exists for this item, update it instead of creating a duplicate.
      * @param string $type The type of item (service, appointment, inquiry)
      * @param int $itemId The ID of the item being archived
      * @param string $itemName The name/title of the item
@@ -26,71 +25,31 @@ class Archive extends Model
     public function archive(string $type, int $itemId, string $itemName, array $data, ?int $adminId = null): bool
     {
         try {
-            // Check if an archive already exists for this item
-            $checkSql = "SELECT archive_id FROM {$this->table}
-                        WHERE item_type = :item_type
-                        AND details LIKE :details_search
-                        LIMIT 1";
-            
-            $checkStmt = $this->getDb()->prepare($checkSql);
-            $detailsSearch = '%"item_id":' . $itemId . '%';
-            $checkStmt->execute([
-                'item_type' => $type,
-                'details_search' => $detailsSearch
-            ]);
-            
-            $existingArchive = $checkStmt->fetch(PDO::FETCH_ASSOC);
-            
-            if ($existingArchive) {
-                // Update existing archive instead of creating duplicate
-                $updateSql = "UPDATE {$this->table}
-                             SET item_name = :item_name,
-                                 item_data = :item_data,
-                                 details = :details,
-                                 is_archived = 1,
-                                 archived_at = NOW()
-                             WHERE archive_id = :archive_id";
-                
-                $updateStmt = $this->getDb()->prepare($updateSql);
-                $params = [
-                    'archive_id' => $existingArchive['archive_id'],
-                    'item_name' => $itemName,
-                    'item_data' => json_encode($data, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES),
-                    'details' => json_encode(['item_id' => $itemId, 'name' => $itemName], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES)
-                ];
-                
-                $ok = $updateStmt->execute($params);
-                if (!$ok) {
-                    $err = $updateStmt->errorInfo();
-                    error_log('Archive update failed: ' . json_encode($err));
-                    return false;
-                }
-                
-                error_log('Archive updated for existing item: ' . $type . ' ID ' . $itemId);
-                return true;
-            }
-            
-            // Create new archive if none exists
-            $insertSql = "INSERT INTO {$this->table} 
+            // The `tbl_archives` schema in this project stores the full snapshot JSON in
+            // `item_data` and has a `details` field for a short description. The table
+            // does not include an `item_id` column in the current schema, so insert
+            // into the actual columns present.
+            $sql = "INSERT INTO {$this->table} 
                     (item_type, item_name, item_data, details, is_archived, archived_at)
                     VALUES (:item_type, :item_name, :item_data, :details, 1, NOW())";
 
-            $insertStmt = $this->getDb()->prepare($insertSql);
+            $stmt = $this->getDb()->prepare($sql);
             $params = [
                 'item_type' => $type,
                 'item_name' => $itemName,
+                // store a UTF-8 safe JSON representation
                 'item_data' => json_encode($data, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES),
+                // keep a small details summary (including original id) to help quick lookups
                 'details' => json_encode(['item_id' => $itemId, 'name' => $itemName], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES)
             ];
 
-            $ok = $insertStmt->execute($params);
+            $ok = $stmt->execute($params);
             if (!$ok) {
-                $err = $insertStmt->errorInfo();
+                $err = $stmt->errorInfo();
                 error_log('Archive insert failed: ' . json_encode($err));
                 return false;
             }
 
-            error_log('New archive created for item: ' . $type . ' ID ' . $itemId);
             return true;
         } catch (\Throwable $e) {
             error_log('Error creating archive snapshot: ' . $e->getMessage());

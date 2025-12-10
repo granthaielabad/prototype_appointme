@@ -38,8 +38,3 @@ AddDefaultCharset utf-8
 <IfModule mod_autoindex.c>
     Options -Indexes
 </IfModule>
-
-<FilesMatch "^\.env$">
-  Order allow,deny
-  Deny from all
-</FilesMatch>
