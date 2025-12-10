@@ -207,6 +207,11 @@
   font-weight: 600;
 }
 
+.landing-footer{
+    padding-left: 3rem !important;
+    padding-right: 3rem !important;
+}
+
 /* ================================
    RESPONSIVENESS
 ================================ */
@@ -214,6 +219,10 @@
   .booking-page-root {
     flex-direction: column;
     padding: 20px;
+  }
+
+  .booking-card-art{
+    margin-top: 10% !important;
   }
 
   .booking-panel-left,

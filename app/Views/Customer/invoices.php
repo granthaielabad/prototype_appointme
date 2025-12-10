@@ -73,7 +73,7 @@ $formatMoney = static function ($value) {
             <div class="card-footer bg-white border-0 pt-0 pb-3 px-3">
               <div class="d-flex gap-2">
                 <a href="/invoices/show?id=<?= (int) $inv['invoice_id'] ?>" class="btn btn-light border invoice-btn w-50">View</a>
-                <a href="/invoices/show?id=<?= (int)$inv['invoice_id'] ?>" class="btn btn-outline-secondary invoice-btn w-50 js-download-invoice" data-invoice-id="<?= (int)$inv['invoice_id'] ?>">Print</a>
+                <a href="/invoices/show?id=<?= (int)$inv['invoice_id'] ?>" class="btn btn-outline-secondary invoice-btn w-50 js-download-invoice" data-invoice-id="<?= (int)$inv['invoice_id'] ?>">Download</a>
               </div>
             </div>
           </div>

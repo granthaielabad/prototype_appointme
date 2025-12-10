@@ -31,7 +31,7 @@ document.addEventListener('DOMContentLoaded', ()=>{
 
       const originalText = btn.textContent;
       btn.disabled = true;
-      btn.textContent = 'Preparing...';
+      btn.textContent = 'Downloading';
 
       try {
         const canvas = await html2canvas(card, { scale: 2, useCORS: true });
