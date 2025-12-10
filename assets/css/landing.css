@@ -303,7 +303,8 @@ body {
 }
 
 .price-card h4 {
-    font-family: "Italiana", serif !important;
+    font-family: "Italiana",
+        serif !important;
     font-size: 28px;
 }
 
@@ -405,6 +406,7 @@ body {
 
 /* MAIN LARGE BACKGROUND IMAGE */
 .about-img-main {
+
     height: 100%;
     position: absolute;
     top: 0;
@@ -495,22 +497,128 @@ body {
 
 
 
-/* ========================================
-   CONTACT SECTION
-======================================== */
+/* ==========================================================
+   CONTACT SECTION 
+========================================================== */
 
 .contact-section {
     width: 100%;
-    padding-top: 100px;
-    padding-bottom: 100px;
+    padding: 120px 0;
+    background: white;
 }
 
-.contact-info-box {
-    background: white;
-    padding: 22px;
-    border-radius: 14px;
-    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.06);
+.contact-layout {
+    max-width: 1300px;
+    margin: 60px auto 0;
+    display: flex;
+    justify-content: space-between;
+    gap: 80px;
 }
+
+/* ========== LEFT TEXT INFO ========== */
+.contact-info-list {
+    width: 40%;
+    display: flex;
+    flex-direction: column;
+    gap: 35px;
+}
+
+.info-block h4 {
+    font-size: 25px;
+    color: #2A2A2A;
+    margin-bottom: 8px;
+}
+
+.info-block p {
+    font-size: 18px;
+    color: #555;
+    line-height: 1.6;
+}
+
+/* ========== RIGHT SIDE FORM ========== */
+.contact-form-wrapper {
+    width: 55%;
+}
+
+.contact-form {
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+}
+
+/* Form label */
+.form-line label {
+    font-size: 17px;
+    font-weight: 600;
+    color: #6A4DBA;
+    margin-bottom: 8px;
+    display: block;
+}
+
+/* Underline input fields */
+.contact-form input,
+.contact-form textarea {
+    width: 100%;
+    padding: 10px 5px;
+    font-size: 16px;
+    border: none;
+    border-bottom: 2px solid #D4C3F7;
+    background: transparent;
+    outline: none;
+    color: #444;
+    transition: 0.25s ease;
+}
+
+.contact-form textarea {
+    min-height: 120px;
+    resize: vertical;
+}
+
+/* Underline glow on focus */
+.contact-form input:focus,
+.contact-form textarea:focus {
+    border-bottom: 2px solid #A178FF;
+}
+
+/* Submit button */
+.contact-submit {
+    padding: 14px 32px;
+    align-self: flex-start;
+
+    border-radius: 12px;
+    border: none;
+    font-size: 17px;
+    font-weight: 600;
+    color: white;
+
+    background: linear-gradient(90deg, #C57BFF, #A55BFF);
+    cursor: pointer;
+    transition: 0.25s ease;
+}
+
+.contact-submit:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 12px 24px rgba(165, 91, 255, 0.25);
+}
+
+/* ========== RESPONSIVE ========== */
+@media (max-width: 992px) {
+    .contact-layout {
+        flex-direction: column;
+        gap: 50px;
+        text-align: center;
+    }
+
+    .contact-info-list,
+    .contact-form-wrapper {
+        width: 100%;
+    }
+
+    .contact-submit {
+        align-self: center;
+    }
+}
+
 
 
 /* ========================================
