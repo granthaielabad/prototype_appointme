@@ -49,7 +49,7 @@ class ArchiveController extends AdminController
                     ? json_decode($archive['item_data'], true) 
                     : [];
 
-                // Extract the item_id from snapshot (service_id, appointment_id, or inquiry_id)
+                // Extract the item_id from snapshot (service_id, appointment_id, inquiry_id, or employee id)
                 $itemId = null;
                 $itemType = $archive['item_type'] ?? 'unknown';
                 if ($itemType === 'service' && isset($itemData['service_id'])) {
@@ -58,6 +58,8 @@ class ArchiveController extends AdminController
                     $itemId = $itemData['appointment_id'];
                 } elseif ($itemType === 'inquiry' && isset($itemData['inquiry_id'])) {
                     $itemId = $itemData['inquiry_id'];
+                } elseif ($itemType === 'employee' && isset($itemData['id'])) {
+                    $itemId = $itemData['id'];
                 }
 
                 // Build the item for display
@@ -84,13 +86,45 @@ class ArchiveController extends AdminController
                     $item['details']['appointment_date'] = $item['details']['appointment_date'] ?? null;
                     $item['details']['appointment_time'] = $item['details']['appointment_time'] ?? null;
                     $item['details']['status'] = $item['details']['status'] ?? 'pending';
+                    $item['details']['note'] = $item['details']['notes'] ?? $item['details']['note'] ?? '';
+
+                    // Add service information
+                    if (isset($item['details']['service_id'])) {
+                        $serviceStmt = $db->prepare("SELECT service_name, category FROM tbl_services WHERE service_id = :service_id");
+                        $serviceStmt->execute(['service_id' => $item['details']['service_id']]);
+                        $service = $serviceStmt->fetch(PDO::FETCH_ASSOC);
+                        if ($service) {
+                            $item['details']['services'] = [[
+                                'name' => $service['service_name'],
+                                'category' => $service['category'] ?? 'Service'
+                            ]];
+                        } else {
+                            $item['details']['services'] = [['name' => 'Unknown Service', 'category' => 'Service']];
+                        }
+                    } else {
+                        $item['details']['services'] = [['name' => 'Unknown Service', 'category' => 'Service']];
+                    }
+
                     $item['details']['archived_at'] = $item['archived_at'];
                 } elseif ($item['item_type'] === 'inquiry') {
                     $item['details']['full_name'] = $item['details']['full_name'] ?? $item['item_name'] ?? 'Unknown';
                     $item['details']['phone'] = $item['details']['phone'] ?? 'N/A';
                     $item['details']['email'] = $item['details']['email'] ?? 'N/A';
+                    $item['details']['status'] = $item['details']['status'] ?? 'pending';
                     $item['details']['message'] = $item['details']['message'] ?? '';
                     $item['details']['created_at'] = $item['details']['created_at'] ?? $item['archived_at'];
+                    $item['details']['archived_at'] = $item['archived_at'];
+                } elseif ($item['item_type'] === 'employee') {
+                    $item['details']['full_name'] = $item['details']['full_name'] ?? $item['item_name'] ?? 'Unknown Employee';
+                    $item['details']['email'] = $item['details']['email'] ?? 'N/A';
+                    $item['details']['contact_number'] = $item['details']['contact_number'] ?? 'N/A';
+                    $item['details']['employee_number'] = $item['details']['employee_number'] ?? 'N/A';
+                    $item['details']['position'] = $item['details']['position'] ?? 'N/A';
+                    $item['details']['hire_date'] = $item['details']['hire_date'] ?? 'N/A';
+                    $item['details']['address'] = $item['details']['address'] ?? 'N/A';
+                    $item['details']['work_schedule'] = $item['details']['work_schedule'] ?? 'N/A';
+                    $item['details']['remarks'] = $item['details']['remarks'] ?? '';
+                    $item['details']['is_active'] = $item['details']['is_active'] ?? 1;
                     $item['details']['archived_at'] = $item['archived_at'];
                 }
 
@@ -114,6 +148,7 @@ class ArchiveController extends AdminController
     {
         $type = $_GET['type'] ?? null;
         $id   = $_GET['id'] ?? null;
+        $filter = $_GET['filter'] ?? 'all';
 
         if (!$type || !$id) {
             Session::flash('error', 'Invalid restore request.', 'danger');
@@ -134,8 +169,43 @@ class ArchiveController extends AdminController
                 $ok = (new Inquiry())->restore($id);
                 break;
 
+            case 'employee':
+                // For employees, we need to restore from tbl_employees
+                $db = (new \App\Models\Service())->getDb();
+
+                // Check if employee exists and is deleted
+                $stmt = $db->prepare("SELECT * FROM tbl_employees WHERE id = ? AND is_deleted = 1");
+                $stmt->execute([$id]);
+                $employee = $stmt->fetch(PDO::FETCH_ASSOC);
+
+                if (!$employee) {
+                    $ok = false;
+                    break;
+                }
+
+                // Restore in main table (mark as not deleted)
+                $stmt = $db->prepare("UPDATE tbl_employees SET is_deleted = 0, deleted_at = NULL, deleted_by = NULL WHERE id = ?");
+                $ok = $stmt->execute([$id]);
+                break;
+
             default:
                 $ok = false;
+        }
+
+        // Also update the archive record to mark it as not archived
+        if ($ok) {
+            try {
+                $db = (new Service())->getDb();
+                // Search in JSON details column for the item_id
+                $stmt = $db->prepare("UPDATE tbl_archives SET is_archived = 0 WHERE item_type = :type AND details LIKE :details_search");
+                $detailsSearch = '%"item_id":' . intval($id) . '%';
+                $stmt->execute(['type' => $type, 'details_search' => $detailsSearch]);
+                
+                error_log("Archive restore: Updated archives for type=$type, id=$id");
+            } catch (\Throwable $e) {
+                error_log("Failed to update archive status: " . $e->getMessage());
+                // Don't fail the restore just because archive update failed
+            }
         }
 
         Session::flash(
@@ -144,7 +214,8 @@ class ArchiveController extends AdminController
             $ok ? 'success' : 'danger'
         );
 
-        header('Location: /admin/archives');
+        // Redirect back with the filter preserved
+        header('Location: /admin/archives?filter=' . urlencode($filter));
         exit;
     }
 
@@ -176,7 +247,7 @@ class ArchiveController extends AdminController
                 break;
 
             case 'inquiry':
-                $ok = (new Inquiry())->archive($id, $adminId);
+                $ok = (new Inquiry())->archive($id, $adminId, 'deleted');
                 $redirect = '/admin/inquiries';
                 break;
 

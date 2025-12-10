@@ -152,55 +152,70 @@
 
 
     <!-- ======================================================= -->
-    <!-- CONTACT SECTION -->
+    <!-- CONTACT SECTION — SVG STYLE (NO CARDS) -->
     <!-- ======================================================= -->
     <section id="contact" class="contact-section">
 
-        <h2 class="section-title">Contact Us</h2>
+        <h2 class="section-title italiana">Contact Us</h2>
         <p class="section-subtitle">Do you want to ask something? Send us a message.</p>
 
-        <div class="contact-inner">
-            <div class="row mt-4">
-                <!-- LEFT FORM -->
-                <div class="col-md-6">
-                    <form method="POST" action="/inquiry/storePublic">
-                        <div class="mb-3">
-                            <label class="form-label">Name</label>
-                            <input name="name" type="text" class="form-control" required>
-                        </div>
+        <div class="contact-layout">
 
-                        <div class="mb-3">
-                            <label class="form-label">Email</label>
-                            <input name="email" type="email" class="form-control" required>
-                        </div>
+            <!-- LEFT SIDE — PLAIN TEXT INFO -->
+            <div class="contact-info-list">
 
-                        <div class="mb-3">
-                            <label class="form-label">Message</label>
-                            <textarea name="message" class="form-control" rows="4" required></textarea>
-                        </div>
-
-                        <button class="btn btn-primary" style="background:#AF62FF;border:none;">
-                            Send Message
-                        </button>
-                    </form>
+                <div class="info-block">
+                    <h4>Contact Us</h4>
+                    <p>+639123456789</p>
                 </div>
 
-                <!-- RIGHT CONTACT INFO -->
-                <div class="col-md-6">
-                    <div class="contact-info-box">
-                        <h5>Visit Us</h5>
-                        <p>8th Avenue Salon, QC</p>
 
-                        <h5>Contact</h5>
-                        <p>0912 345 6789<br>8thavenuesalon@gmail.com</p>
-
-                        <h5>Business Hours</h5>
-                        <p>Mon–Sun: 9:00 AM – 7:00 PM</p>
-                    </div>
+                <div class="info-block">
+                    <h4>Email</h4>
+                    <p>8thavenuesalon@gmail.com</p>
                 </div>
+
+                <div class="info-block">
+                    <h4>Address</h4>
+                    <p>33 Susana St. Gulod, Novaliches, Quezon City, Philippines</p>
+                </div>
+
+                <div class="info-block">
+                    <h4>Business Hours</h4>
+                    <p>Mon – Sun: 8:00 AM – 7:00 PM</p>
+                </div>
+
             </div>
+
+            <!-- RIGHT SIDE — SIMPLE FORM -->
+            <div class="contact-form-wrapper">
+
+                <form method="POST" action="/inquiry/storePublic" class="contact-form">
+                    <div class="form-line">
+                        <label>Name</label>
+                        <input type="text" name="name" required>
+                    </div>
+
+                    <div class="form-line">
+                        <label>Email</label>
+                        <input type="email" name="email" required>
+                    </div>
+
+                    <div class="form-line">
+                        <label>Message</label>
+                        <textarea name="message" required></textarea>
+                    </div>
+
+                    <button class="contact-submit">Send Message</button>
+                </form>
+
+            </div>
+
         </div>
+
     </section>
+
+
 
 
     <script>

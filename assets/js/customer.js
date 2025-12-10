@@ -1,28 +1,36 @@
-document.addEventListener('DOMContentLoaded', ()=>{
+document.addEventListener('DOMContentLoaded', () => {
   // fetch notifications count and list
   const notifCount = document.getElementById('notifCount');
   const notifBody = document.getElementById('notifBody');
 
   fetch('/notifications/list')
-    .then(r=>r.json())
-    .then(items=>{
-      if (!items || !items.length){
-        notifBody.innerHTML = '<p class="text-muted">No notifications.</p>';
+    .then((r) => r.json())
+    .then((items) => {
+      if (!items || !items.length) {
+        if (notifBody) notifBody.innerHTML = '<p class="text-muted">No notifications.</p>';
         return;
       }
-      notifCount.style.display = items.length ? 'inline-block' : 'none';
-      notifCount.textContent = items.length;
-
-      notifBody.innerHTML = items.map(i => `
+      if (notifCount) {
+        notifCount.style.display = items.length ? 'inline-block' : 'none';
+        notifCount.textContent = items.length;
+      }
+      if (notifBody) {
+        notifBody.innerHTML = items
+          .map(
+            (i) => `
         <div class="mb-2">
           <strong>${i.title}</strong>
           <div class="small text-muted">${i.message}</div>
         </div>
-      `).join('');
-    }).catch(()=>{});
+      `,
+          )
+          .join('');
+      }
+    })
+    .catch(() => {});
 
   // invoice card to PNG download
-  document.querySelectorAll('.js-download-invoice').forEach(btn => {
+  document.querySelectorAll('.js-download-invoice').forEach((btn) => {
     btn.addEventListener('click', async (e) => {
       e.preventDefault();
 
@@ -31,7 +39,7 @@ document.addEventListener('DOMContentLoaded', ()=>{
 
       const originalText = btn.textContent;
       btn.disabled = true;
-      btn.textContent = 'Downloading';
+      btn.textContent = 'Download';
 
       try {
         const canvas = await html2canvas(card, { scale: 2, useCORS: true });
@@ -48,4 +56,61 @@ document.addEventListener('DOMContentLoaded', ()=>{
       }
     });
   });
+
+  // profile inline edit toggle
+  const editBtn = document.getElementById('editProfileBtn');
+  const cancelBtn = document.getElementById('cancelEditBtn');
+  const viewNodes = document.querySelectorAll('.view-mode');
+  const editNodes = document.querySelectorAll('.edit-mode');
+
+  function setEditMode(on) {
+    viewNodes.forEach((n) => n.classList.toggle('d-none', on));
+    editNodes.forEach((n) => n.classList.toggle('d-none', !on));
+    if (editBtn) {
+      editBtn.textContent = on ? 'Editing…' : 'Edit Profile';
+      editBtn.disabled = on;
+    }
+  }
+
+  editBtn?.addEventListener('click', () => setEditMode(true));
+  cancelBtn?.addEventListener('click', () => setEditMode(false));
+
+
+
+
+// profile - changed password
+  const changePassForm = document.querySelector('#changePasswordModal form');
+  if (changePassForm) {
+    changePassForm.addEventListener('submit', (e) => {
+      const pwd = changePassForm.querySelector('[name="new_password"]')?.value || '';
+      const confirm = changePassForm.querySelector('[name="confirm_password"]')?.value || '';
+      if (pwd !== confirm) {
+        e.preventDefault();
+        alert('New passwords do not match.');
+      }
+    });
+  }
+
+// profile - changed profile
+
+  const photoTrigger = document.getElementById('profilePhotoTrigger');
+  const photoInput = document.getElementById('profilePhotoInput');
+  const photoImg = document.getElementById('profilePhoto');
+  const photoForm = document.getElementById('profilePhotoForm');
+
+  if (photoTrigger && photoInput) {
+    photoTrigger.addEventListener('click', () => photoInput.click());
+    photoInput.addEventListener('change', (e) => {
+      const file = e.target.files?.[0];
+      if (file) {
+        const url = URL.createObjectURL(file);
+        if (photoImg) photoImg.src = url;
+        photoForm?.submit();
+      }
+    });
+  }
+
+
+
+
 });

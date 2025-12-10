@@ -9,7 +9,7 @@ class PaymentController extends Controller
 {
     public function index(): void
     {
-        Auth::requireRole(3);
+        Auth::requireRole(2);
         $user = Auth::user();
         if ($user && (int) $user["role_id"] === 1) {
             header("Location: /admin/dashboard");

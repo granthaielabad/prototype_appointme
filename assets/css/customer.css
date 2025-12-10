@@ -1,77 +1,379 @@
+/* ============================================================
+   GLOBAL BASE
+============================================================ */
 * {
-    font-family: "Inter", sans-serif;
+    font-family: "Poppins", sans-serif;
     box-sizing: border-box;
-    /* NEW: prevents layout overflow */
 }
 
 .italiana {
     font-family: "Italiana", serif !important;
-    font-weight: 400;
 }
 
+.customer-layout-body {
+    background: #FFF9FE;
+    min-height: 100vh;
+}
 
+.text-muted { color: #6b6b6b !important; }
 
-/* CSS ooking History */
-
-.appointments-container {
+/* ============================================================
+   HEADER (Figma Style)
+============================================================ */
+.customer-header {
     width: 100%;
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 15px;
+    height: 82px;
+    padding: 0 28px;
+    background: #2E2E2E;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    box-shadow: 0 4px 18px rgba(0,0,0,0.08);
+    position: sticky;
+    top: 0;
+    z-index: 900;
 }
 
+.header-left {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+}
+
+.header-logo {
+    height: 58px;
+}
+
+.header-title {
+    font-size: 22px;
+    font-weight: 600;
+    color: #fff;
+    margin: 0;
+}
+
+/* RIGHT SECTION */
+.header-right {
+    display: flex;
+    align-items: center;
+    gap: 26px;
+}
+
+.header-icon-btn {
+    background: none;
+    border: none;
+    padding: 0;
+    position: relative;
+    cursor: pointer;
+}
+
+.header-icon {
+    width: 28px;
+    height: 28px;
+}
+
+.notif-badge {
+    position: absolute;
+    top: -5px;
+    right: -4px;
+    background: #D10000;
+    color: #fff;
+    font-size: 10px;
+    padding: 2px 6px;
+    border-radius: 10px;
+}
+
+.profile-btn {
+    background: none;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+}
+
+.profile-avatar {
+    width: 34px;
+    height: 34px;
+    object-fit: cover;
+}
+
+/* ============================================================
+   SIDEBAR
+============================================================ */
+.customer-sidebar {
+    position: fixed;
+    top: 0;
+    left: -260px;
+    width: 260px;
+    height: 100vh;
+    background: linear-gradient(120deg, #E0ABFF, #FFFFFF);
+    padding: 22px;
+    box-shadow: 3px 0 10px rgba(0,0,0,0.12);
+    transition: left .35s ease;
+    z-index: 2000;
+}
+
+.customer-sidebar.open {
+    left: 0;
+}
+
+.customer-sidebar .logo {
+    width: 210px;
+    margin-bottom: 20px;
+}
+
+.sidebar-links {
+    margin-top: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.sidebar-links a {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 12px 14px;
+    border-radius: 12px;
+    color: #333;
+    text-decoration: none;
+    transition: .25s;
+}
+
+.sidebar-links a img {
+    height: 20px;
+}
+
+.sidebar-links a:hover {
+    background: #F3E7FF;
+    color: #8A5FD1;
+}
+
+.sidebar-toggle-btn {
+    position: absolute;
+    top: 50%;
+    right: -35px;
+    width: 70px;
+    height: 70px;
+    border-radius: 50%;
+    border: none;
+    background: #8A5FD1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transform: translateY(-50%);
+    cursor: pointer;
+}
+
+.sidebar-toggle-btn img {
+    width: 18px;
+    transition: transform .35s ease;
+}
+
+.customer-sidebar.open .sidebar-toggle-btn img {
+    transform: rotate(180deg);
+}
+
+/* ============================================================
+   BOOKING HISTORY TABLE
+============================================================ */
 .appointments-card {
-    background: #ffffff;
-    padding: 25px;
+    background: #fff;
     border-radius: 14px;
-    box-shadow: 0px 2px 15px rgba(0,0,0,0.06);
+    padding: 25px;
+    box-shadow: 0 2px 15px rgba(0,0,0,0.06);
 }
 
-.table-responsive {
-    overflow-x: auto;
-}
+.table-responsive { overflow-x: auto; }
 
 .appointments-table {
     width: 100%;
     border-collapse: collapse;
-    min-width: 900px; 
+    min-width: 850px;
 }
 
 .appointments-table th,
 .appointments-table td {
     padding: 12px 14px;
     border-bottom: 1px solid #eee;
-    white-space: nowrap;
-    text-align: left;
 }
 
-.no-appointments {
-    text-align: center;
-    padding: 20px 0;
-    font-style: italic;
-    color: #777;
+.cancel-btn { color: #FF4444; }
+
+/* ============================================================
+   INVOICE VIEW
+============================================================ */
+.invoice-card {
+    border-radius: 14px;
+    border: 1px solid #dcdcdc;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.08);
 }
 
-.action-col a {
-    margin-right: 8px;
+.invoice-header {
+    padding: 16px 20px;
+    border-bottom: 1px solid #ccc;
 }
 
+.invoice-logo img { height: 50px; }
 
-.cancel-btn {
-    color: #ff4444; 
+/* ============================================================
+   PROFILE PAGE (Figma)
+============================================================ */
+.profile-root { color: #222; }
+
+.page-title {
+    font-size: 30px;
+    font-weight: 600;
 }
 
-/* invoices css */
+.page-sub {
+    font-size: 15px;
+    color: #6b6b6b;
+}
 
-  .invoice-card { border-radius: 14px; border: 1px solid #cfcfcf; box-shadow: 0 10px 22px rgba(0,0,0,0.08); overflow: hidden; }
-  .invoice-header { border-bottom: 1px solid #cfcfcf; padding: 14px 18px; }
-  .invoice-logo img { height: 50px; object-fit: contain; }
-  .invoice-title { font-size: 22px; font-weight: 800; margin: 0; }
-  .invoice-date { color: #6c6c6c; font-size: 13px; margin-top: 4px; }
-  .invoice-meta { font-size: 14px; }
-  .invoice-meta .label { font-weight: 600; color: #444; }
-  .invoice-meta .value { color: #2f2f2f; }
-  .invoice-table thead th { border-top: 1px solid #9c9c9c; border-bottom: 1px solid #9c9c9c; }
-  .invoice-table tbody td { border-bottom: 1px solid #e5e5e5; }
-  .invoice-table tfoot th { border-top: 1px solid #9c9c9c; }
-  .invoice-btn { border-radius: 12px; font-weight: 600; }
+/* Appointment Status Box */
+.appt-status-box {
+    background: #fff;
+    padding: 22px;
+    border-radius: 14px;
+    box-shadow: 0 8px 28px rgba(0,0,0,0.10);
+}
+
+.appt-number { font-size: 34px; font-weight: 700; }
+.appt-state { font-size: 18px; font-weight: 700; }
+.appt-date,
+.appt-time { font-size: 14px; color: #777; }
+
+/* Clock */
+.status-clock { text-align: center; }
+
+.clock-visual {
+    width: 90px;
+    height: 90px;
+    border-radius: 50%;
+    border: 2px solid rgba(0,0,0,0.1);
+    margin: 0 auto 8px;
+    position: relative;
+}
+
+.hand {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform-origin: 50% 100%;
+    transform: translate(-50%, -100%);
+}
+
+.hand.hour   { height: 22%; width: 4px; background: #333; }
+.hand.minute { height: 30%; width: 3px; background: #333; }
+.hand.second { height: 38%; width: 2px; background: #D10000; }
+
+.center-dot {
+    width: 8px;
+    height: 8px;
+    background: #333;
+    border-radius: 50%;
+    position: absolute;
+}
+
+.digital-time { font-size: 18px; font-weight: 600; }
+
+/* Avatar Card */
+.profile-avatar-card,
+.profile-details-card {
+    background: #fff;
+    border-radius: 14px;
+    box-shadow: 0 8px 28px rgba(0,0,0,0.06);
+    border: none;
+}
+
+.avatar-wrap {
+    width: 280px;
+    height: 280px;
+    border-radius: 50%;
+    overflow: hidden;
+    border: 8px solid #fff;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.08);
+}
+
+.avatar-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+/* Buttons */
+.btn-purple {
+    background: linear-gradient(180deg, #F3DCFF, #D8BCFF);
+    border: none;
+    color: #7329CE;
+    padding: 12px;
+    font-weight: 700;
+    border-radius: 10px;
+}
+
+.btn-danger-outline {
+    background: #fff;
+    border: 1px solid rgba(220,40,40,0.18);
+    color: #c62828;
+    padding: 12px;
+    border-radius: 10px;
+}
+
+/* Icon Buttons */
+.btn-icon {
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+    border: none;
+    background: #fff;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.06);
+}
+
+.btn-icon img {
+    width: 18px;
+}
+
+.btn-edit {
+    background: #AF62FF;
+    border: solid #8C4ECC;
+}
+
+.btn-delete {
+    background: #FF4D4D;
+    border: solid #A80000;
+}
+
+.info-row { margin-bottom: 18px; }
+.info-row label { font-size: 12px; color: #777; }
+.info-value { font-size: 16px; color: #222; }
+
+/* Change Password */
+.btn-outline-settings {
+    width: 100%;
+    padding: 12px 14px;
+    border-radius: 12px;
+    background: #fff;
+    border: 1px solid #ddd;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-weight: 600;
+}
+
+.btn-outline-settings img {
+    width: 20px;
+}
+
+/* ============================================================
+   RESPONSIVE
+============================================================ */
+@media (max-width: 991px) {
+    .page-title { font-size: 26px; }
+
+    .avatar-wrap {
+        width: 210px;
+        height: 210px;
+    }
+}

@@ -181,8 +181,11 @@ class InquiryController extends AdminController
             return;
         }
 
+        $action = $_GET['action'] ?? 'reply'; // 'reply' or 'delete'
+        $status = ($action === 'delete') ? 'deleted' : 'replied';
+
         $adminId = \App\Core\Auth::user()['user_id'] ?? null;
-        $success = (new Inquiry())->archive($id, $adminId);
+        $success = (new Inquiry())->archive($id, $adminId, $status);
         
         if ($success) {
             Session::flash('success', 'Inquiry archived successfully.', 'success');

@@ -12,9 +12,11 @@ function initAppointmentRealtime() {
 
 function fetchAndUpdateAppointments() {
     const currentFilter = new URLSearchParams(window.location.search).get('filter') || 'all';
-    
+    const date = new URLSearchParams(window.location.search).get('date') || '';
+
     // Use absolute path with query parameters
-    const apiUrl = window.location.origin + '/admin/appointments/fetch?filter=' + encodeURIComponent(currentFilter);
+    let apiUrl = window.location.origin + '/admin/appointments/fetch?filter=' + encodeURIComponent(currentFilter);
+    if (date) apiUrl += '&date=' + encodeURIComponent(date);
 
     fetch(apiUrl)
         .then(res => {

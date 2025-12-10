@@ -8,15 +8,37 @@ use App\Models\Service;
 use App\Models\Appointment;
 use App\Models\User;
 use App\Models\Payment;
+use App\Models\AdminNotification;
+
 
 
 class BookingController extends Controller
 {
+    
+    private function notifyAdminAppointment(int $appointmentId, int $userId, string $type, array $context = []): void
+            {
+                try {
+                    (new AdminNotification())->createForEvent($appointmentId, $userId, $type, $context);
+                } catch (\Throwable $e) {
+                   
+                }
+            }
+
+
+    private function clearPaymentSession(): void
+    {
+        unset($_SESSION['checkout_url'], $_SESSION['payment_session']);
+    }
+
+
+
+
     public function index(): void
     {
         // only customers
-        Auth::requireRole(3);
-
+        
+        Auth::requireRole(2);
+        
         $serviceModel = new Service();
         $services = $serviceModel->findAll();
 
@@ -40,10 +62,11 @@ class BookingController extends Controller
     }
 
 
+    
    
     public function store(): void
     {
-        Auth::requireRole(3);
+        Auth::requireRole(2);
 
         if ($_SERVER["REQUEST_METHOD"] !== "POST") {
             header("Location: /book");
@@ -77,7 +100,7 @@ class BookingController extends Controller
             exit();
         }
 
-        // combine
+        // create appointment
         $apptModel = new Appointment();
         $appointmentId = $apptModel->createAppointment([
             "user_id"          => $user["user_id"],
@@ -89,6 +112,8 @@ class BookingController extends Controller
             "created_at"       => date("Y-m-d H:i:s"),
         ]);
 
+
+
          if (!$appointmentId) {
             Session::flash("error", "Failed to create appointment.", "danger");
             header("Location: /book");
@@ -96,15 +121,29 @@ class BookingController extends Controller
 
          }
 
+             $this->notifyAdminAppointment(
+            $appointmentId,
+            (int) $user['user_id'],
+            'booked',
+            [
+                'customer_name' => trim($user['first_name'] . ' ' . $user['last_name']),
+                'service_name'  => $service['service_name'] ?? 'Service',
+                'date'          => $date,
+                'time'          => $time,
+            ]
+        );
+
+
           $referenceNumber = 'APT-' . $appointmentId . '-' . time();
 
           $paymentModel = new Payment();
-            $paymentModel->create([
+            $paymentId = $paymentModel->create([
                 'appointment_id' =>$appointmentId,
                 'amount' => $service['price'],
                 'status' => 'pending',
 
             ]);
+            
 
               // billing part
         $billing = [
@@ -130,7 +169,9 @@ class BookingController extends Controller
         'billing'          => $billing,
         'line_items'       => $lineItems,
         'reference_number' => $referenceNumber,
-    ]);
+        'success_url'      => rtrim($_ENV['APP_URL'] ?? 'http://localhost:8000/', '/') . '/payment/success',
+        'cancel_url'       => rtrim($_ENV['APP_URL'] ?? 'http://localhost:8000/', '/') . '/my-appointments',
+]);
 
         //temporary lipat sa env
         $token   = "super-secret-string";
@@ -158,6 +199,7 @@ class BookingController extends Controller
         }
 
         $result = json_decode($response, true);
+        
 
         if (empty($result['success']) || empty($result['checkout_url'])) {
             Session::flash('error', 'Payment session failed to initialize.', 'danger');
@@ -165,45 +207,96 @@ class BookingController extends Controller
             exit();
         }
 
-      
+        $_SESSION['payment_session'] = [
+            'appointment_id' => $appointmentId,
+            'payment_id'     => $paymentId,
+        ];
+
+          
         $_SESSION['checkout_url'] = $result['checkout_url'];
 
-        Session::flash(
-            'success',
-            'Appointment booked successfully! Please proceed to the payment.',
-            'success'
-        );
+      
 
         header("Location: /payment-qr");
         exit();
     }
 
+    public function cancelPaymentSession(): void
+{
+    Auth::requireRole(2);
+    header('Content-Type: application/json');
 
-
-    public function paymentQr(): void
-    {
-        Auth::requireRole(3);
-
-        if (empty($_SESSION['checkout_url'])) {
-            Session::flash('error', 'No active paymentsession found. Please try booking again.', 'danger' );
-            header('Location: /my-appointments' );
-            exit;
-        }
-
-        $checkoutUrl = $_SESSION['checkout_url'];
-        
-
-         $this->renderCustomer('payment_qr', [
-             'pageTitle' => 'Payment QR',
-             'checkoutUrl' => $checkoutUrl,
-    ]);
-
+    if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+        http_response_code(405);
+        echo json_encode(['error' => 'Method not allowed']);
+        return;
     }
+
+    $session = $_SESSION['payment_session'] ?? null;
+    if (!$session) {
+        $this->clearPaymentSession();
+        http_response_code(204);
+        echo json_encode(['ok' => true]);
+        return;
+    }
+
+    $apptId = (int) ($session['appointment_id'] ?? 0);
+    $payId  = (int) ($session['payment_id'] ?? 0);
+
+    $apptModel = new Appointment();
+    $payModel  = new Payment();
+
+    if ($apptId > 0) {
+        $apptModel->update($apptId, [
+            'status'     => 'cancelled',
+            'updated_at' => date('Y-m-d H:i:s'),
+        ]);
+    }
+
+    if ($payId > 0) {
+        $payModel->update($payId, [
+            'status'     => 'failed',
+            'updated_at' => date('Y-m-d H:i:s'),
+        ]);
+    }
+
+    $this->clearPaymentSession();
+    echo json_encode(['ok' => true]);
+}
+
+   
+    
+
+
+   public function paymentQr(): void
+{
+    Auth::requireRole(2);
+
+    // prevent cached QR from showing after cancellation/back
+    header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
+    header('Pragma: no-cache');
+    header('Expires: 0');
+
+    if (empty($_SESSION['checkout_url']) || empty($_SESSION['payment_session']['appointment_id'])) {
+        $this->clearPaymentSession();
+        Session::flash('error', 'No active payment session found. Please try booking again.', 'danger');
+        header('Location: /my-appointments');
+        exit();
+    }
+
+    $checkoutUrl = $_SESSION['checkout_url'];
+
+    $this->renderCustomer('payment_qr', [
+        'pageTitle'   => 'Payment QR',
+        'checkoutUrl' => $checkoutUrl,
+    ]);
+}
+
 
     // GREY OUT THE TAKEN SLOTS 
     public function takenSlots(): void
 {
-    Auth::requireRole(3);
+    Auth::requireRole(2);
 
     $date = $_GET['date'] ?? null;
     if (!$date) {
@@ -224,7 +317,7 @@ class BookingController extends Controller
 
     public function myAppointments(): void
     {
-        Auth::requireRole(3);
+        Auth::requireRole(2);
 
         $user = Auth::user();
         $apptModel = new Appointment();
@@ -240,7 +333,7 @@ class BookingController extends Controller
     // nagagamit po ba ito? 
     public function cancel(): void
     {
-        Auth::requireRole(3);
+        Auth::requireRole(2);
 
         $id = (int) ($_GET["id"] ?? 0);
         if ($id <= 0) {
@@ -259,7 +352,7 @@ class BookingController extends Controller
     
    public function cancelFromHistory(): void
                 {
-            Auth::requireRole(3);
+            Auth::requireRole(2);
 
             $id = (int) ($_GET["id"] ?? 0);
             if ($id <= 0) {
@@ -294,10 +387,118 @@ class BookingController extends Controller
                 "updated_at" => date("Y-m-d H:i:s"),
             ]);
 
+                        $this->notifyAdminAppointment(
+                $id,
+                (int) $appointment['user_id'],
+                'cancelled',
+                [
+                    'customer_name' => trim(Auth::user()['first_name'] . ' ' . Auth::user()['last_name']),
+                    'service_name'  => $appointment['service_name'] ?? 'Service',
+                    'date'          => $appointment['appointment_date'] ?? '',
+                    'time'          => $appointment['appointment_time'] ?? '',
+                ]
+            );
+
+
             Session::flash("success", "Appointment cancelled successfully.");
             header("Location: /my-appointments");
         }
 
+
+        // paymentSuccess page
+        public function paymentSuccess(): void
+        {
+            Auth::requireRole(2);
+
+            // If there was a payment session, you can optionally mark it as cleared.
+            unset($_SESSION['payment_session'], $_SESSION['checkout_url']);
+
+            Session::flash('success', 'Payment successful! Redirecting to your appointments...', 'success');
+            $this->renderCustomer('payment_success', ['pageTitle' => 'Payment Successful']);
+            return;
+        }
+
+
+        public function reschedule(): void
+{
+    Auth::requireRole(2);
+    header('Content-Type: application/json');
+
+    if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+        http_response_code(405);
+        echo json_encode(['error' => 'Method not allowed']);
+        return;
+    }
+
+    $user   = Auth::user();
+    $apptId = (int) ($_POST['appointment_id'] ?? 0);
+    $date   = trim($_POST['date'] ?? '');
+    $time   = trim($_POST['time'] ?? '');
+
+    if ($apptId <= 0 || empty($date) || empty($time)) {
+        http_response_code(422);
+        echo json_encode(['error' => 'Date and time are required.']);
+        return;
+    }
+
+    $apptModel   = new Appointment();
+    $appointment = $apptModel->find($apptId);
+
+    if (!$appointment || (int) $appointment['user_id'] !== (int) $user['user_id']) {
+        http_response_code(403);
+        echo json_encode(['error' => 'Unauthorized action.']);
+        return;
+    }
+
+    if (in_array(strtolower($appointment['status']), ['cancelled', 'completed'], true)) {
+        http_response_code(422);
+        echo json_encode(['error' => 'Cannot reschedule this appointment.']);
+        return;
+    }
+
+    $rescheduleCount = (int) ($appointment['reschedule_count'] ?? 0);
+    if ($rescheduleCount >= 1) {
+        http_response_code(422);
+        echo json_encode(['error' => 'You can only reschedule once.']);
+        return;
+    }
+
+    // If the slot is unchanged, allow without updating
+    if ($appointment['appointment_date'] === $date && $appointment['appointment_time'] === $time) {
+        echo json_encode(['success' => true]);
+        return;
+    }
+
+    // Exclude current appointment from the slot check
+    if ($apptModel->isSlotTaken($date, $time, $apptId)) {
+        http_response_code(422);
+        echo json_encode(['error' => 'That slot is already taken. Please choose another.']);
+        return;
+    }
+
+    $apptModel->update($apptId, [
+        'appointment_date'  => $date,
+        'appointment_time'  => $time,
+        'status'            => 'pending',
+        'reschedule_count'  => $rescheduleCount + 1,
+        'updated_at'        => date('Y-m-d H:i:s'),
+    ]);
+
+        $this->notifyAdminAppointment(
+        $apptId,
+        (int) $user['user_id'],
+        'rescheduled',
+        [
+            'customer_name' => trim($user['first_name'] . ' ' . $user['last_name']),
+            'service_name'  => $appointment['service_name'] ?? 'Service',
+            'date'          => $date,
+            'time'          => $time,
+        ]
+    );
+
+
+    echo json_encode(['success' => true]);
+}
 
 
 
