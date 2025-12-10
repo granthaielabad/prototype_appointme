@@ -731,3 +731,48 @@ body {
         font-size: 48px !important;
     }
 }
+
+#menu-toggle{
+    display: none;
+}
+
+
+
+.menu-icon{
+    display: none;
+}
+
+@media (max-width: 768px) {
+  /* Show hamburger icon */
+  .menu-icon {
+    display: block;
+    color: #ffffff;
+    margin-left: auto !important;
+  }
+
+  .nav-left{
+    width: 100%;
+  }
+
+  .nav-links {
+    position: absolute;
+    top: 60px;
+    right: 0;
+    background: #33333385;
+    width: 100%;
+    flex-direction: column;
+    display: none;
+    padding: 20px 0;
+}
+  
+
+  .nav-links li {
+    padding: 10px 0;
+    text-align: center;
+  }
+
+  /* Show menu when checkbox is checked */
+  #menu-toggle:checked + .menu-icon + .nav-links {
+    display: flex;
+  }
+}
