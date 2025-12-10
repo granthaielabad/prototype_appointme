@@ -12,12 +12,17 @@ $unreadCount = $notificationsCount ?? 0;
 
         <div class="nav-divider"></div>
 
+        <input type="checkbox" id="menu-toggle">
+        <label for="menu-toggle" class="menu-icon">&#9776;</label>
+
         <ul class="nav-links">
             <li><a href="#home" class="scroll-link">Home</a></li>
             <li><a href="#services" class="scroll-link">Services</a></li>
             <li><a href="#about" class="scroll-link">About Us</a></li>
             <li><a href="#contact" class="scroll-link">Contact Us</a></li>
         </ul>
+
+
     </div>
 
     <div class="nav-right">
